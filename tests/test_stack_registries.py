@@ -367,7 +367,8 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
         self.assertRaises(DoesNotImplement,
                           WorkflowStackRegistry.register, FakeStack)
         self.assert_(
-            'Fake Stack' not in WorkflowStackRegistry.listWorkflowStackTypes())
+            'Fake Stack' not in
+            WorkflowStackRegistry.listWorkflowStackTypes())
 
     def test_stackdef_registry_interface_check(self):
 
@@ -383,7 +384,25 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
                           WorkflowStackDefRegistry.register,
                           FakeStackDef)
         self.assert_(
-            'Fake Stack Def' not in WorkflowStackRegistry.listWorkflowStackTypes())
+            'Fake Stack Def' not in
+            WorkflowStackRegistry.listWorkflowStackTypes())
+
+    def test_stackelt_registry_interface_check(self):
+
+        #
+        # Here, we will try to register a stackelt that is not implementing the
+        # base interface
+        #
+
+        class FakeStackElement:
+            meta_type = 'Fake Stack Element'
+
+        self.assertRaises(DoesNotImplement,
+                          WorkflowStackElementRegistry.register,
+                          FakeStackElement)
+        self.assert_(
+            'Fake Stack Element' not in
+            WorkflowStackElementRegistry.listWorkflowStackElementTypes())
 
 
 if __name__ == '__main__':
