@@ -258,17 +258,6 @@ Initiated by WorkflowMethod
     </tr>
     <tr>
       <td>
-        <input type="checkbox" name="transition_behavior:int:list" value="43"
-            <dtml-if "43 in behavior">checked</dtml-if> />
-      </td>
-      <td colspan="3">
-        Return up delegatees hierarchy, on workflow variables
-        <input type="text" name="returned_up_hierarchy_on_workflow_variable:tokens"
-          value="<dtml-var "' '.join(returned_up_hierarchy_on_workflow_variable)" html_quote>" size="25" />
-      </td>
-    </tr>
-    <tr>
-      <td>
         <input type="checkbox" name="transition_behavior:int:list" value="44"
             <dtml-if "44 in behavior">checked</dtml-if> />
       </td>
@@ -287,28 +276,6 @@ Initiated by WorkflowMethod
         Decrease workflow level, on workflow variables
         <input type="text" name="workflow_down_on_workflow_variable:tokens"
           value="<dtml-var "' '.join(workflow_down_on_workflow_variable)" html_quote>" size="25" />
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <input type="checkbox" name="transition_behavior:int:list" value="46"
-            <dtml-if "46 in behavior">checked</dtml-if> />
-      </td>
-      <td colspan="3">
-        Lock workflow, for workflow variables
-        <input type="text" name="workflow_lock_on_workflow_variable:tokens"
-          value="<dtml-var "' '.join(workflow_lock_on_workflow_variable)" html_quote>" size="25" />
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <input type="checkbox" name="transition_behavior:int:list" value="47"
-            <dtml-if "47 in behavior">checked</dtml-if> />
-      </td>
-      <td colspan="3">
-        Unlock workflow, for workflow variables
-        <input type="text" name="workflow_unlock_on_workflow_variable:tokens"
-          value="<dtml-var "' '.join(workflow_unlock_on_workflow_variable)" html_quote>" size="25" />
       </td>
     </tr>
     <tr>

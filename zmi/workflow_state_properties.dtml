@@ -63,17 +63,6 @@
     </tr>
     <tr>
       <td align="right">
-        <input type="checkbox" name="state_behaviors:int:list" value="105"
-            <dtml-if "105 in state_behaviors">checked</dtml-if> />
-      </td>
-      <td>
-        Return up delegatees hierarchy, on workflow variables
-        <input type="text" name="returned_up_hierarchy_on_workflow_variable:tokens"
-          value="<dtml-var "' '.join(returned_up_hierarchy_on_workflow_variable)" html_quote>" size="25" />
-      </td>
-    </tr>
-    <tr>
-      <td align="right">
         <input type="checkbox" name="state_behaviors:int:list" value="103"
             <dtml-if "103 in state_behaviors">checked</dtml-if> />
       </td>
@@ -92,28 +81,6 @@
         Decrease workflow level, on workflow variables
         <input type="text" name="workflow_down_on_workflow_variable:tokens"
           value="<dtml-var "' '.join(workflow_down_on_workflow_variable)" html_quote>" size="25" />
-      </td>
-    </tr>
-    <tr>
-      <td align="right">
-        <input type="checkbox" name="state_behaviors:int:list" value="106"
-            <dtml-if "106 in state_behaviors">checked</dtml-if> />
-      </td>
-      <td>
-        Lock workflow, for workflow variables
-        <input type="text" name="workflow_lock_on_workflow_variable:tokens"
-          value="<dtml-var "' '.join(workflow_lock_on_workflow_variable)" html_quote>" size="25" />
-      </td>
-    </tr>
-    <tr>
-      <td align="right">
-        <input type="checkbox" name="state_behaviors:int:list" value="107"
-            <dtml-if "107 in state_behaviors">checked</dtml-if> />
-      </td>
-      <td>
-        Unlock workflow, for workflow variables
-        <input type="text" name="workflow_unlock_on_workflow_variable:tokens"
-          value="<dtml-var "' '.join(workflow_unlock_on_workflow_variable)" html_quote>" size="25" />
       </td>
     </tr>
     <tr>
