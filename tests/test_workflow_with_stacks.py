@@ -1755,7 +1755,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         self.logout()
 
-        self.login('toto)
+        self.login('toto')
         scontent = pstacks.getStackContent(type='object', context=content)
         elt = scontent[0]
         self.assertEqual(elt.meta_type, 'Hidden User Stack Element')
