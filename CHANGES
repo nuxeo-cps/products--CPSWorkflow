@@ -4,6 +4,7 @@ Requires:
 New features:
 ~~~~~~~~~~~~~
 - Stack, stack def and stack element registries.
+- Stack do have a render() method
 Bug fixes:
 ~~~~~~~~~~
 - 'stock' CMF compatible
@@ -19,3 +20,12 @@ New internal features:
   base interfaces
 - basic stack element definitions
 - stack stores now stack elements instead of strings
+- skins directory for stack rendering methods
+- wftool.getWorkflowStackElementRegistry()
+- _changeStateOf() overriden that permits to initialize the stacks at
+  creation time
+- renammed : wftool.getDelegateesDataStructures() -> wftool.getStacks()
+             wftool.getDelegateesDataStructureFor() -> wftool.getStackFor()
+- renammed : sci.getDelegateesVarInfoFor() -> sci.getStackFor()
+             sci.delegatees -> sci.stacks
+             sci.getAllDelegateesVarInfo() -> None
