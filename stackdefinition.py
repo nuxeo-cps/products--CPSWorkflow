@@ -163,7 +163,7 @@ class StackDefinition(SimpleItem):
         return self._managed_role_exprs.keys()
 
     security.declareProtected(ManagePortal, 'addManagedRole')
-    def addManagedRole(self, role_id, expression='python:1', master_role=1):
+    def addManagedRole(self, role_id, expression='python:1', master_role=0):
         """Add a role to to the list of role this stack definition can cope
         with
 
