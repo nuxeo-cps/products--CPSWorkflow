@@ -60,6 +60,8 @@ class SimpleStack(Stack):
 
     __implements__ = (IWorkflowStack, ISimpleWorkflowStack,)
 
+    render_method = 'stack_simple_method'
+
     def __init__(self, **kw):
         """Default constructor
         """
@@ -156,6 +158,8 @@ class HierarchicalStack(SimpleStack):
     __implements__ = (IWorkflowStack,
                       ISimpleWorkflowStack,
                       IHierarchicalWorkflowStack,)
+
+    render_method = 'stack_hierarchical_method'
 
     def __init__(self,  **kw):
         """CPSSimpleStack constructor
