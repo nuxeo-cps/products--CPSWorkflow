@@ -198,8 +198,8 @@ class HierarchicalStackDefinition(StackDefinition):
 
         #
         # Check first if the member is granted because of its position within
-        # the stack content
-        #
+        # the stack content.
+        # e.g.check that current user, or one of its groups, is at current level
 
         for each in ds.getLevelContent(type='role'):
             if not each.startswith('group:'):
@@ -207,6 +207,11 @@ class HierarchicalStackDefinition(StackDefinition):
                     return 1
             else:
                 try:
+                    # XXX AT: Maybe we could think that, statistically, there
+                    # are more users in a given group than groups for a given
+                    # user. So maybe could replace this code checking that
+                    # given group is in user's computed groups, instead of
+                    # iterating on each group's content?
                     group_no_prefix = each[len('group:'):]
                     group = aclu.getGroupById(group_no_prefix)
                     group_users = group.getUsers()
