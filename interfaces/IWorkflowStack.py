@@ -70,3 +70,7 @@ class IWorkflowStack(Interface.Base):
 
         Simply Call the constructor to reinitialize
         """
+
+    def render(context, mode, **kw):
+        """Render in mode
+        """
