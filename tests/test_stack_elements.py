@@ -27,6 +27,15 @@ from Interface.Verify import verifyClass
 
 from Products.CPSWorkflow.stackelement import StackElement
 
+from Products.CPSWorkflow.basicstackelements import UserStackElement
+from Products.CPSWorkflow.basicstackelements import GroupStackElement
+from Products.CPSWorkflow.basicstackelements import HiddenUserStackElement
+from Products.CPSWorkflow.basicstackelements import HiddenGroupStackElement
+from Products.CPSWorkflow.basicstackelements import UserSubstituteStackElement
+from Products.CPSWorkflow.basicstackelements import GroupSubstituteStackElement
+from Products.CPSWorkflow.basicstackelements import \
+     USER_STACK_ELEMENT_NOT_VISIBLE, GROUP_STACK_ELEMENT_NOT_VISIBLE
+
 from Products.CPSWorkflow.interfaces import IStackElement
 
 class TestStackElements(ZopeTestCase):
@@ -194,6 +203,50 @@ class TestStackElements(ZopeTestCase):
         ##
         ## XXX need to test the check() API
         ##
+
+    def test_UserStackElement(self):
+        elt = UserStackElement('anguenot')
+        self.assertEqual(elt(), 'anguenot')
+        self.assertEqual(str(elt), 'anguenot')
+        self.assert_('anguenot' == elt)
+        self.assertEqual(elt.getIdForRoleSettings(), 'anguenot')
+        self.assertEqual(elt.getPrefix(), 'user')
+
+    def test_GroupStackElement(self):
+        elt = GroupStackElement('group:nuxeo')
+        self.assertEqual(elt(), 'group:nuxeo')
+        self.assertEqual(str(elt), 'group:nuxeo')
+        self.assert_('group:nuxeo' == elt)
+        self.assertEqual(elt.getIdForRoleSettings(), 'group:nuxeo')
+        self.assertEqual(elt.getPrefix(), 'group')
+
+    def test_HiddenUserStackElement(self):
+        elt = HiddenUserStackElement()
+        self.assertEqual(elt(),  USER_STACK_ELEMENT_NOT_VISIBLE)
+        self.assertEqual(str(elt),  USER_STACK_ELEMENT_NOT_VISIBLE)
+        self.assertEqual(elt.getIdForRoleSettings(), '')
+
+    def test_HiddenGroupStackElement(self):
+        elt = HiddenGroupStackElement()
+        self.assertEqual(elt(),  GROUP_STACK_ELEMENT_NOT_VISIBLE)
+        self.assertEqual(str(elt),  GROUP_STACK_ELEMENT_NOT_VISIBLE)
+        self.assertEqual(elt.getIdForRoleSettings(), '')
+
+    def test_UserSubstituteStackElement(self):
+        elt = UserSubstituteStackElement('user_substitute:anguenot')
+        self.assertEqual(elt(), 'user_substitute:anguenot')
+        self.assertEqual(str(elt), 'user_substitute:anguenot')
+        self.assert_('user_substitute:anguenot' == elt)
+        self.assertEqual(elt.getIdForRoleSettings(), 'anguenot')
+        self.assertEqual(elt.getPrefix(), 'user_substitute')
+        
+    def test_GroupSubstituteStackElement(self):
+        elt = GroupSubstituteStackElement('group_substitute:group:nuxeo')
+        self.assertEqual(elt(), 'group_substitute:group:nuxeo')
+        self.assertEqual(str(elt), 'group_substitute:group:nuxeo')
+        self.assert_('group_substitute:group:nuxeo' == elt)
+        self.assertEqual(elt.getIdForRoleSettings(), 'group:nuxeo')
+        self.assertEqual(elt.getPrefix(), 'group_substitute')
 
 def test_suite():
     loader = unittest.TestLoader()
