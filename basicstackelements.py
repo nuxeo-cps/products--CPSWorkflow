@@ -89,7 +89,7 @@ class GroupStackElement(UserStackElement):
 
     You may use it like this :
 
-        >>> gse = UserStackElement('group:nuxeo')
+        >>> gse = GroupStackElement('group:nuxeo')
         >>> gse()
         'group:nuxeo'
         >>> str(gse)
