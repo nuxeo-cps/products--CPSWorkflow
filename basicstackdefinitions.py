@@ -41,7 +41,7 @@ class SimpleStackDefinition(StackDefinition):
     """Simple Workflow Stack Definition
     """
 
-    meta_type = 'Simple Workflow Stack Definition'
+    meta_type = 'Simple Stack Definition'
 
     security = ClassSecurityInfo()
 
@@ -291,7 +291,9 @@ class HierarchicalStackDefinition(StackDefinition):
     """Hierarchical Workflow Stack Definition
     """
 
-    meta_type = 'Hierarchical Workflow Stack Definition'
+    meta_type = 'Hierarchical Stack Definition'
+
+    __implements__ = (IWorkflowStackDefinition,)
 
     security = ClassSecurityInfo()
 
@@ -314,9 +316,6 @@ class HierarchicalStackDefinition(StackDefinition):
         The constructor will create an instance of HierarchicalStack to hold
         delegatees in here
         """
-
-        __implements__ = (IWorkflowStackDefinition,)
-
         StackDefinition.__init__(self,
                                  stack_ds_type,
                                  wf_var_id,
@@ -472,7 +471,7 @@ class HierarchicalStackDefinition(StackDefinition):
         # the stack content
         #
 
-        for each in ds.getLevelContent():
+        for each in ds.getLevelContentValues():
             if not each.startswith('group:'):
                 if each == member_id:
                     return 1
@@ -496,7 +495,7 @@ class HierarchicalStackDefinition(StackDefinition):
         _granted_local_roles = ('Owner',
                                 self.getAssociatedLocalRole())
 
-        if ds.getLevelContent() == []:
+        if ds.getLevelContentValues() == []:
             if context is not None:
                 member_roles = member.getRolesInContext(context)
                 for lc in _granted_local_roles:
@@ -534,7 +533,7 @@ class HierarchicalStackDefinition(StackDefinition):
                         if level < current_level]
 
         for each in above_levels:
-            for elt in ds.getLevelContent(level=each):
+            for elt in ds.getLevelContentValues(level=each):
                 new = mapping.get(elt, ()) + (self.up_ass_local_role,)
                 mapping[elt] = new
 
@@ -548,7 +547,7 @@ class HierarchicalStackDefinition(StackDefinition):
                         if level > current_level]
 
         for each in below_levels:
-            for elt in ds.getLevelContent(level=each):
+            for elt in ds.getLevelContentValues(level=each):
                 new = mapping.get(elt, ()) + (self.down_ass_local_role,)
                 mapping[elt] = new
 
@@ -557,7 +556,7 @@ class HierarchicalStackDefinition(StackDefinition):
         # They will get the ass_local_role
         #
 
-        elements = ds.getLevelContent()
+        elements = ds.getLevelContentValues()
         for each in elements:
             new = mapping.get(each, ()) + (self.getAssociatedLocalRole(),)
             mapping[each] = new
