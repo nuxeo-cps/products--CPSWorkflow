@@ -156,7 +156,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
                 continue
 
             ds = wftool.getInfoFor(ob, stackdef, self.id)
-            former_mapping = stackdefs[stackdef].getFormerLocalRolesMapping(ds)
+            former_mapping = wftool.getFormerLocalRoleMappingForStack(
+                ob, self.id, stackdef)
             mapping = stackdefs[stackdef].listLocalRoles(ds)
 
             #
@@ -226,6 +227,9 @@ class WorkflowDefinition(DCWorkflowDefinition):
                                     ids=[group_id],
                                     role=old_local_role)
 
+            # Update the former local role mapping
+            wftool.updateFormerLocalRoleMappingForStack(ob, self.id, stackdef,
+                                                        mapping)
         return changed
 
     def updateRoleMappingsFor(self, ob, **kw):
@@ -1219,6 +1223,31 @@ class WorkflowDefinition(DCWorkflowDefinition):
     #
     # API
     #
+
+    security.declarePrivate('getInfoFor')
+    def getInfoFor(self, ob, name, default):
+        '''
+        Allows the user to request information provided by the
+        workflow.  This method must perform its own security checks.
+        '''
+        if name == self.state_var:
+            return self._getWorkflowStateOf(ob, 1)
+        vdef = self.variables[name]
+        if vdef.info_guard is not None and not vdef.info_guard.check(
+            getSecurityManager(), self, ob):
+            return default
+        status = self._getStatusOf(ob)
+        if status is not None and status.has_key(name):
+            value = status[name]
+
+        # Not set yet.  Use a default.
+        elif vdef.default_expr is not None:
+            ec = createExprContext(StateChangeInfo(ob, self, status))
+            value = vdef.default_expr(ec)
+        else:
+            value = vdef.default_value
+
+        return value
 
     security.declarePrivate('insertIntoWorkflow')
     def insertIntoWorkflow(self, ob, initial_transition, initial_behavior,
