@@ -927,6 +927,9 @@ class WorkflowTool(BaseWorkflowTool):
         The former local role mapping is defined within the status of the
         object.
         """
+
+        # XXX code sucks
+
         self._p_changed = 1
         _status = self[wf_id]._getStatusOf(ob)
         _sflrm = _status.get('sflrm', {})
@@ -939,6 +942,9 @@ class WorkflowTool(BaseWorkflowTool):
         """Return the former local role mapping for a given stack on a given
         given content object for a given workflow
         """
+
+        # XXX code sucks
+        
         _wf_history = ob.workflow_history[wf_id]
         if len(_wf_history) > 1:
             return _wf_history[-2].get('sflrm', {}).get(stack_id, {})
