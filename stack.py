@@ -72,6 +72,8 @@ class Stack(SimpleItem):
 
     __implements__ = IWorkflowStack
 
+    render_method = ''
+
     def __init__(self, maxsize=None):
         """ Possiblity to specify a maximum size
         """
@@ -193,5 +195,20 @@ class Stack(SimpleItem):
         Call the constructor
         """
         self.__init__()
+
+    ##################################################################
+
+    def render(self, context, mode, **kw):
+        """Render in mode
+
+        context is te context. var_id is the wokkflow variable holding this
+        stack
+        """
+        meth = getattr(context, self.render_method, None)
+        if meth is None:
+            raise RuntimeError(
+                "Unknown Render method %s for stack type %s"
+                    %(self.render_method, self.meta_type))
+        return meth(mode=mode, stack=self)
 
 InitializeClass(Stack)
