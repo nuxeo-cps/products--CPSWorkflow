@@ -25,6 +25,8 @@ This module contains all CPS Stack definitions
 
 from zLOG import LOG, DEBUG
 
+from types import DictType
+
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
 from OFS.SimpleItem import SimpleItem
@@ -179,19 +181,16 @@ class SimpleStackDefinition(StackDefinition):
         # Prepare the ds
         ds = self._prepareStack(ds)
 
-        # Get stack elements
-        elements = ds.getStackContent()
-
         #
         # Build the local role mapping Have to respect the fact that some
         # stacks might have be able to define different local roles for the
         # same element in the stack at a given time
         #
 
-        for each in elements:
-            new = mapping.get(each, ()) + (self.getAssociatedLocalRole(),)
-            mapping[each] = new
-
+        for elt in ds.getStackContent():
+            for role_id in self.getManagedRoles():
+                if self._getExpressionForRole(role_id, ds):
+                    mapping[elt] = mapping.get(elt, ()) + (role_id,)
         return mapping
 
     security.declarePublic('canManageStack')
@@ -249,8 +248,7 @@ class SimpleStackDefinition(StackDefinition):
         # having the same local role as the associated local roles of the stack
         #
 
-        _granted_local_roles = ('Owner',
-                                self.getAssociatedLocalRole())
+        _granted_local_roles = ('Owner', self._master_role)
 
         if ds.getStackContent() == []:
             if context is not None:
@@ -307,6 +305,7 @@ class HierarchicalStackDefinition(StackDefinition):
                                  stack_ds_type,
                                  wf_var_id,
                                  **kw)
+
     def _prepareStack(self, ds):
         """Prepare stack on wich we gonna work one
 
@@ -479,8 +478,7 @@ class HierarchicalStackDefinition(StackDefinition):
         # having the same local role as the associated local roles of the stack
         #
 
-        _granted_local_roles = ('Owner',
-                                self.getAssociatedLocalRole())
+        _granted_local_roles = ('Owner', self._master_role)
 
         if ds.getLevelContentValues() == []:
             if context is not None:
@@ -496,58 +494,26 @@ class HierarchicalStackDefinition(StackDefinition):
         """Give the local roles mapping for the member / group ids within the
         stack
 
-        Here, we decide that only the people at the current level do have the
-        main associated Local role. The other ones have a default role for
-        being able to still work but they can't manage the workflow
-
-        The people above get the up_ass_local_role
-        The people below get the down_ass_local_role
+        Simple case : all the member of the stack have the associated local
+        role
         """
 
         mapping = {}
 
         # Prepare the ds
         ds = self._prepareStack(ds)
-        current_level = ds.getCurrentLevel()
 
         #
-        # Cope with people above the current level
-        # Means the people at levels -1, -2, ... -n
-        # Above is a sort of view of my brain ;)
+        # Build the local role mapping Have to respect the fact that some
+        # stacks might have be able to define different local roles for the
+        # same element in the stack at a given time
         #
 
-        above_levels = [level for level in ds.getAllLevels()
-                        if level < current_level]
-
-        for each in above_levels:
-            for elt in ds.getLevelContentValues(level=each):
-                new = mapping.get(elt, ()) + (self.up_ass_local_role,)
-                mapping[elt] = new
-
-        #
-        # Cope with people below the current level
-        # Means the people at levels 1, 2, ... n
-        # Below is a sort of view of my brain ;)
-        #
-
-        below_levels = [level for level in ds.getAllLevels()
-                        if level > current_level]
-
-        for each in below_levels:
-            for elt in ds.getLevelContentValues(level=each):
-                new = mapping.get(elt, ()) + (self.down_ass_local_role,)
-                mapping[elt] = new
-
-        #
-        # Cope with people at current level
-        # They will get the ass_local_role
-        #
-
-        elements = ds.getLevelContentValues()
-        for each in elements:
-            new = mapping.get(each, ()) + (self.getAssociatedLocalRole(),)
-            mapping[each] = new
-
+        for k, v in ds.getStackContent().items():
+            for elt in v:
+                for role_id in self.getManagedRoles():
+                    if self._getExpressionForRole(role_id, ds, k):
+                        mapping[elt] = mapping.get(elt, ()) + (role_id,)
         return mapping
 
     security.declareProtected(ModifyPortalContent, 'doIncLevel')
