@@ -202,6 +202,25 @@ class WorkflowToolTests(SecurityRequestTest):
         chain = wft.getChainFor('Dummy Content', f2)
         self.assertEqual(tuple(chain), ('wf2',))
 
+    def test_toXML(self):
+        self.makeWorkflows()
+        self.makeTypes()
+        self.makeTree()
+        wf = self.root.portal_workflow.wf
+        expected = """
+<workflow id="wf" title="CPS Workflow Definition">
+  <transitions>
+    <transition title="title" actionCategory="workflow" destination="s1" trigger="user_action" id="t1">
+      <behaviors>
+        <behavior type="initial_create"></behavior>
+      </behaviors>
+      <guard></guard>
+      <variables></variables>
+    </transition>
+  </transitions>
+</workflow>"""
+        self.assertEquals(wf.toXML().strip(), expected.strip()) 
+
 
 def test_suite():
     loader = unittest.TestLoader()
