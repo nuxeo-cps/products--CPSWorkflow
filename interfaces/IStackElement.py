@@ -25,10 +25,28 @@ import Interface
 
 class IStackElement(Interface.Base):
     """API for the Workflow Stack Element
+
+    The stack element classes you may want to define and register within the
+    WOrkflowStackElementRegistry *DO* have to inherit and implement this
+    interface
     """
+
+    def __call__():
+        """Has to be overriden by the child
+        """
+
+    def __str__():
+        """Has to be overriden by the child
+        """
+
+    def __cmp__(other):
+        """Comparaison can be done against another stack element or against a
+        string """
+
     def getGuard():
         """Return a temporarly guard instance
         """
+
     def getGuardSummary():
         """Return a guard summary for display purpose
         """
