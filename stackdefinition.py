@@ -136,13 +136,6 @@ class StackDefinition(SimpleItem):
         """
         raise NotImplementedError
 
-    security.declareProtected(View, 'getFormerLocalRolesMapping')
-    def getFormerLocalRolesMapping(self, ds):
-        """Give the former local roles mapping for the member / group ids
-        within the stack
-        """
-        raise NotImplementedError
-
     security.declarePublic('canManageStack')
     def canManageStack(self, ds, aclu, mtool, context, **kw):
         """Can the current member manage the stack ?
