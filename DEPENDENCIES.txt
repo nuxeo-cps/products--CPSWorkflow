@@ -1,11 +1,9 @@
-$Id$
+# $Id$
 
-Below are the product versions on which it's been tested :
+# works fine with
+# - Zope-2.7.3
+# - CPSCore > 3.19 is optional
+# - Plone 2.x (based on CMF-1.4.x). Has to be tested by a Plone guy though
 
-- CMF-1.4.7
-- Zope-2.7.3
-- Plone 2.x (based on CMF-1.4.x). Has to be tested by a Plone guy though
+CMFCore >= 1.4.7
 
-Optional  :
-
- - CPSCore > 3.19.0
