@@ -5,8 +5,8 @@ from OFS.Folder import Folder
 
 from Testing import ZopeTestCase
 from Products.CMFCore.tests.base.testcase import SecurityRequestTest
-from Products.CPSWorkflow.CPSWorkflowStacks import SimpleStack, HierarchicalStack
-from Products.CPSWorkflow.CPSWorkflowStackDefinitions import  \
+from Products.CPSWorkflow.basicstacks import SimpleStack, HierarchicalStack
+from Products.CPSWorkflow.basicstackdefinitions import  \
      BaseWorkflowStackDefinition, \
      SimpleWorkflowStackDefinition, \
      HierarchicalWorkflowStackDefinition

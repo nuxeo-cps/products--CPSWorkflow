@@ -17,14 +17,14 @@ from Products.CMFDefault.Portal import manage_addCMFSite
 
 from Products.CMFCore.utils import getToolByName
 
-from Products.CPSWorkflow.CPSWorkflowStackRegistries import \
+from Products.CPSWorkflow.stackregistries import \
      WorkflowStackRegistryCls, WorkflowStackDefRegistryCls, \
      WorkflowStackRegistry, WorkflowStackDefRegistry
 
-from Products.CPSWorkflow.CPSWorkflowStacks import SimpleStack, \
+from Products.CPSWorkflow.basicstacks import SimpleStack, \
      HierarchicalStack
 
-from Products.CPSWorkflow.CPSWorkflowStackDefinitions import \
+from Products.CPSWorkflow.basicstackdefinitions import \
      SimpleWorkflowStackDefinition, HierarchicalWorkflowStackDefinition
 
 from Products.CPSWorkflow.interfaces.IWorkflowStackRegistry import \
@@ -61,6 +61,10 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
         # Test the stack registry with the stack types defined within
         # the CPSWorkflowStacks
         #
+
+        # Reset registries for being able to test behaviors
+        stack_reg_save = WorkflowStackRegistry._stack_classes
+        WorkflowStackRegistry._stack_classes = {}
 
         self.assertEqual(WorkflowStackRegistry.listWorkflowStackTypes(),
                          [])
@@ -120,12 +124,19 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
             '')
         self.assert_(icls is None)
 
+        # Recover old value
+        WorkflowStackRegistry._stack_classes = stack_reg_save
+
     def test_stack_def_registry(self):
 
         #
         # Test the stack def registry with the stack types defined within
         # the CPSWorkflowStacks
         #
+
+        # Reset the reg for being able to test the behavior
+        stackdef_reg_save = WorkflowStackDefRegistry._stack_def_classes
+        WorkflowStackDefRegistry._stack_def_classes = {}
 
         self.assertEqual(WorkflowStackDefRegistry.listWorkflowStackDefTypes(),
                          [])
@@ -193,6 +204,8 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
             '', '', '')
         self.assert_(icls is None)
 
+        # Recover back the value
+        WorkflowStackDefRegistry._stack_def_classes = stackdef_reg_save
 
 if __name__ == '__main__':
     framework()

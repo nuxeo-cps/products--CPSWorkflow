@@ -2,10 +2,11 @@
 import unittest
 from Testing.ZopeTestCase import ZopeTestCase
 
-from Products.CPSWorkflow.CPSWorkflowStacks import BaseStack, SimpleStack, \
+from Products.CPSWorkflow.basicstacks import BaseStack, SimpleStack, \
      HierarchicalStack
 
 from Interface.Verify import verifyClass
+
 from Products.CPSWorkflow.interfaces.IWorkflowStack import IWorkflowStack
 from Products.CPSWorkflow.interfaces.ISimpleWorkflowStack import \
      ISimpleWorkflowStack

@@ -16,20 +16,26 @@
 <tr>
   <th align="left" valign="top">Add workflow variables holding delegatees</th>
   <td align="right">
-    <small>Type&nbsp; :&nbsp; </small>
-    <select name="data_struct_type:int">
-      <dtml-in expr="getAvailableDataStructureTypes().keys()">
+    <small>Stack Definition Type&nbsp; :&nbsp; </small>
+    <select name="stack_def_type">
+      <dtml-in expr="portal_workflow.getWorkflowStackDefRegistry().listWorkflowStackDefTypes()">
           <option value="&dtml-sequence-item;">
-            <dtml-if expr="_['sequence-item'] == 201">
-              Simple Stack (No levels)
-            </dtml-if>
-            <dtml-if expr="_['sequence-item'] == 202">
-              Hierarchical Stack (Stack with Levels)
-            </dtml-if>
+            <dtml-var expr="_['sequence-item']">
           </option>
       </dtml-in>
     </select>
     <br /><br />
+
+    <small>Associate Stack Type&nbsp; :&nbsp; </small>
+    <select name="data_struct_type">
+      <dtml-in expr="portal_workflow.getWorkflowStackRegistry().listWorkflowStackTypes()">
+          <option value="&dtml-sequence-item;">
+            <dtml-var expr="_['sequence-item']">
+          </option>
+      </dtml-in>
+    </select>
+    <br /><br />
+
     <b>Common properties</b>
     <br /><br />
     <small>With workflow variable name :</small>
@@ -90,12 +96,7 @@
         <dtml-let
         stackdef="getDelegateesVarInfoFor(current_variable_id)">
         <b>Type : </b>
-          <dtml-if expr="stackdef.getStackDataStructureType() == 201">
-            Simple Stack (No level)
-          </dtml-if>
-          <dtml-if expr="stackdef.getStackDataStructureType() == 202">
-            Hierarchical Stack (With levels)
-          </dtml-if>
+          <dtml-var expr="stackdef.getStackDataStructureType()">
         <br />
         <b>With variable id : </b><dtml-var expr="current_variable_id"><br />
         <b>Associated local role (current_level): </b><dtml-var

@@ -44,18 +44,17 @@ from Products.CMFDefault.Portal import manage_addCMFSite
 
 from Products.CMFCore.utils import getToolByName
 
-from Products.CPSWorkflow.CPSWorkflow import CPSWorkflowDefinition
-from Products.CPSWorkflow.CPSWorkflow import TRIGGER_USER_ACTION
+from Products.CPSWorkflow.workflow import WorkflowDefinition
+from Products.CPSWorkflow.workflow import TRIGGER_USER_ACTION
 
-from Products.CPSWorkflow.CPSWorkflowConfiguration \
-    import addCPSWorkflowConfiguration
+from Products.CPSWorkflow.configuration import addConfiguration
 
-from Products.CPSWorkflow.CPSWorkflowTool import CPSWorkflowConfig_id
+from Products.CPSWorkflow.workflowtool import Config_id
 
-from Products.CPSWorkflow.CPSWorkflowTransitions import *
-from Products.CPSWorkflow.CPSWorkflowStates import *
+from Products.CPSWorkflow.transitions import *
+from Products.CPSWorkflow.states import *
 
-from Products.CPSWorkflow.CPSWorkflowTransitions import\
+from Products.CPSWorkflow.transitions import \
      transition_behavior_export_dict as tbdict
 
 from dummy import DummyContent
@@ -111,8 +110,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         self.wftool.setChainForPortalTypes(('File',), ('wf',))
 
         # Setup placeful workflows
-        addCPSWorkflowConfiguration(f)
-        config = getattr(f, CPSWorkflowConfig_id)
+        addConfiguration(f)
+        config = getattr(f, Config_id)
         config.setChain('File', ('wf',))
 
         # Create a dummy File objects
@@ -129,7 +128,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         wftool = self.wftool
 
         id = 'wf'
-        wf = CPSWorkflowDefinition(id)
+        wf = WorkflowDefinition(id)
 
         if id in wftool.objectIds():
             wftool._delObjects([id])
@@ -440,7 +439,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         #
 
         id2 = 'wf2'
-        wf2 = CPSWorkflowDefinition(id2)
+        wf2 = WorkflowDefinition(id2)
         wftool._setObject(id2, wf2)
 
         # A a state

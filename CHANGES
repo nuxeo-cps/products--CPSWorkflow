@@ -9,4 +9,9 @@ Bug fixes:
 -
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
--
+- Renamming files and classes
+- Split CPSWorkflowStacks.py into stack and basicstacks.py
+- Split CPSWorkflowStackDefinitions.py into stackdefinition.py and
+  basicstackdefinitions.py
+- Stack and stackdef registries are registrering stacks and stackdefs from
+  basicstacks and basicstackdefinitions.

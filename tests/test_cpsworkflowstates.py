@@ -1,20 +1,23 @@
 # -*- coding: iso-8859-15 -*-
 import Zope
 import unittest
+
 from OFS.Folder import Folder
 
 from Products.CMFCore.tests.base.testcase import SecurityRequestTest
 
-from Products.CPSWorkflow.CPSWorkflow import CPSWorkflowDefinition
-from Products.CPSWorkflow.CPSWorkflow import TRIGGER_USER_ACTION
-from Products.CPSWorkflow.CPSWorkflowConfiguration \
-    import addCPSWorkflowConfiguration
-from Products.CPSWorkflow.CPSWorkflowTool import CPSWorkflowConfig_id
+from Products.CPSWorkflow import basicstacks
+from Products.CPSWorkflow import basicstackdefinitions
 
-from Products.CPSWorkflow.CPSWorkflowStates import CPSStateDefinition, \
+from Products.CPSWorkflow.workflow import WorkflowDefinition
+from Products.CPSWorkflow.workflow import TRIGGER_USER_ACTION
+from Products.CPSWorkflow.configuration import addConfiguration
+from Products.CPSWorkflow.workflowtool import Config_id
+
+from Products.CPSWorkflow.states import StateDefinition, \
      state_behavior_export_dict
-from Products.CPSWorkflow.CPSWorkflowStacks import data_struct_types_export_dict
-from Products.CPSWorkflow.CPSWorkflowStacks import BaseStack, SimpleStack, \
+from Products.CPSWorkflow.stack import data_struct_types_export_dict
+from Products.CPSWorkflow.basicstacks import BaseStack, SimpleStack, \
      HierarchicalStack
 
 # XXX default values for sdef.state_delegatees_vars_info is not {} as it should
@@ -31,19 +34,19 @@ class TestCPSWorkflowStates(SecurityRequestTest):
         root = self.root
 
         from Products.CMFCore.WorkflowTool import addWorkflowFactory
-        addWorkflowFactory(CPSWorkflowDefinition, id='cps wfdef')
+        addWorkflowFactory(WorkflowDefinition, id='cps wfdef')
 
-        from Products.CPSWorkflow.CPSWorkflowTool import addCPSWorkflowTool
-        addCPSWorkflowTool(root)
+        from Products.CPSWorkflow.workflowtool import addWorkflowTool
+        addWorkflowTool(root)
 
     def tearDown(self):
         from Products.CMFCore.WorkflowTool import _removeWorkflowFactory
-        _removeWorkflowFactory(CPSWorkflowDefinition, id='cps wfdef')
+        _removeWorkflowFactory(WorkflowDefinition, id='cps wfdef')
 
         SecurityRequestTest.tearDown(self)
 
     def test_simple_state_definition(self):
-        sdef = CPSStateDefinition('sdef')
+        sdef = StateDefinition('sdef')
 
         self.assertEqual(sdef.getAvailableStateBehaviors(),
                          state_behavior_export_dict)
@@ -75,7 +78,7 @@ class TestCPSWorkflowStates(SecurityRequestTest):
 
     def makeWorkflows(self):
         id = 'wf'
-        wf = CPSWorkflowDefinition(id)
+        wf = WorkflowDefinition(id)
         self.root.portal_workflow._setObject(id, wf)
         wf = self.root.portal_workflow.wf
 
@@ -126,12 +129,15 @@ class TestCPSWorkflowStates(SecurityRequestTest):
         #self.assertEqual(sdef.state_delegatees_vars_info, {})
 
         # Test add delegatees var info
-        for ds_type in data_struct_types_export_dict:
-            for var_id, lc in (('toto', 'WorkspaceManager'),
-                               ('tata', 'WorkspaceMember')):
-                sdef.addDelegateesWorkflowVariableInfo(ds_type,
-                                                       var_id,
-                                                       ass_local_role=lc)
+        for stackdef_type, ds_type, var_id, lc in (
+            ('Hierarchical Workflow Stack Definition', 'Hierarchical Stack',
+             'toto', 'WorkspaceManager'),
+            ('Simple Workflow Stack Definition', 'Simple Stack',
+             'tata', 'WorkspaceMember')):
+            sdef.addDelegateesWorkflowVariableInfo(stackdef_type,
+                                                   ds_type,
+                                                   var_id,
+                                                   ass_local_role=lc)
         # Test property again
         self.assertEqual(sdef.state_behaviors,
                          tuple(state_behavior_export_dict.keys()))
@@ -139,13 +145,14 @@ class TestCPSWorkflowStates(SecurityRequestTest):
 
         dinfo = sdef.getDelegateesVarInfoFor('toto')
         self.assertNotEqual(dinfo, None)
-        self.assertEqual(dinfo.getStackDataStructureType(), 201)
+        self.assertEqual(dinfo.getStackDataStructureType(),
+                         'Hierarchical Stack')
         self.assertEqual(dinfo.getStackWorkflowVariableId(), 'toto')
         self.assertEqual(dinfo.getAssociatedLocalRole(), 'WorkspaceManager')
 
         dinfo = sdef.getDelegateesVarInfoFor('tata')
         self.assertNotEqual(dinfo, None)
-        self.assertEqual(dinfo.getStackDataStructureType(), 201)
+        self.assertEqual(dinfo.getStackDataStructureType(), 'Simple Stack')
         self.assertEqual(dinfo.getStackWorkflowVariableId(), 'tata')
         self.assertEqual(dinfo.getAssociatedLocalRole(), 'WorkspaceMember')
 
@@ -162,7 +169,7 @@ class TestCPSWorkflowStates(SecurityRequestTest):
 
         dinfo = sdef.getDelegateesVarInfoFor('tata')
         self.assertNotEqual(dinfo, None)
-        self.assertEqual(dinfo.getStackDataStructureType(), 201)
+        self.assertEqual(dinfo.getStackDataStructureType(), 'Simple Stack')
         self.assertEqual(dinfo.getStackWorkflowVariableId(), 'tata')
         self.assertEqual(dinfo.getAssociatedLocalRole(), 'WorkspaceMember')
 
@@ -176,7 +183,7 @@ class TestCPSWorkflowStates(SecurityRequestTest):
 
         dinfo = sdef.getDelegateesVarInfoFor('tata')
         self.assertNotEqual(dinfo, None)
-        self.assertEqual(dinfo.getStackDataStructureType(), 201)
+        self.assertEqual(dinfo.getStackDataStructureType(), 'Simple Stack')
         self.assertEqual(dinfo.getStackWorkflowVariableId(), 'tata')
         self.assertEqual(dinfo.getAssociatedLocalRole(), 'WorkspaceMember')
 

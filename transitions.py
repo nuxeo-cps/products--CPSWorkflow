@@ -133,7 +133,7 @@ transition_behavior_export_dict = {
     TRANSITION_BEHAVIOR_WORKFLOW_RESET : 'behavior_workflow_reset',
     }
 
-class CPSTransitionDefinition(DCWFTransitionDefinition):
+class TransitionDefinition(DCWFTransitionDefinition):
     """CPS Transition Definition
 
     It extends the DC Workfow Transition Definition by adding transition flags.
@@ -282,22 +282,22 @@ class CPSTransitionDefinition(DCWFTransitionDefinition):
                 _interested_behaviors += (behavior,)
         return _interested_behaviors
 
-class CPSTransitions(DCWFTransitions):
+class Transitions(DCWFTransitions):
     """CPS Transitions
 
     Extends DC Workflow Transition.  Actually, the goal is to new meta_type and
-    use the CPSTransitionDefinition
+    use the TransitionDefinition
     """
 
     meta_type = 'CPS Workflow Transitions'
 
-    all_meta_types = ({'name':CPSTransitionDefinition.meta_type,
+    all_meta_types = ({'name':TransitionDefinition.meta_type,
                        'action':'addTransition',
                        },)
 
     def addTransition(self, id, REQUEST=None):
         """Add a new transition to the workflow."""
-        tdef = CPSTransitionDefinition(id)
+        tdef = TransitionDefinition(id)
         self._setObject(id, tdef)
         if REQUEST is not None:
             return self.manage_main(REQUEST, 'Transition added.')

@@ -20,29 +20,29 @@
 from Products.CMFCore.CMFCorePermissions import ManagePortal
 from Products.CMFCore.utils import ToolInit
 
-import CPSWorkflow
-import CPSWorkflowTool
-import CPSWorkflowExpression
-import CPSWorkflowTransitions
-import CPSWorkflowStates
+import workflow
+import workflowtool
+import expression
+import transitions
+import states
 
-import CPSWorkflowStacks
-import CPSWorkflowStackDefinitions
-import CPSWorkflowStackRegistries
+import basicstacks
+import basicstackdefinitions
+import stackregistries
 
-from CPSWorkflowConfiguration import CPSWorkflowConfiguration
-from CPSWorkflowConfiguration import addCPSWorkflowConfiguration
+from configuration import Configuration
+from configuration import addConfiguration
 
 tools = (
-    CPSWorkflowTool.CPSWorkflowTool,
+    workflowtool.WorkflowTool,
     )
 
 def initialize(registrar):
     # Workflow Configuration Object
     registrar.registerClass(
-        CPSWorkflowConfiguration,
+        Configuration,
         permission=ManagePortal,
-        constructors=(addCPSWorkflowConfiguration,)
+        constructors=(addConfiguration,)
         )
     # Workflow Tool
     ToolInit(

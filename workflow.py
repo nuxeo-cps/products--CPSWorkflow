@@ -51,9 +51,8 @@ from Products.DCWorkflow.Transitions import TRIGGER_AUTOMATIC
 from Products.DCWorkflow.Transitions import TRIGGER_USER_ACTION
 from Products.DCWorkflow.Transitions import TRIGGER_WORKFLOW_METHOD
 
-from CPSWorkflowExpression import CPSStateChangeInfo as StateChangeInfo
-from CPSWorkflowExpression import createExprContext
-
+from expression import CPSStateChangeInfo as StateChangeInfo
+from expression import createExprContext
 
 #
 # CPSCore is optional now.
@@ -89,10 +88,10 @@ except ImportError, e:
 # Importing transition flags from here before.
 #
 
-from Products.CPSWorkflow.CPSWorkflowTransitions import *
-from Products.CPSWorkflow.CPSWorkflowStates import *
+from Products.CPSWorkflow.transitions import *
+from Products.CPSWorkflow.states import *
 
-class CPSWorkflowDefinition(DCWorkflowDefinition):
+class WorkflowDefinition(DCWorkflowDefinition):
     """A Workflow implementation with enhanced transitions.
 
     Features:
@@ -109,8 +108,8 @@ class CPSWorkflowDefinition(DCWorkflowDefinition):
     def __init__(self, id):
         self.id = id
         # CPS versions
-        self._addObject(CPSStates('states'))
-        self._addObject(CPSTransitions('transitions'))
+        self._addObject(States('states'))
+        self._addObject(Transitions('transitions'))
         # Normal DCWorkflow versions
         from Products.DCWorkflow.Variables import Variables
         self._addObject(Variables('variables'))
@@ -1444,9 +1443,9 @@ class CPSWorkflowDefinition(DCWorkflowDefinition):
     manage_exportWorkflow = DTMLFile('zmi/workflow_export', globals())
 
 
-InitializeClass(CPSWorkflowDefinition)
+InitializeClass(WorkflowDefinition)
 
-addWorkflowFactory(CPSWorkflowDefinition, id='cps_workflow',
+addWorkflowFactory(WorkflowDefinition, id='cps_workflow',
                    title='Web-configurable workflow for CPS')
 
 

@@ -24,20 +24,19 @@ from OFS.Folder import Folder
 
 from Products.CMFCore.tests.base.testcase import SecurityRequestTest
 
-from Products.CPSWorkflow.CPSWorkflow import CPSWorkflowDefinition
-from Products.CPSWorkflow.CPSWorkflow import TRIGGER_USER_ACTION
-from Products.CPSWorkflow.CPSWorkflowConfiguration \
-    import addCPSWorkflowConfiguration
-from Products.CPSWorkflow.CPSWorkflowTool import CPSWorkflowConfig_id
+from Products.CPSWorkflow.workflow import WorkflowDefinition
+from Products.CPSWorkflow.workflow import TRIGGER_USER_ACTION
+from Products.CPSWorkflow.configuration import addConfiguration
+from Products.CPSWorkflow.workflowtool import Config_id
 
-from Products.CPSWorkflow.CPSWorkflowStates import CPSStateDefinition, \
+from Products.CPSWorkflow.states import StateDefinition, \
      state_behavior_export_dict
-from Products.CPSWorkflow.CPSWorkflowStacks import data_struct_types_export_dict
-from Products.CPSWorkflow.CPSWorkflowStacks import BaseStack, SimpleStack, \
+from Products.CPSWorkflow.stack import data_struct_types_export_dict
+from Products.CPSWorkflow.basicstacks import BaseStack, SimpleStack, \
      HierarchicalStack
 
-from Products.CPSWorkflow.CPSWorkflowTransitions import CPSTransitionDefinition, \
-     CPSTransitions
+from Products.CPSWorkflow.transitions import TransitionDefinition, \
+     Transitions
 
 class TestCPSWorkflowTransitions(SecurityRequestTest):
 
@@ -49,14 +48,14 @@ class TestCPSWorkflowTransitions(SecurityRequestTest):
         root = self.root
 
         from Products.CMFCore.WorkflowTool import addWorkflowFactory
-        addWorkflowFactory(CPSWorkflowDefinition, id='cps wfdef')
+        addWorkflowFactory(WorkflowDefinition, id='cps wfdef')
 
-        from Products.CPSWorkflow.CPSWorkflowTool import addCPSWorkflowTool
-        addCPSWorkflowTool(root)
+        from Products.CPSWorkflow.workflowtool import addWorkflowTool
+        addWorkflowTool(root)
 
     def tearDown(self):
         from Products.CMFCore.WorkflowTool import _removeWorkflowFactory
-        _removeWorkflowFactory(CPSWorkflowDefinition, id='cps wfdef')
+        _removeWorkflowFactory(WorkflowDefinition, id='cps wfdef')
 
         SecurityRequestTest.tearDown(self)
 
@@ -66,7 +65,7 @@ class TestCPSWorkflowTransitions(SecurityRequestTest):
         # Test the CPS Transition class
         #
 
-        tdef = CPSTransitionDefinition(id='fake')
+        tdef = TransitionDefinition(id='fake')
         tdef.setProperties(title='Transition def title',
                            new_state_id='')
         self.assertRaises(AttributeError, tdef.getAvailableTransitionIds)
@@ -115,7 +114,7 @@ class TestCPSWorkflowTransitions(SecurityRequestTest):
 
     def makeWorkflows(self):
         id = 'wf'
-        wf = CPSWorkflowDefinition(id)
+        wf = WorkflowDefinition(id)
         self.root.portal_workflow._setObject(id, wf)
         wf = self.root.portal_workflow.wf
 

@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
-
 # (C) Copyright 2003 Nuxeo SARL <http://nuxeo.com>
 # Author: Florent Guillaume <fg@nuxeo.com>
 #
@@ -36,11 +35,10 @@ from Products.CMFCore.tests.base.testcase import SecurityRequestTest
 
 from OFS.Folder import Folder
 
-from Products.CPSWorkflow.CPSWorkflow import CPSWorkflowDefinition
-from Products.CPSWorkflow.CPSWorkflow import TRIGGER_USER_ACTION
-from Products.CPSWorkflow.CPSWorkflowConfiguration \
-    import addCPSWorkflowConfiguration
-from Products.CPSWorkflow.CPSWorkflowTool import CPSWorkflowConfig_id
+from Products.CPSWorkflow.workflow import WorkflowDefinition
+from Products.CPSWorkflow.workflow import TRIGGER_USER_ACTION
+from Products.CPSWorkflow.configuration import addConfiguration
+from Products.CPSWorkflow.workflowtool import Config_id
 
 from dummy import DummyContent, DummyTypesTool
 
@@ -56,14 +54,14 @@ class WorkflowToolTests(SecurityRequestTest):
         root = self.root
 
         from Products.CMFCore.WorkflowTool import addWorkflowFactory
-        addWorkflowFactory(CPSWorkflowDefinition, id='cps wfdef')
+        addWorkflowFactory(WorkflowDefinition, id='cps wfdef')
 
-        from Products.CPSWorkflow.CPSWorkflowTool import addCPSWorkflowTool
-        addCPSWorkflowTool(root)
+        from Products.CPSWorkflow.workflowtool import addWorkflowTool
+        addWorkflowTool(root)
 
     def tearDown(self):
         from Products.CMFCore.WorkflowTool import _removeWorkflowFactory
-        _removeWorkflowFactory(CPSWorkflowDefinition, id='cps wfdef')
+        _removeWorkflowFactory(WorkflowDefinition, id='cps wfdef')
 
         SecurityRequestTest.tearDown(self)
 
@@ -71,7 +69,7 @@ class WorkflowToolTests(SecurityRequestTest):
 
     def makeWorkflows(self):
         id = 'wf'
-        wf = CPSWorkflowDefinition(id)
+        wf = WorkflowDefinition(id)
         self.root.portal_workflow._setObject(id, wf)
         wf = self.root.portal_workflow.wf
         #ct = wf.getCreationTransitions(self.root)
@@ -93,7 +91,7 @@ class WorkflowToolTests(SecurityRequestTest):
 
         # Another empty workflow
         id2 = 'wf2'
-        wf2 = CPSWorkflowDefinition(id2)
+        wf2 = WorkflowDefinition(id2)
         self.root.portal_workflow._setObject(id2, wf2)
 
     def makeTypes(self):
@@ -170,8 +168,8 @@ class WorkflowToolTests(SecurityRequestTest):
         f2 = f.f2
 
         # Setup placeful workflows
-        addCPSWorkflowConfiguration(f)
-        config = getattr(f, CPSWorkflowConfig_id)
+        addConfiguration(f)
+        config = getattr(f, Config_id)
         config.setChain('Dummy Content', ('wf',))
 
         # Check placeful
@@ -180,8 +178,8 @@ class WorkflowToolTests(SecurityRequestTest):
         self.assertEqual(tuple(chain), ('wf',))
 
         # Add new sub folder
-        addCPSWorkflowConfiguration(f2)
-        config2 = getattr(f2, CPSWorkflowConfig_id)
+        addConfiguration(f2)
+        config2 = getattr(f2, Config_id)
         config2.setChain('Dummy Content', ('wf2',))
 
         # Check inheritance order

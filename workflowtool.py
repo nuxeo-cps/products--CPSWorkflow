@@ -35,7 +35,10 @@ from Products.CMFCore.CMFCorePermissions import View
 from Products.CMFCore.CMFCorePermissions import ModifyPortalContent
 from Products.CMFCore.CMFCorePermissions import ManagePortal
 from Products.CMFCore.WorkflowCore import WorkflowException
-from Products.CMFCore.WorkflowTool import WorkflowTool
+from Products.CMFCore.WorkflowTool import WorkflowTool as BaseWorkflowTool
+
+from stackregistries import WorkflowStackRegistry
+from stackregistries import WorkflowStackDefRegistry
 
 #
 # CPSCore is optional now.
@@ -73,25 +76,25 @@ except ImportError, e:
     class ProxyBTreeFolderishDocument:
         pass
 
-from Products.CPSWorkflow.CPSWorkflowTransitions import TRANSITION_ALLOWSUB_CREATE
-from Products.CPSWorkflow.CPSWorkflowTransitions import TRANSITION_ALLOWSUB_DELETE
-from Products.CPSWorkflow.CPSWorkflowTransitions import TRANSITION_ALLOWSUB_MOVE
-from Products.CPSWorkflow.CPSWorkflowTransitions import TRANSITION_ALLOWSUB_COPY
-from Products.CPSWorkflow.CPSWorkflowTransitions import TRANSITION_ALLOWSUB_PUBLISHING
-from Products.CPSWorkflow.CPSWorkflowTransitions import TRANSITION_ALLOWSUB_CHECKOUT
-from Products.CPSWorkflow.CPSWorkflowTransitions import TRANSITION_INITIAL_CREATE
-from Products.CPSWorkflow.CPSWorkflowTransitions import TRANSITION_INITIAL_MOVE
-from Products.CPSWorkflow.CPSWorkflowTransitions import TRANSITION_INITIAL_COPY
-from Products.CPSWorkflow.CPSWorkflowTransitions import TRANSITION_INITIAL_PUBLISHING
-from Products.CPSWorkflow.CPSWorkflowTransitions import TRANSITION_INITIAL_CHECKOUT
-from Products.CPSWorkflow.CPSWorkflowTransitions import TRANSITION_ALLOW_CHECKIN
-from Products.CPSWorkflow.CPSWorkflowTransitions import TRANSITION_BEHAVIOR_PUBLISHING
+from Products.CPSWorkflow.transitions import TRANSITION_ALLOWSUB_CREATE
+from Products.CPSWorkflow.transitions import TRANSITION_ALLOWSUB_DELETE
+from Products.CPSWorkflow.transitions import TRANSITION_ALLOWSUB_MOVE
+from Products.CPSWorkflow.transitions import TRANSITION_ALLOWSUB_COPY
+from Products.CPSWorkflow.transitions import TRANSITION_ALLOWSUB_PUBLISHING
+from Products.CPSWorkflow.transitions import TRANSITION_ALLOWSUB_CHECKOUT
+from Products.CPSWorkflow.transitions import TRANSITION_INITIAL_CREATE
+from Products.CPSWorkflow.transitions import TRANSITION_INITIAL_MOVE
+from Products.CPSWorkflow.transitions import TRANSITION_INITIAL_COPY
+from Products.CPSWorkflow.transitions import TRANSITION_INITIAL_PUBLISHING
+from Products.CPSWorkflow.transitions import TRANSITION_INITIAL_CHECKOUT
+from Products.CPSWorkflow.transitions import TRANSITION_ALLOW_CHECKIN
+from Products.CPSWorkflow.transitions import TRANSITION_BEHAVIOR_PUBLISHING
 
 
-CPSWorkflowConfig_id = '.cps_workflow_configuration'
+Config_id = '.cps_workflow_configuration'
 
 
-class CPSWorkflowTool(WorkflowTool):
+class WorkflowTool(BaseWorkflowTool):
     """A Workflow Tool extending the CMFCore one with CPS features.
 
     - Initial transition knowledge for CPSWorkflow
@@ -711,7 +714,7 @@ class CPSWorkflowTool(WorkflowTool):
         status['rpath'] = utool.getRelativeUrl(ob)
         status['workflow_id'] = wf_id
         # Standard CMF storage.
-        WorkflowTool.setStatusOf(self, wf_id, ob, status)
+        BaseWorkflowTool.setStatusOf(self, wf_id, ob, status)
         # Store aggregated history in repository.
         if not isinstance(ob, ProxyBase):
             return
@@ -751,14 +754,14 @@ class CPSWorkflowTool(WorkflowTool):
         if pt is None:
             return ()
         if container is None:
-            LOG('CPSWorkflowTool', ERROR,
+            LOG('WorkflowTool', ERROR,
                 'getChainFor: no container for ob %s' % (ob,))
             return ()
         # Find placeful workflow configuration object.
-        wfconf = getattr(container, CPSWorkflowConfig_id, None)
+        wfconf = getattr(container, Config_id, None)
         if wfconf is not None:
             # Was it here or did we acquire?
-            start_here = hasattr(aq_base(container), CPSWorkflowConfig_id)
+            start_here = hasattr(aq_base(container), Config_id)
             chain = wfconf.getPlacefulChainFor(pt, start_here=start_here)
             if chain is not None:
                 return chain
@@ -768,7 +771,7 @@ class CPSWorkflowTool(WorkflowTool):
     security.declarePrivate('getGlobalChainFor')
     def getGlobalChainFor(self, ob):
         """Get the global chain for a given object or type_name."""
-        return CPSWorkflowTool.inheritedAttribute('getChainFor')(self, ob)
+        return WorkflowTool.inheritedAttribute('getChainFor')(self, ob)
 
     security.declarePrivate('getManagedPermissions')
     def getManagedPermissions(self):
@@ -879,6 +882,26 @@ class CPSWorkflowTool(WorkflowTool):
                         return 1
         return 0
 
+    ####################################################################
+
+    security.declarePublic('getWorkflowStackRegistry')
+    def getWorkflowStackRegistry(self):
+        """Returns the Workflow Stack Regitry
+
+        So that it can be access from within restricted code
+        """
+        return WorkflowStackRegistry
+
+    security.declarePublic('getWorkflowStackDefRegistry')
+    def getWorkflowStackDefRegistry(self):
+        """Returns the Workflow Stack Regitry
+
+        So that it can be access from within restricted code
+        """
+        return WorkflowStackDefRegistry
+
+    ####################################################################
+
     #
     # ZMI
     #
@@ -895,12 +918,11 @@ class CPSWorkflowTool(WorkflowTool):
                 )
 
 
-InitializeClass(CPSWorkflowTool)
+InitializeClass(WorkflowTool)
 
-
-def addCPSWorkflowTool(container, REQUEST=None):
+def addWorkflowTool(container, REQUEST=None):
     """Add a CPS Workflow Tool."""
-    ob = CPSWorkflowTool()
+    ob = WorkflowTool()
     id = ob.getId()
     container._setObject(id, ob)
     if REQUEST is not None:

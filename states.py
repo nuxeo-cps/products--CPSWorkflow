@@ -34,11 +34,13 @@ from Globals import DTMLFile
 from Products.DCWorkflow.States import StateDefinition as DCWFStateDefinition
 from Products.DCWorkflow.States import States as DCWFStates
 
-from CPSWorkflowStackDefinitions import SimpleWorkflowStackDefinition, \
+from basicstackdefinitions import SimpleWorkflowStackDefinition, \
      HierarchicalWorkflowStackDefinition
 
-from CPSWorkflowStacks import DATA_STRUCT_STACK_TYPE_LIFO, \
+from stack import DATA_STRUCT_STACK_TYPE_LIFO, \
      DATA_STRUCT_STACK_TYPE_HIERARCHICAL, data_struct_types_export_dict
+
+from stackregistries import WorkflowStackDefRegistry
 
 #
 # State behaviors Use for workflow stacks right now.  It permits to allow a
@@ -66,7 +68,7 @@ state_behavior_export_dict = {
     STATE_BEHAVIOR_WORKFLOW_RESET : 'Workflow Reset',
     }
 
-class CPSStateDefinition(DCWFStateDefinition):
+class StateDefinition(DCWFStateDefinition):
     """ CPS State Definition
     """
 
@@ -191,20 +193,21 @@ class CPSStateDefinition(DCWFStateDefinition):
         #
 
         kw = {}
-        kw['ass_local_role'] = variable_information[1]
-        kw['up_ass_local_role'] = variable_information[2]
-        kw['down_ass_local_role'] = variable_information[3]
-        kw['manager_stack_ids'] = variable_information[4]
+        kw['ass_local_role'] = variable_information[2]
+        kw['up_ass_local_role'] = variable_information[3]
+        kw['down_ass_local_role'] = variable_information[4]
+        kw['manager_stack_ids'] = variable_information[5]
 
-        if variable_information[0] == DATA_STRUCT_STACK_TYPE_LIFO:
-            stackdef = SimpleWorkflowStackDefinition(variable_information[0],
-                                                     key,
-                                                     **kw)
-        if variable_information[0] == DATA_STRUCT_STACK_TYPE_HIERARCHICAL:
-            stackdef = HierarchicalWorkflowStackDefinition(
-                variable_information[0],
-                key,
-                **kw)
+        #
+        # Call the stack def registries to get an instance associated to a
+        # given stack type
+        #
+
+        stackdef = WorkflowStackDefRegistry.makeWorkflowStackDefTypeInstance(
+            variable_information[0],
+            variable_information[1],
+            key,
+            **kw)
 
         #
         # state_delegatees_var_info is a dictionnary with the workflow variable
@@ -219,6 +222,7 @@ class CPSStateDefinition(DCWFStateDefinition):
             raise NotImplementedError
 
     def addDelegateesWorkflowVariableInfo(self,
+                                          stack_def_type,
                                           data_struct_type,
                                           var_id='',
                                           ass_local_role='',
@@ -277,7 +281,8 @@ class CPSStateDefinition(DCWFStateDefinition):
             return -1
 
         self.setDelegateesVarsInfo(var_id,
-                                   (data_struct_type,
+                                   (stack_def_type,
+                                    data_struct_type,
                                     ass_local_role,
                                     up_ass_local_role,
                                     down_ass_local_role,
@@ -335,16 +340,16 @@ class CPSStateDefinition(DCWFStateDefinition):
         """
         return self.getDelegateesVarsInfo().get(var_id)
 
-class CPSStates(DCWFStates):
+class States(DCWFStates):
     meta_type = 'CPS Workflow States'
 
-    all_meta_types = ({'name':CPSStateDefinition.meta_type,
+    all_meta_types = ({'name':StateDefinition.meta_type,
                        'action':'addState',
                        },)
 
     def addState(self, id, REQUEST=None):
         """Add a new state to the workflow."""
-        sdef = CPSStateDefinition(id)
+        sdef = StateDefinition(id)
         self._setObject(id, sdef)
         if REQUEST is not None:
             return self.manage_main(REQUEST, 'State added.')

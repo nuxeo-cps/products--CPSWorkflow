@@ -34,16 +34,16 @@ from Products.CMFCore.utils import getToolByName
 
 from permissions import ManageWorkflows
 
-from Products.CPSWorkflow.CPSWorkflowTool import CPSWorkflowConfig_id
+from Products.CPSWorkflow.workflowtool import Config_id
 
-class CPSWorkflowConfiguration(SimpleItem):
+class Configuration(SimpleItem):
     """Workflow Configuration.
 
     A workflow configuration object describes placefully what workflow
     chain are to be used for what portal_type.
     """
 
-    id = CPSWorkflowConfig_id
+    id = Config_id
     meta_type = 'CPS Workflow Configuration'
     portal_type = None
 
@@ -85,7 +85,7 @@ class CPSWorkflowConfiguration(SimpleItem):
         # Ask above.
         parent = aq_parent(aq_inner(aq_parent(aq_inner(self))))
         try:
-            higher_conf = parent.aq_acquire(CPSWorkflowConfig_id,
+            higher_conf = parent.aq_acquire(Config_id,
                                             containment=1)
         except AttributeError:
             # Nothing placeful found.
@@ -242,12 +242,12 @@ class CPSWorkflowConfiguration(SimpleItem):
             REQUEST.set('manage_tabs_message', 'Added.')
             return self.manage_editForm(REQUEST)
 
-InitializeClass(CPSWorkflowConfiguration)
+InitializeClass(Configuration)
 
-def addCPSWorkflowConfiguration(container, REQUEST=None):
+def addConfiguration(container, REQUEST=None):
     """Add a Workflow Configuration."""
     # container is a dispatcher when called from ZMI
-    ob = CPSWorkflowConfiguration()
+    ob = Configuration()
     id = ob.getId()
     container._setObject(id, ob)
     if REQUEST is not None:
