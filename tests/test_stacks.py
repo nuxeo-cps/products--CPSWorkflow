@@ -1011,6 +1011,60 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         self.assert_(isinstance(elt2, GroupStackElement))
         self.assert_(elt2 == 'group:elt2')
 
+    def test_level_api_for_hierarchical(self):
+        hstack = HierarchicalStack()
+
+        # no upper nor lower level here.
+        self.assert_(not hstack.hasUpperLevel())
+        self.assert_(not hstack.hasLowerLevel())
+
+        # Add someone at level 0
+        hstack.push('base', level=0)
+        self.assert_(not hstack.hasUpperLevel())
+        self.assert_(not hstack.hasLowerLevel())
+
+        # Add someone at level 1
+        hstack.push('elt1', level=1)
+        self.assert_(hstack.hasUpperLevel())
+        self.assert_(not hstack.hasLowerLevel())
+
+        # Add someone at level -1
+        hstack.push('elt2', level=-1)
+        self.assert_(hstack.hasUpperLevel())
+        self.assert_(hstack.hasLowerLevel())
+
+        # Dec level
+        hstack.doDecLevel()
+        self.assertEqual(hstack.getCurrentLevel(), -1)
+        self.assert_(hstack.hasUpperLevel())
+        self.assert_(not hstack.hasLowerLevel())
+
+        # Inc level
+        hstack.doIncLevel()
+        self.assertEqual(hstack.getCurrentLevel(), 0)
+        self.assert_(hstack.hasUpperLevel())
+        self.assert_(hstack.hasLowerLevel())
+
+        # Inc level
+        hstack.doIncLevel()
+        self.assertEqual(hstack.getCurrentLevel(), 1)
+        self.assert_(not hstack.hasUpperLevel())
+        self.assert_(hstack.hasLowerLevel())
+
+        # Dec level
+        hstack.doDecLevel()
+        self.assert_(hstack.getCurrentLevel() == 0)
+
+        # Remove elt2 at level -1
+        hstack.removeElement('elt2', level=-1)
+        self.assert_(hstack.hasUpperLevel())
+        self.assert_(not hstack.hasLowerLevel())
+
+        # Remove elt1 at level 1
+        hstack.removeElement('elt1', level=1)
+        self.assert_(not hstack.hasUpperLevel())
+        self.assert_(not hstack.hasLowerLevel())
+
 def test_suite():
     loader = unittest.TestLoader()
     return loader.loadTestsFromTestCase(TestCPSWorkflowStacks)

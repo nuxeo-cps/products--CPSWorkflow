@@ -258,6 +258,16 @@ class HierarchicalStack(SimpleStack):
         """
         return self.level
 
+    def hasUpperLevel(self):
+        """Has the stack a level upper than current level
+        """
+        return (self.getCurrentLevel() + 1) in self.getAllLevels()
+
+    def hasLowerLevel(self):
+        """Has the stack a level lower than the current level
+        """
+        return (self.getCurrentLevel() - 1) in self.getAllLevels()
+
     def doIncLevel(self):
         """Increment the level value
 
@@ -402,4 +412,3 @@ InitializeClass(HierarchicalStack)
 
 WorkflowStackRegistry.register(SimpleStack)
 WorkflowStackRegistry.register(HierarchicalStack)
-
