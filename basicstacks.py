@@ -509,18 +509,6 @@ class HierarchicalStack(SimpleStack):
             except ValueError:
                 pass
 
-    def insert(self, elt, low_level=0, high_level=0):
-        """Insert an element in between two levels.
-
-        If low_level and high_level are equal then just insert at this
-        given level
-        """
-        if low_level == high_level:
-            self.push(elt, level=low_level)
-        elif (low_level in self.getAllLevels() and
-              high_level in self.getAllLevels()):
-            pass
-
     def getCopy(self):
         """Duplicate self
 
