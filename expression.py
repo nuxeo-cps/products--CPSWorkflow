@@ -23,9 +23,10 @@
 Extends DCWorkflow Expression for CPS.
 """
 
+from zLOG import LOG, DEBUG
+
 from  Globals import InitializeClass
 
-from Globals import Persistent
 from Acquisition import aq_inner, aq_parent
 from AccessControl import getSecurityManager
 
@@ -41,36 +42,26 @@ class CPSStateChangeInfo(StateChangeInfo):
     """
 
     def __init__(self, object, workflow, status=None, transition=None,
-                 old_state=None, new_state=None, delegatees=None, kwargs=None):
+                 old_state=None, new_state=None, stacks=None, kwargs=None):
 
         StateChangeInfo.__init__(self, object, workflow, status, transition,
                                  old_state, new_state, kwargs)
-        self.delegatees = delegatees
+        self.stacks = stacks
 
     def getLanguageRevisions(self):
         ob = self.object
         return {ob.getLanguage(): ob.getRevision()}
 
-    def getDelegateesVarInfoFor(self, var_id=''):
-        """Return the data structure object holding the delegatees for the
-        workflow variable var_id
-        """
-        if self.delegatees is not None:
-            return self.delegatees.get(var_id, None)
-        return None
-
-    def getAllDelegateesVarInfo(self):
-        """Return all the delegatees variables information
-
-        Dictionnary holding information for all the defined delegatees
-        variables.
-
-        The key is the workflow wariable id.
-        The value is the data structure
-        """
-        if self.delegatees is not None:
-            return self.delegatees
-        return {}
+    def getStackFor(self, var_id=''):
+        """Return the stack data structure object holding for the workflow
+        variable var_id """
+        stack = None
+        if self.stacks is not None:
+            stack = self.stacks.get(var_id, None)
+            if stack is None:
+                current_state = self.workflow._getWorkflowStateOf(self.object)
+                LOG("Current ob state", DEBUG, str(current_state)+'x')
+        return stack
 
 InitializeClass(CPSStateChangeInfo)
 
@@ -91,7 +82,7 @@ def createExprContext(sci):
         'state_change': sci,
         'transition':   sci.transition,
         'status':       sci.status,
-        'delegatees':   sci.delegatees,
+        'stacks':       sci.stacks,
         'kwargs':       sci.kwargs,
         'workflow':     wf,
         'scripts':      wf.scripts,
