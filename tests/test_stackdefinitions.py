@@ -69,15 +69,14 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         verifyClass(IWorkflowStackDefinition, HierarchicalStackDefinition)
 
     def test_StackDefinition(self):
-        base = StackDefinition(101,
+        base = StackDefinition('Simple Stack',
                                'toto',
                                ass_local_role='WorkspaceManager')
 
         # Basics
         self.assertEqual(base.meta_type, 'Stack Definition')
-        self.assertEqual(base.getStackDataStructureType(), 101)
+        self.assertEqual(base.getStackDataStructureType(), 'Simple Stack')
         self.assertEqual(base.getStackWorkflowVariableId(), 'toto')
-        self.assertEqual(base.getAssociatedLocalRole(), 'WorkspaceManager')
 
         # Not implemented methods
         self.assertRaises(NotImplementedError, base.push, None)
@@ -94,15 +93,16 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertEqual(base.isLocked(), 0)
 
     def test_SimpleStackDefinition(self):
-        simple = SimpleStackDefinition(101,
-                                       'toto',
-                                       ass_local_role='WorkspaceManager')
+        simple = SimpleStackDefinition('Simple Stack',
+                                       'toto')
+
+        # Add expressions
+        simple.addManagedRole('WorkspaceManager', 'python:1', master_role=1)
 
         # Basics
         self.assertEqual(simple.meta_type, 'Simple Stack Definition')
-        self.assertEqual(simple.getStackDataStructureType(), 101)
+        self.assertEqual(simple.getStackDataStructureType(), 'Simple Stack')
         self.assertEqual(simple.getStackWorkflowVariableId(), 'toto')
-        self.assertEqual(simple.getAssociatedLocalRole(), 'WorkspaceManager')
 
         # Lock / unlock
         self.assertEqual(simple.isLocked(), 0)
@@ -355,7 +355,6 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         member_user1 = mtool.getMemberById('user1')
         user1_roles = member_user1.getRolesInContext(self)
         self.assertEqual('WorkspaceManager' in user1_roles, 1)
-        self.assertEqual(simple.getAssociatedLocalRole(), 'WorkspaceManager')
 
         self.assertEqual(simple.canManageStack(ds=new_stack,
                                                aclu=aclu,
@@ -388,19 +387,25 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
     def test_HierarchicalStackDefinitionCurrentLevel(self):
         hierarchical = HierarchicalStackDefinition(
-            101,
-            'toto',
-            ass_local_role='WorkspaceManager',
-            up_local_role='WorkspaceReader',
-            down_local_role='WorkspaceReader')
+            'Hierarchical Stack',
+            'toto')
+
+        # Add expressions
+        hierarchical.addManagedRole('WorkspaceManager',
+                                    "python:level == stack.getCurrentLevel() and 1 or nothing",
+                                    master_role=1)
+        hierarchical.addManagedRole('WorkspaceMember',
+                                    "python:level < stack.getCurrentLevel() and 1 or nothing",
+                                    master_role=0)
+        hierarchical.addManagedRole('WorkspaceReader',
+                                    "python:level > stack.getCurrentLevel() and 1 or nothing",
+                                    master_role=0)
 
         # Basics
         self.assertEqual(hierarchical.meta_type,
                          'Hierarchical Stack Definition')
-        self.assertEqual(hierarchical.getStackDataStructureType(), 101)
+        self.assertEqual(hierarchical.getStackDataStructureType(), 'Hierarchical Stack')
         self.assertEqual(hierarchical.getStackWorkflowVariableId(), 'toto')
-        self.assertEqual(hierarchical.getAssociatedLocalRole(),
-                         'WorkspaceManager')
 
         # Lock / unlock
         self.assertEqual(hierarchical.isLocked(), 0)
@@ -447,6 +452,9 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         # No former local roles mapping
         # Push the guy in it
+
+
+        self.assertEqual(new_stack.getCurrentLevel(), 0)
         self.assertEqual(hierarchical.listLocalRoles(new_stack),
                          {'user1': ('WorkspaceManager',)})
 
@@ -670,7 +678,6 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         member_user1 = mtool.getMemberById('user1')
         user1_roles = member_user1.getRolesInContext(self)
         self.assertEqual('WorkspaceManager' in user1_roles, 1)
-        self.assertEqual(hierarchical.getAssociatedLocalRole(), 'WorkspaceManager')
 
         self.assertEqual(hierarchical.canManageStack(ds=new_stack,
                                                      aclu=aclu,
@@ -710,19 +717,25 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         mtool = FakeMembershipTool()
 
         hierarchical = HierarchicalStackDefinition(
-            101,
-            'toto',
-            ass_local_role='WorkspaceManager',
-            up_ass_local_role='WorkspaceMember',
-            down_ass_local_role='WorkspaceReader')
+            'Hierarchical Stack',
+            'toto')
+
+        # Add expressions
+        hierarchical.addManagedRole('WorkspaceManager',
+                                    "python:level == stack.getCurrentLevel() and 1 or nothing",
+                                    master_role=1)
+        hierarchical.addManagedRole('WorkspaceMember',
+                                    "python:level < stack.getCurrentLevel() and 1 or nothing",
+                                    master_role=0)
+        hierarchical.addManagedRole('WorkspaceReader',
+                                    "python:level > stack.getCurrentLevel() and 1 or nothing",
+                                    master_role=0)
 
         # Basics
         self.assertEqual(hierarchical.meta_type,
                          'Hierarchical Stack Definition')
-        self.assertEqual(hierarchical.getStackDataStructureType(), 101)
+        self.assertEqual(hierarchical.getStackDataStructureType(), 'Hierarchical Stack')
         self.assertEqual(hierarchical.getStackWorkflowVariableId(), 'toto')
-        self.assertEqual(hierarchical.getAssociatedLocalRole(),
-                         'WorkspaceManager')
 
         # Lock / unlock
         self.assertEqual(hierarchical.isLocked(), 0)
@@ -1298,6 +1311,153 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                          'Hierarchical Stack')
         self.assertEqual(stack.getLevelContent(),
                          [])
+
+    def test_managed_roles(self):
+
+        #
+        # This API is defined on the base stack definition class
+        #
+
+        sstackdef = StackDefinition('Simple Stack', 'id')
+        self.assert_(sstackdef.getManagedRoles() == [])
+
+        # Add WorkspaceManager as managed role
+        sstackdef.addManagedRole('WorkspaceManager')
+        self.assertEqual(sstackdef.getManagedRoles(), ['WorkspaceManager'])
+
+        # Add WorkspaceMember as managed role
+        sstackdef.addManagedRole('WorkspaceMember')
+        self.assert_('WorkspaceMember' in sstackdef.getManagedRoles())
+        self.assert_('WorkspaceManager' in sstackdef.getManagedRoles())
+        self.assert_(len(sstackdef.getManagedRoles()) == 2)
+
+        # Del a WorkspaceMember
+        sstackdef.delManagedRole('WorkspaceMember')
+        self.assert_('WorkspaceMember' not in sstackdef.getManagedRoles())
+        self.assert_('WorkspaceManager' in sstackdef.getManagedRoles())
+        self.assert_(len(sstackdef.getManagedRoles()) == 1)
+
+    def test_role_expressions(self):
+
+        #
+        # Test the possiblity to add expressions to role
+        #
+
+        sstackdef = StackDefinition('Simple Stack', 'id')
+        self.assert_(sstackdef.getManagedRoles() == [])
+
+        # Add WorkspaceManager as managed role
+        sstackdef.addManagedRole('WorkspaceManager')
+        self.assertEqual(sstackdef.getManagedRoles(), ['WorkspaceManager'])
+
+        # Add expression
+        sstackdef._addExpressionForRole('WorkspaceManager', 'string:toto')
+        self.assertEqual(sstackdef._getExpressionForRole('WorkspaceManager', None), 'toto')
+
+        # Change expression
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:1')
+        self.assertEqual(sstackdef._getExpressionForRole('WorkspaceManager', None), 1)
+
+    def test_role_expression_NS_with_simple(self):
+
+        #
+        # Test the NS content
+        #
+
+        sstack = SimpleStack()
+        sstackdef = SimpleStackDefinition('Simple Stack Definition', 'Simple Stack')
+
+        # Add WorkspaceManager as managed role
+        sstackdef.addManagedRole('WorkspaceManager')
+        self.assertEqual(sstackdef.getManagedRoles(), ['WorkspaceManager'])
+
+        # Add expression and test the NS (if the stack object is available)
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:stack')
+        self.assertEqual(sstackdef._getExpressionForRole('WorkspaceManager', sstack), sstack)
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:stack.getStackContent()')
+        self.assertEqual(sstackdef._getExpressionForRole('WorkspaceManager', sstack), [])
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:stackdef')
+        self.assertEqual(sstackdef._getExpressionForRole('WorkspaceManager', sstack),
+                         sstackdef)
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:level')
+        self.assertEqual(sstackdef._getExpressionForRole('WorkspaceManager', sstack),
+                         0)
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:elt')
+        self.assertEqual(sstackdef._getExpressionForRole('WorkspaceManager', sstack),
+                         None)
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:DateTime')
+        self.assert_(sstackdef._getExpressionForRole('WorkspaceManager', sstack) is not None)
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:nothing')
+        self.assert_(sstackdef._getExpressionForRole('WorkspaceManager', sstack) is None)
+
+        # test portal object none in here
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:portal')
+        self.assert_(sstackdef._getExpressionForRole('WorkspaceManager', sstack) is None)
+
+        # Add a fake URLTool
+        class URLTool:
+            meta_type = 'CMF URL Tool'
+            id = 'portal_url'
+            def getPortalObject(self):
+                return self
+
+        self.portal_url = URLTool()
+        sstackdef.parent = self
+
+        # Test again and check we have one now
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:portal')
+        self.assert_(sstackdef._getExpressionForRole('WorkspaceManager', sstack) is not None)
+
+    def test_role_expression_NS_with_hierarchical(self):
+
+        #
+        # Test the NS content
+        #
+
+        sstack = HierarchicalStack()
+        sstackdef = HierarchicalStackDefinition('Hierarchical Stack Definition',
+                                                'Hierarchical Stack')
+
+        # Add WorkspaceManager as managed role
+        sstackdef.addManagedRole('WorkspaceManager')
+        self.assertEqual(sstackdef.getManagedRoles(), ['WorkspaceManager'])
+
+        # Add expression and test the NS (if the stack object is available)
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:stack')
+        self.assertEqual(sstackdef._getExpressionForRole('WorkspaceManager', sstack), sstack)
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:stack.getStackContent()')
+        self.assertEqual(sstackdef._getExpressionForRole('WorkspaceManager', sstack), {})
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:stackdef')
+        self.assertEqual(sstackdef._getExpressionForRole('WorkspaceManager', sstack),
+                         sstackdef)
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:level')
+        self.assertEqual(sstackdef._getExpressionForRole('WorkspaceManager', sstack),
+                         0)
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:elt')
+        self.assertEqual(sstackdef._getExpressionForRole('WorkspaceManager', sstack),
+                         None)
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:DateTime')
+        self.assert_(sstackdef._getExpressionForRole('WorkspaceManager', sstack) is not None)
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:nothing')
+        self.assert_(sstackdef._getExpressionForRole('WorkspaceManager', sstack) is None)
+
+        # test portal object none in here
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:portal')
+        self.assert_(sstackdef._getExpressionForRole('WorkspaceManager', sstack) is None)
+
+        # Add a fake URLTool
+        class URLTool:
+            meta_type = 'CMF URL Tool'
+            id = 'portal_url'
+            def getPortalObject(self):
+                return self
+
+        self.portal_url = URLTool()
+        sstackdef.parent = self
+
+        # Test again and check we have one now
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:portal')
+        self.assert_(sstackdef._getExpressionForRole('WorkspaceManager', sstack) is not None)
 
 
 def test_suite():

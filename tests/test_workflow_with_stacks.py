@@ -109,6 +109,13 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         self.portal.manage_addProduct['CPSCore'].manage_addTool(
             'CPS Membership Tool')
 
+        # Set the URL tool
+        self.portal.manage_delObjects(['portal_url'])
+        self.portal.manage_addProduct['CMFCore'].manage_addTool(
+            'CMF URL Tool')
+
+        self.assert_(getToolByName(self.portal, 'portal_url') is not None)
+
         # Set workflow definitions that we gonna test
         self._makeWorkflows()
 
@@ -143,28 +150,48 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
             'Hierarchical Stack Definition',
             'Hierarchical Stack',
             'Pilots',
-            ass_local_role='WorkspaceManager',
-            up_ass_local_role='WorkspaceReader',
-            down_ass_local_role='WorkspaceMember',
             manager_stack_ids=['Associates', 'Observers'],
             )
+
+        stackdef = s.getStackDefinitionFor('Pilots')
+
+        # Add expressions
+        stackdef.addManagedRole('WorkspaceManager',
+                                "python:level == stack.getCurrentLevel() and 1 or nothing",
+                                master_role=1)
+        stackdef.addManagedRole('WorkspaceMember',
+                                    "python:level < stack.getCurrentLevel() and 1 or nothing",
+                                    master_role=0)
+        stackdef.addManagedRole('WorkspaceReader',
+                                "python:level > stack.getCurrentLevel() and 1 or nothing",
+                                master_role=0)
 
         # Add Associates stack
         s.addStackDefinition(
             'Simple Stack Definition',
             'Simple Stack',
             'Associates',
-            ass_local_role='WorkspaceMember',
             manager_stack_ids=['Observers']
             )
+
+        stackdef = s.getStackDefinitionFor('Associates')
+        # Add expressions
+        stackdef.addManagedRole('WorkspaceMember',
+                                "python:1",
+                                master_role=1)
 
         # Add Observers stack
         s.addStackDefinition(
             'Simple Stack Definition',
             'Simple Stack',
             'Observers',
-            ass_local_role='WorkspaceMember',
             )
+
+        stackdef = s.getStackDefinitionFor('Observers')
+        # Add expressions
+        stackdef.addManagedRole('WorkspaceMember',
+                                "python:1",
+                                master_role=1)
 
     def _makeWorkflows(self):
 

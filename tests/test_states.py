@@ -105,15 +105,11 @@ class TestCPSWorkflowStates(SecurityRequestTest):
         # Test initial properties
         self.assertEqual(sdef.state_behaviors, ())
         self.assertEqual(sdef.transitions, ())
-        #self.assertEqual(sdef.state_delegatees_vars_info, {})
-
-        # Just call it without anything
         sdef.setProperties()
 
         # Test property again
         self.assertEqual(sdef.state_behaviors, ())
         self.assertEqual(sdef.transitions, ())
-        #self.assertEqual(sdef.state_delegatees_vars_info, {})
 
         # Test adding state behaviors
         sdef.setProperties(state_behaviors=state_behavior_export_dict.keys())
@@ -122,18 +118,24 @@ class TestCPSWorkflowStates(SecurityRequestTest):
         self.assertEqual(sdef.state_behaviors,
                          tuple(state_behavior_export_dict.keys()))
         self.assertEqual(sdef.transitions, ())
-        #self.assertEqual(sdef.state_delegatees_vars_info, {})
 
         # Test add delegatees var info
-        for stackdef_type, ds_type, var_id, lc in (
+        for stackdef_type, stack_type, var_id, lc in (
             ('Hierarchical Stack Definition', 'Hierarchical Stack',
              'toto', 'WorkspaceManager'),
             ('Simple Stack Definition', 'Simple Stack',
              'tata', 'WorkspaceMember')):
             sdef.addStackDefinition(stackdef_type,
-                                    ds_type,
-                                    var_id,
-                                    ass_local_role=lc)
+                                    stack_type,
+                                    var_id)
+
+
+        # Add Expressions
+        new_stackdef = sdef.getStackDefinitionFor('toto')
+        new_stackdef.addManagedRole('WorkspaceManager', 'python:1')
+        new_stackdef = sdef.getStackDefinitionFor('tata')
+        new_stackdef.addManagedRole('WorkspaceMember', 'python:1')
+
         # Test property again
         self.assertEqual(sdef.state_behaviors,
                          tuple(state_behavior_export_dict.keys()))
@@ -144,13 +146,13 @@ class TestCPSWorkflowStates(SecurityRequestTest):
         self.assertEqual(dinfo.getStackDataStructureType(),
                          'Hierarchical Stack')
         self.assertEqual(dinfo.getStackWorkflowVariableId(), 'toto')
-        self.assertEqual(dinfo.getAssociatedLocalRole(), 'WorkspaceManager')
+        self.assert_('WorkspaceManager' in dinfo.getManagedRoles())
 
         dinfo = sdef.getStackDefinitionFor('tata')
         self.assertNotEqual(dinfo, None)
         self.assertEqual(dinfo.getStackDataStructureType(), 'Simple Stack')
         self.assertEqual(dinfo.getStackWorkflowVariableId(), 'tata')
-        self.assertEqual(dinfo.getAssociatedLocalRole(), 'WorkspaceMember')
+        self.assert_('WorkspaceMember' in dinfo.getManagedRoles())
 
         # Let's remove the delegatees var info
         sdef.delStackDefinitionsById(['toto'])
@@ -167,7 +169,7 @@ class TestCPSWorkflowStates(SecurityRequestTest):
         self.assertNotEqual(dinfo, None)
         self.assertEqual(dinfo.getStackDataStructureType(), 'Simple Stack')
         self.assertEqual(dinfo.getStackWorkflowVariableId(), 'tata')
-        self.assertEqual(dinfo.getAssociatedLocalRole(), 'WorkspaceMember')
+        self.assert_('WorkspaceMember' in dinfo.getManagedRoles())
 
         # Let's remove the delegatees var info
         sdef.delStackDefinitionsById(['toto'])
@@ -181,7 +183,7 @@ class TestCPSWorkflowStates(SecurityRequestTest):
         self.assertNotEqual(dinfo, None)
         self.assertEqual(dinfo.getStackDataStructureType(), 'Simple Stack')
         self.assertEqual(dinfo.getStackWorkflowVariableId(), 'tata')
-        self.assertEqual(dinfo.getAssociatedLocalRole(), 'WorkspaceMember')
+        self.assert_('WorkspaceMember' in dinfo.getManagedRoles())
 
         # Let's remove the delegatees var info
         sdef.delStackDefinitionsById(['tata'])
