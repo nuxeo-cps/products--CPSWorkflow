@@ -15,3 +15,5 @@ New internal features:
   basicstackdefinitions.py
 - Stack and stackdef registries are registrering stacks and stackdefs from
   basicstacks and basicstackdefinitions.
+- registries will not register any classes of they are not implementing the
+  base interfaces
