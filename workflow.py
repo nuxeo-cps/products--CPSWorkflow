@@ -686,8 +686,6 @@ class WorkflowDefinition(DCWorkflowDefinition):
                 stackdef = new_sdef.getStackDefinitionFor(wf_var)
                 if stackdef is not None:
                     ds = stacks.get(wf_var)
-            print ds
-            print kwargs
                     stacks[wf_var] = stackdef._push(ds, **kwargs)
 
         if TRANSITION_BEHAVIOR_POP_DELEGATEES in behavior:
