@@ -34,7 +34,6 @@ from OFS.SimpleItem import SimpleItem
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
 
-from ZODB.PersistentMapping import PersistentMapping
 from ZODB.PersistentList import PersistentList
 
 from basicstackelements import UserStackElement, GroupStackElement
@@ -69,7 +68,10 @@ class Stack(SimpleItem):
         """ Possiblity to specify a maximum size
         """
         self.max_size = maxsize
-        self.container = []
+        self._elements_container = PersistentList()
+
+    def _getElementsContainer(self):
+        return self._elements_container
 
     def getMetaType(self):
         """Returns the meta_type of the class
@@ -79,7 +81,7 @@ class Stack(SimpleItem):
     def getSize(self):
         """ Return the current size of the Stack
         """
-        return len(self.container)
+        return len(self._getElementsContainer())
 
     def isFull(self):
         """Is the queue Full ?
@@ -110,7 +112,7 @@ class Stack(SimpleItem):
             # XXX : see how to cope with other kind of stack element Either
             # with the use of the registry either with the devel will ovverride
             # this method to cope with it's own case
-            pass
+            elt = elt_str
         return elt
 
     def push(self, elt=None):
@@ -130,7 +132,7 @@ class Stack(SimpleItem):
             return 0
 
         # ok we push
-        self.container.append(elt)
+        self._getElementsContainer().append(elt)
         return 1
 
     def pop(self):
@@ -144,19 +146,34 @@ class Stack(SimpleItem):
             return 0
 
         last_elt_index = self.getSize() - 1
-        res = self.container[last_elt_index]
-        del self.container[last_elt_index]
+        res = self._getElementsContainer()[last_elt_index]
+        del self._getElementsContainer()[last_elt_index]
         return res
 
     #################################################################
 
-    def reset(self):
+    def reset(self, **kw):
         """Reset the stack
 
-        Call the constructor
+        new_stack  : stack that might be a substitute of self
+        new_users  : users to add at current level
+        new_groups : groups to add ar current level
         """
-        self.__init__()
+        new_stack = kw.get('new_stack')
+        new_users = kw.get('new_users', ())
+        new_groups = kw.get('new_groups', ())
 
+        if new_stack is not None:
+            self._elements_container = new_stack._elements_container
+        else:
+            self.__init__()
+
+        for new_user in new_users:
+            self.push(new_user)
+        for new_group in new_groups:
+            self.push(new_group)
+        
+                
     ##################################################################
 
     def render(self, context, mode, **kw):
