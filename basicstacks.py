@@ -21,7 +21,6 @@
 """ Stack type definitions
 """
 
-import copy
 
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo, getSecurityManager
@@ -90,25 +89,6 @@ class SimpleStack(Stack):
     #
     # PRIVATE API
     #
-
-    def __deepcopy__(self, ob):
-        """Deep copy. Just to call a clean API while calling getCopy()
-
-        Cope with mutable attrs to break reference, and deep copy stack
-        elements too.
-        """
-        copy = WorkflowStackRegistry.makeWorkflowStackTypeInstance(
-            self.meta_type)
-        for attr, value in self.__dict__.items():
-            if attr == '_elements_container':
-                # Break reference with mutable structure
-                new_container_ref = PersistentList()
-                for each in value:
-                    new_container_ref.append(each.getCopy())
-                copy.__dict__[attr] = new_container_ref
-            else:
-                copy.__dict__[attr] = value
-        return copy
 
     def _getStackElementIndex(self, id):
         i = 0
@@ -267,17 +247,6 @@ class SimpleStack(Stack):
 
         return self
 
-    #
-    # MISC
-    #
-
-    def getCopy(self):
-        """Duplicate self
-
-        Return a new object instance of the same type
-        """
-        return copy.deepcopy(self)
-
 InitializeClass(SimpleStack)
 
 ###########################################################
@@ -314,26 +283,6 @@ class HierarchicalStack(SimpleStack):
     #
     # PRIVATE API
     #
-
-    def __deepcopy__(self, ob):
-        """Deep copy. Just to call a clean API while calling getCopy()
-
-        Cope with mutable attrs to break reference, and deep copy stack
-        elements too.
-        """
-        copy = WorkflowStackRegistry.makeWorkflowStackTypeInstance(
-            self.meta_type)
-        for attr, value in self.__dict__.items():
-            if attr == '_elements_container':
-                # Break reference with mutable structure
-                new_container_ref = PersistentMapping()
-                for key in value.keys():
-                    new_key_value = [x.getCopy() for x in value[key]]
-                    new_container_ref[key] = new_key_value
-                copy.__dict__[attr] = new_container_ref
-            else:
-                copy.__dict__[attr] = value
-        return copy
 
     def _getStackElementIndex(self, elt, level=None):
         """Find the index of the given element within the stack at a
@@ -676,17 +625,6 @@ class HierarchicalStack(SimpleStack):
         self.push(**kw)
 
         return self
-
-    #
-    # MISC
-    #
-
-    def getCopy(self):
-        """Duplicate self
-
-        Return a new object instance of the same type
-        """
-        return copy.deepcopy(self)
 
 InitializeClass(HierarchicalStack)
 
