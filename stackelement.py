@@ -52,7 +52,7 @@ class StackElement(SimpleItem):
     view_guard = None
     edit_guard = None
 
-    def __init__(self, id):
+    def __init__(self, id, **kw):
         self.id = id
 
     #
