@@ -1159,7 +1159,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # reset with new_users
         ############################
 
-        kw = {'new_ids': ('user:toto',),
+        kw = {'reset_ids': ('user:toto',),
               'current_wf_var_id':'Associates'}
         wftool.doActionFor(content,'reset',
                            **kw)
@@ -1196,7 +1196,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # reset with new_groups
         ############################
 
-        kw = {'new_ids': ('group:nuxeo',),
+        kw = {'reset_ids': ('group:nuxeo',),
               'current_wf_var_id':'Associates'}
         wftool.doActionFor(content,'reset',
                            **kw)
@@ -1236,7 +1236,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         new_stack = SimpleStack()
 
         kw = {'new_stack': new_stack,
-              'new_ids': ('user:manager',),
+              'reset_ids': ('user:manager',),
               'current_wf_var_id':'Associates'}
         wftool.doActionFor(content,'reset',
                            **kw)
@@ -1337,7 +1337,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # reset with new_users
         ############################
 
-        kw = {'new_ids': ('user:toto',),
+        kw = {'reset_ids': ('user:toto',),
               'current_wf_var_id':'Pilots'}
         wftool.doActionFor(content,'reset',
                            **kw)
@@ -1374,7 +1374,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # reset with new_groups
         ############################
 
-        kw = {'new_ids': ('group:nuxeo',),
+        kw = {'reset_ids': ('group:nuxeo',),
               'current_wf_var_id':'Pilots'}
         wftool.doActionFor(content,'reset',
                            **kw)
@@ -1414,7 +1414,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         new_stack = HierarchicalStack()
 
         kw = {'new_stack': new_stack,
-              'new_ids': ('user:manager',),
+              'reset_ids': ('user:manager',),
               'current_wf_var_id':'Pilots'}
         wftool.doActionFor(content,'reset',
                            **kw)

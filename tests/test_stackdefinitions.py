@@ -1652,23 +1652,23 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                          ['elt1'])
 
         # Reset with one (1) new user
-        stack = stackdef._reset(stack, new_ids=('elt2',))
+        stack = stackdef._reset(stack, reset_ids=('elt2',))
         self.assertEqual([x() for x in stack._getElementsContainer()],
                          ['elt2'])
 
         # Reset with two (2) new users
-        stack = stackdef._reset(stack, new_ids=('elt3', 'elt4'))
+        stack = stackdef._reset(stack, reset_ids=('elt3', 'elt4'))
         self.assertEqual([x() for x in stack._getElementsContainer()],
                          ['elt3', 'elt4'])
 
         # Reset with one (1) new group
-        stack = stackdef._reset(stack, new_ids=('group:elt2',))
+        stack = stackdef._reset(stack, reset_ids=('group:elt2',))
         self.assertEqual([x() for x in stack._getElementsContainer()],
                          ['group:elt2'])
 
         # Reset with two (2) new users
         stack = stackdef._reset(stack,
-                                    new_ids=('group:elt3', 'group:elt4'))
+                                    reset_ids=('group:elt3', 'group:elt4'))
         self.assertEqual([x() for x in stack._getElementsContainer()],
                          ['group:elt3', 'group:elt4'])
 
@@ -1682,7 +1682,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Reset with a new stack, new users and new groups
         new_stack = SimpleStack()
         stack = stackdef._reset(stack, new_stack=new_stack,
-                                new_ids=('elt1', 'elt2', 'group:elt3', 'group:elt4'))
+                                reset_ids=('elt1', 'elt2', 'group:elt3', 'group:elt4'))
         self.assertEqual([x() for x in stack._getElementsContainer()],
                          ['elt1', 'elt2', 'group:elt3', 'group:elt4'])
 
@@ -1705,23 +1705,23 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                          ['elt1'])
 
         # Reset with one (1) new user
-        stack = stackdef._reset(stack, new_ids=('elt2',))
+        stack = stackdef._reset(stack, reset_ids=('elt2',))
         self.assertEqual([x() for x in stack._getElementsContainer()[0]],
                          ['elt2'])
 
         # Reset with two (2) new users
-        stack = stackdef._reset(stack, new_ids=('elt3', 'elt4'))
+        stack = stackdef._reset(stack, reset_ids=('elt3', 'elt4'))
         self.assertEqual([x() for x in stack._getElementsContainer()[0]],
                          ['elt3', 'elt4'])
 
         # Reset with one (1) new group
-        stack = stackdef._reset(stack, new_ids=('group:elt2',))
+        stack = stackdef._reset(stack, reset_ids=('group:elt2',))
         self.assertEqual([x() for x in stack._getElementsContainer()[0]],
                          ['group:elt2'])
 
         # Reset with two (2) new users
         stack = stackdef._reset(stack,
-                                    new_ids=('group:elt3', 'group:elt4'))
+                                    reset_ids=('group:elt3', 'group:elt4'))
         self.assertEqual([x() for x in stack._getElementsContainer()[0]],
                          ['group:elt3', 'group:elt4'])
 
@@ -1735,7 +1735,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Reset with a new stack, new users and new groups
         new_stack = HierarchicalStack()
         stack = stackdef._reset(stack, new_stack=new_stack,
-                                new_ids=('elt1', 'elt2', 'group:elt3', 'group:elt4'))
+                                reset_ids=('elt1', 'elt2', 'group:elt3', 'group:elt4'))
         self.assertEqual([x() for x in stack._getElementsContainer()[0]],
                          ['elt1', 'elt2', 'group:elt3', 'group:elt4'])
 
