@@ -189,6 +189,9 @@ class StateDefinition(DCWFStateDefinition):
 
         var_id : workflow variable id used to store this new variable
         """
+        if REQUEST is not None:
+            kw = REQUEST.form
+
         self._p_changed = 1
         workflow = self.getWorkflow()
 
