@@ -32,7 +32,7 @@ Check the documentation within the doc sub-folder
 
 from zLOG import LOG, ERROR, DEBUG
 
-from types import StringType
+from types import StringType, DictType
 
 from Globals import DTMLFile
 from OFS.ObjectManager import ObjectManager
@@ -135,10 +135,12 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
         self.transitions = tuple(map(str, transitions))
         self.state_behaviors = tuple(state_behaviors)
 
-        # Simple edit properties form with no stackdef specified Avoid removing
-        # the configuration for stacks if not specified
-        if stackdefs:
-            self.stackdefs = dict(stackdefs)
+        # Stack defs
+        if stackdefs and isinstance(stackdefs, DictType):
+            for k, stackdef_conf in stackdefs.items():
+                if k in self.getStackDefinitions().keys():
+                    self.delStackDefinitionsById(k)
+                self.addStackDefinition(**stackdef_conf)
 
         # Stack workflow state behavior flags
         if push_on_workflow_variable is not None:
@@ -199,8 +201,8 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
         """
         return self.getStackDefinitions().get(var_id)
 
-    def addStackDefinition(self, stackdef_type, stack_type, var_id,
-                           REQUEST=None, **kw):
+    def addStackDefinition(self, stackdef_type='', stack_type='',
+                           var_id='', REQUEST=None, **kw):
         """Add a new stack definition on this state
 
         stackdef_type : is the stack definition type
@@ -241,7 +243,6 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
                     'The id you choose is already taken !')
             return -1
 
-
         stackdef = None
 
         # Clean the kw before passing it to constructor
@@ -259,6 +260,19 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
         if stackdef is not None:
             # XXX change this
             stackdef.parent = self
+
+            # Managed role exprs
+            managed_role_exprs = kw.get('managed_role_exprs', {})
+            if isinstance(managed_role_exprs, DictType):
+                for k, v in managed_role_exprs.items():
+                    stackdef.addManagedRole(k, v)
+
+            # Master role
+            master_role = kw.get('master_role', '')
+            if master_role:
+                stackdef.setMasterRole(master_role)
+
+            # Store the stackdef as a sub-object
             self._setObject(var_id, stackdef)
 
         if REQUEST is not None:
@@ -284,8 +298,8 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
             return self.manage_advanced_properties(
                 REQUEST, 'Delegate workflow variables removed !')
 
-    def updateStackDefinition(self, stackdef_type, stack_type, old_wf_var_id,
-                              wf_var_id, REQUEST=None, **kw):
+    def updateStackDefinition(self, stackdef_type='', stack_type='',
+                              old_wf_var_id='', wf_var_id='', REQUEST=None, **kw):
         """Update an existing stack definition
         """
 
