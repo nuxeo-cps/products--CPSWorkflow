@@ -1935,6 +1935,206 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         self.logout()
 
+
+    def test_role_mappings_with_several_stacks(self):
+
+        self.login('manager')
+        wftool = self.wftool
+        content = getattr(self.portal.f, 'dummy')
+        self.assertEqual(wftool.getInfoFor(content, 'review_state'),
+                         'delegating')
+
+        #
+        # push in associates stack
+        #
+        kw = {'push_ids': ('user:manager',),
+              'current_wf_var_id' : 'Associates'}
+        wftool.doActionFor(content,'delegate', **kw)
+
+        sstack = wftool.getStackFor(content, 'Associates')
+
+        # Check stack status
+        self.assert_(sstack is not None)
+        self.assertEqual(['user:manager'],
+                         sstack.getStackContent())
+
+        # Check local roles mapping
+        sstackdef = wftool.getStackDefinitionFor(content, 'Associates')
+        self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
+                         {'manager' : ('WorkspaceMember',)})
+
+        # Check the former local role mapping
+        ssflrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Associates')
+
+        # It's been updated for next time
+        self.assertEqual(ssflrm, {})
+
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        self.assert_('user:manager' in lc.keys())
+        self.assert_('WorkspaceMember' in lc['user:manager'])
+
+        # push toto too
+        self.assert_( wftool.canManageStack(content, 'Associates'))
+
+        kw = {'push_ids': ('user:toto',),
+              'current_wf_var_id' : 'Associates'}
+        wftool.doActionFor(content,'delegate', **kw)
+
+        sstack = wftool.getStackFor(content, 'Associates')
+
+        self.assertEqual(['user:manager', 'user:toto'],
+                         sstack.getStackContent())
+
+        # Check local roles mapping
+        sstackdef = wftool.getStackDefinitionFor(content, 'Associates')
+        self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
+                         {'manager': ('WorkspaceMember',),
+                          'toto' : ('WorkspaceMember',)})
+
+        # Check the former local role mapping
+        ssflrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Associates')
+
+        # It's been updated for next time
+        self.assertEqual(ssflrm, {'manager':('WorkspaceMember',)})
+
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        self.assert_('user:manager' in lc.keys())
+        self.assert_('WorkspaceMember' in lc['user:manager'])
+        self.assert_('user:toto' in lc.keys())
+        self.assert_('WorkspaceMember' in lc['user:toto'])
+
+        #
+        # push people on hstack
+        #
+        kw = {'push_ids': ('user:manager',),
+              'levels':(0,),
+              'current_wf_var_id' : 'Pilots'}
+        wftool.doActionFor(content,'delegate', **kw)
+
+        hstack = wftool.getStackFor(content, 'Pilots')
+
+        # Check stack status
+        self.assert_(hstack is not None)
+        self.assertEqual({0: ['user:manager']},
+                         hstack.getStackContent())
+
+        # Check local roles mapping
+        hstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
+        self.assertEqual(hstackdef._getLocalRolesMapping(hstack),
+                         {'manager' : ('WorkspaceManager',)})
+
+        # Check the former local role mapping
+        hsflrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Pilots')
+
+        # It's been updated for next time
+        self.assertEqual(hsflrm, {})
+
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+        self.assert_('user:manager' in lc.keys())
+        self.assert_('WorkspaceManager' in lc['user:manager'])
+
+        # push toto too, so that he getsthe same role than the one he already
+        # has thanks too the Associates stack
+        self.assert_( wftool.canManageStack(content, 'Pilots'))
+
+        kw = {'push_ids': ('user:toto',),
+              'levels':(-1,),
+              'current_wf_var_id' : 'Pilots'}
+        wftool.doActionFor(content,'delegate', **kw)
+
+        hstack = wftool.getStackFor(content, 'Pilots')
+
+        self.assertEqual({0: ['user:manager'],
+                          -1: ['user:toto']},
+                         hstack.getStackContent())
+
+        # Check local roles mapping
+        hstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
+        self.assertEqual(hstackdef._getLocalRolesMapping(hstack),
+                         {'manager': ('WorkspaceManager',),
+                          'toto' : ('WorkspaceMember',)})
+
+        # Check the former local role mapping
+        hsflrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Pilots')
+
+        # It's been updated for next time
+        self.assertEqual(hsflrm, {'manager':('WorkspaceManager',)})
+
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        self.assert_('user:manager' in lc.keys())
+        self.assert_('WorkspaceManager' in lc['user:manager'])
+        self.assert_('user:toto' in lc.keys())
+        self.assert_('WorkspaceMember' in lc['user:toto'])
+
+
+        # pop toto from the Pilots stack (pop behaviour is only Pilots stack)
+        kw = {'pop_ids': ('-1,user:toto',),
+              'current_wf_var_id' : 'Pilots'}
+        wftool.doActionFor(content, 'remove_delegate', **kw)
+
+        sstack = wftool.getStackFor(content, 'Associates')
+        # Check the former local role mapping
+        ssflrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                          'Associates')
+        # It's been updated for next time
+        self.assertEqual(ssflrm, {'manager': ('WorkspaceMember',),
+                                  'toto': ('WorkspaceMember',)})
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+        self.assertEqual(['user:manager', 'user:toto'],
+                         sstack.getStackContent())
+        # Check local roles mapping
+        sstackdef = wftool.getStackDefinitionFor(content, 'Associates')
+        self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
+                         {'manager': ('WorkspaceMember',),
+                          'toto': ('WorkspaceMember',)})
+
+        hstack = wftool.getStackFor(content, 'Pilots')
+        # Check the former local role mapping
+        hsflrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                          'Pilots')
+        # It's been updated for next time
+        self.assertEqual(hsflrm, {'manager': ('WorkspaceManager',),
+                                  'toto': ('WorkspaceMember',)})
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+        self.assertEqual({0: ['user:manager']},
+                         hstack.getStackContent())
+        # Check local roles mapping
+        hstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
+        self.assertEqual(hstackdef._getLocalRolesMapping(hstack),
+                         {'manager': ('WorkspaceManager',)})
+
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+        self.assert_('user:manager' in lc.keys())
+        self.assert_('WorkspaceMember' in lc['user:manager'])
+        self.assert_('WorkspaceManager' in lc['user:manager'])
+
+        # XXX AT: currently breaks tests
+        self.assert_('user:toto' in lc.keys())
+        self.assert_('WorkspaceMember' in lc['user:toto'])
+
+
+
 def test_suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(WorkflowToolTests))
