@@ -18,9 +18,8 @@ from Products.CMFDefault.Portal import manage_addCMFSite
 from Products.CMFCore.utils import getToolByName
 
 from Products.CPSWorkflow.CPSWorkflowStackRegistryTool import \
-     WorkflowStackRegistryTool, WorkflowStackRegistryCls, \
-     WorkflowStackDefRegistryCls, WorkflowStackRegistry, \
-     WorkflowStackDefRegistry
+     WorkflowStackRegistryCls, WorkflowStackDefRegistryCls, \
+     WorkflowStackRegistry, WorkflowStackDefRegistry
 
 from Products.CPSWorkflow.CPSWorkflowStacks import SimpleStack, \
      HierarchicalStack
@@ -39,11 +38,6 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
     """Workflow Stack Registry test case
     """
 
-    def setUpTool(self):
-        portal = self.getPortal()
-        portal.manage_addProduct['CPSWorkflow'].manage_addTool(
-            'CPS Workflow Stack Registry')
-
     def getPortal(self):
         if not hasattr(self.app, portal_name):
             manage_addCMFSite(self.app, portal_name)
@@ -52,9 +46,6 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
     def test_interfaces(self):
         verifyClass(IWorkflowStackRegistry, WorkflowStackRegistryCls)
         verifyClass(IWorkflowStackDefRegistry, WorkflowStackDefRegistryCls)
-
-    def test_setup_tool(self):
-        self.setUpTool()
 
     def test_stack_registry_cls_types(self):
         self.assert_(isinstance(WorkflowStackRegistry,

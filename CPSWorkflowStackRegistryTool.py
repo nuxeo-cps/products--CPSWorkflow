@@ -21,34 +21,13 @@
 """ CPS Workflow Stack Registries and Registry Tool
 """
 
-from Globals import InitializeClass
+from Globals import InitializeClass, DTMLFile
 from AccessControl import ClassSecurityInfo
-from OFS.Folder import Folder
 
 from Products.CMFCore.CMFCorePermissions import ManagePortal
-from Products.CMFCore.utils import UniqueObject
 
 from interfaces.IWorkflowStackRegistry import IWorkflowStackRegistry
 from interfaces.IWorkflowStackDefRegistry import IWorkflowStackDefRegistry
-
-class WorkflowStackRegistryTool(UniqueObject, Folder):
-    """Workflow Stack Registry
-
-    Stores the available stack and stackdef types.
-    """
-
-    id = 'portal_workflow_stack_registry'
-    meta_type = 'CPS Workflow Stack Registry'
-
-    security = ClassSecurityInfo()
-
-    def all_meta_types(self):
-        return []
-
-InitializeClass(WorkflowStackRegistryTool)
-
-###############################################################
-###############################################################
 
 class WorkflowStackRegistryCls:
     """Registry of the available stack types
