@@ -69,8 +69,6 @@ class StackDefinition(SimpleItem):
 
     security = ClassSecurityInfo()
 
-    _isLocked = 0
-
     manager_stack_ids = []
 
     _empty_stack_manage_guard = None
@@ -191,27 +189,6 @@ class StackDefinition(SimpleItem):
         # XXX has to be refactored
         return self.manager_stack_ids
 
-    #
-    # API : Lock / Unlock
-    #
-
-    security.declareProtected(View, 'isLocked')
-    def isLocked(self):
-        """Is the stack locked
-        """
-        return self._isLocked
-
-    security.declareProtected(ManagePortal, 'doLockStack')
-    def doLockStack(self):
-        """Lock the stack
-        """
-        self._isLocked = 1
-
-    security.declareProtected(ManagePortal, 'doUnLockStack')
-    def doUnLockStack(self):
-        """UnLock stack
-        """
-        self._isLocked = 0
 
     #
     # API : Reinitialization

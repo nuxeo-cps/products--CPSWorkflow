@@ -242,8 +242,6 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
             state_behaviors = (STATE_BEHAVIOR_PUSH_DELEGATEES,
                                STATE_BEHAVIOR_POP_DELEGATEES,
                                STATE_BEHAVIOR_WORKFLOW_UP,
-                               STATE_BEHAVIOR_WORKFLOW_LOCK,
-                               STATE_BEHAVIOR_WORKFLOW_UNLOCK,
                                STATE_BEHAVIOR_WORKFLOW_RESET,),
             stackdefs={'Pilots': {'stackdef_type': 'Hierarchical Stack Definition',
                                   'stack_type'   : 'Hierarchical Stack',
@@ -273,10 +271,6 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
             push_on_workflow_variable = ['Pilots', 'Associates', 'Observers'],
             pop_on_workflow_variable = ['Pilots', 'Associates', 'Observers'],
             workflow_up_on_workflow_variable = ['Pilots'],
-            workflow_lock_on_workflow_variable = ['Pilots', 'Associates',
-                                                  'Observers'],
-            workflow_unlock_on_workflow_variable = ['Pilots', 'Associates',
-                                                    'Observers'],
             workflow_reset_on_workflow_variable = ['Pilots', 'Associates',
                                                    'Observers'],)
 
@@ -320,15 +314,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                                      'manager_stack_ids':[],
                                      },
                        },
-            state_behaviors = (STATE_BEHAVIOR_WORKFLOW_LOCK,
-                               STATE_BEHAVIOR_WORKFLOW_UNLOCK,
-                               STATE_BEHAVIOR_RETURNED_UP_HIERARCHY,
-                               STATE_BEHAVIOR_WORKFLOW_RESET,),
-            workflow_lock_on_workflow_variable = ['Pilots', 'Associates',
-                                                  'Observers'],
-            workflow_unlock_on_workflow_variable = ['Pilots', 'Associates',
-                                                    'Observers'],
-            returned_up_hierarchy_on_workflow_variable = ['Pilots'],
+            state_behaviors = (STATE_BEHAVIOR_WORKFLOW_RESET,),
             workflow_reset_on_workflow_variable = ['Pilots', 'Associates',
                                                    'Observers'],)
 
@@ -350,16 +336,10 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
             state_behaviors = (STATE_BEHAVIOR_PUSH_DELEGATEES,
                                STATE_BEHAVIOR_POP_DELEGATEES,
                                STATE_BEHAVIOR_WORKFLOW_DOWN,
-                               STATE_BEHAVIOR_WORKFLOW_LOCK,
-                               STATE_BEHAVIOR_WORKFLOW_UNLOCK,
                                STATE_BEHAVIOR_WORKFLOW_RESET,),
             push_on_workflow_variable = ['Pilots'],
             pop_on_workflow_variable = ['Pilots'],
             workflow_down_on_workflow_variable = ['Pilots'],
-            workflow_lock_on_workflow_variable = ['Pilots', 'Associates',
-                                                  'Observers'],
-            workflow_unlock_on_workflow_variable = ['Pilots', 'Associates',
-                                                    'Observers'],
             workflow_reset_on_workflow_variable = ['Pilots', 'Associates',
                                                    'Observers'],)
 
@@ -367,10 +347,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         s.setProperties(
             title='Closed',
             description='Closed',
-            state_behaviors = (STATE_BEHAVIOR_WORKFLOW_UNLOCK,
-                               STATE_BEHAVIOR_WORKFLOW_RESET,),
-            workflow_unlock_on_workflow_variable = ['Pilots', 'Associates',
-                                                    'Observers'],
+            state_behaviors = (STATE_BEHAVIOR_WORKFLOW_RESET,),
             workflow_reset_on_workflow_variable = ['Pilots', 'Associates',
                                                    'Observers'],)
 
@@ -442,8 +419,6 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                         transition_behavior=('behavior_push_delegatees',
                                              'behavior_pop_delegatees',
                                              'behavior_workflow_down',
-                                             'behavior_workflow_lock',
-                                             'behavior_workflow_unlock',
                                              'behavior_workflow_reset'))
 
         # to_validate
@@ -453,9 +428,6 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                         'to_validate',
                         trigger_type=TRIGGER_USER_ACTION,
                         transition_behavior=(
-            'behavior_workflow_lock',
-            'behavior_workflow_unlock',
-            'behavior_return_up_delegatees_hierarchy',
             'behavior_workflow_reset'))
 
         # Close
@@ -464,7 +436,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         t.setProperties('title',
                         'close',
                         trigger_type=TRIGGER_USER_ACTION,
-                        transition_behavior=('behavior_workflow_unlock'))
+                        transition_behavior=())
 
 
         # Check if they do exist
@@ -735,8 +707,6 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         self.assertEqual(behaviors, (STATE_BEHAVIOR_PUSH_DELEGATEES,
                                      STATE_BEHAVIOR_POP_DELEGATEES,
                                      STATE_BEHAVIOR_WORKFLOW_UP,
-                                     STATE_BEHAVIOR_WORKFLOW_LOCK,
-                                     STATE_BEHAVIOR_WORKFLOW_UNLOCK,
                                      STATE_BEHAVIOR_WORKFLOW_RESET,))
         self.assertEqual(current_state.push_on_workflow_variable,
                          ['Pilots', 'Associates', 'Observers'])
@@ -744,10 +714,6 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                          ['Pilots', 'Associates', 'Observers'])
         self.assertEqual(current_state.workflow_up_on_workflow_variable,
                          ['Pilots'])
-        self.assertEqual(current_state.workflow_lock_on_workflow_variable,
-                         ['Pilots', 'Associates','Observers'])
-        self.assertEqual(current_state.workflow_unlock_on_workflow_variable,
-                        ['Pilots', 'Associates', 'Observers'])
         self.assertEqual(current_state.workflow_reset_on_workflow_variable,
                          ['Pilots', 'Associates', 'Observers'],)
 

@@ -33,26 +33,6 @@ class IHierarchicalWorkflowStack(Interface.Base):
         """Deep copy. Just to call a clean API while calling getCopy()
         """
 
-    def getDirection():
-        """Get the direction.
-        """
-
-    def setDirectionDown():
-        """Set the direction below
-        """
-
-    def setDirectionUp():
-        """Set the directionn above
-        """
-
-    def blockDirection():
-        """Intermediate situation in between the 1 and 0
-        """
-
-    def returnedUpDirection():
-        """Returned up direction
-        """
-
     def getCurrentLevel():
         """Return the current level
         """

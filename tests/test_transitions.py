@@ -100,11 +100,6 @@ class TestCPSWorkflowTransitions(SecurityRequestTest):
 
         tdef.setProperties(title='Transition def title',
                            new_state_id='',
-                           returned_up_hierarchy_on_workflow_variable=['xx', 'yy'],)
-        self.assertEqual(tdef.returned_up_hierarchy_on_workflow_variable, ['xx', 'yy'])
-
-        tdef.setProperties(title='Transition def title',
-                           new_state_id='',
                            workflow_up_on_workflow_variable=['xx', 'yy'],)
         self.assertEqual(tdef.workflow_up_on_workflow_variable, ['xx', 'yy'])
 

@@ -209,7 +209,6 @@ class HierarchicalStack(SimpleStack):
         SimpleStack.__init__(self, **kw)
         self._elements_container = PersistentMapping()
         self._level = 0
-        self.direction = 1
 
     #
     # PRIVATE API
@@ -244,37 +243,6 @@ class HierarchicalStack(SimpleStack):
     #
     # API
     #
-
-    def getDirection(self):
-        """Get the direction.
-        """
-        return self.direction
-
-    def setDirectionDown(self):
-        """Set the direction below
-        """
-        self.direction = 1
-        return self.direction
-
-    def setDirectionUp(self):
-        """Set the directionn above
-        """
-        self.direction = -1
-        return self.direction
-
-    def blockDirection(self):
-        """Intermediate situation in between the 1 and 0
-        """
-        self.direction = 0
-        return self.direction
-
-    def returnedUpDirection(self):
-        """Returned up direction
-        """
-        self.direction = -(self.direction)
-        return self.direction
-
-    ###################################################
 
     def getSize(self, level=None):
         """Return the size of a given level

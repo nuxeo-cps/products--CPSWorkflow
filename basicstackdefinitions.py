@@ -506,25 +506,6 @@ class HierarchicalStackDefinition(StackDefinition):
         ds = ds.getCopy()
         return ds
 
-    security.declareProtected(ModifyPortalContent, 'doDecLevel')
-    def doReturnedUpDirection(self, ds):
-        """Returned up the direction
-        """
-
-        # Prepare the ds
-        ds = self._prepareStack(ds)
-
-        # Inverse direction
-        ds.returnUpDirection()
-
-        #
-        # For the workflow history.
-        # Let's do a copy of the stack instance
-        #
-
-        ds = ds.getCopy()
-        return ds
-
 InitializeClass(HierarchicalStackDefinition)
 
 #####################################################################

@@ -403,19 +403,6 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         res = hstack.push(None)
         self.assertEqual(res, -1)
 
-        # direction
-        self.assertEqual(hstack.getDirection(), 1)
-        self.assertEqual(hstack.blockDirection(), 0)
-        self.assertEqual(hstack.getDirection(), 0)
-        self.assertEqual(hstack.setDirectionUp(), -1)
-        self.assertEqual(hstack.getDirection(), -1)
-        self.assertEqual(hstack.blockDirection(), 0)
-        self.assertEqual(hstack.getDirection(), 0)
-        self.assertEqual(hstack.setDirectionDown(), 1)
-        self.assertEqual(hstack.getDirection(), 1)
-        self.assertEqual(hstack.returnedUpDirection(), -1)
-        self.assertEqual(hstack.returnedUpDirection(), 1)
-
     def test_HierarchicalStackNoMaxSizeWithLevels(self):
 
         #
@@ -853,20 +840,6 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         hstack.pop('elt3')
         hstack.pop('elt1')
         self.assertEqual(hstack.getStackContent(), {})
-
-        # direction
-        self.assertEqual(hstack.getDirection(), 1)
-        self.assertEqual(hstack.blockDirection(), 0)
-        self.assertEqual(hstack.getDirection(), 0)
-        self.assertEqual(hstack.setDirectionUp(), -1)
-        self.assertEqual(hstack.getDirection(), -1)
-        self.assertEqual(hstack.blockDirection(), 0)
-        self.assertEqual(hstack.getDirection(), 0)
-        self.assertEqual(hstack.setDirectionDown(), 1)
-        self.assertEqual(hstack.getDirection(), 1)
-        self.assertEqual(hstack.returnedUpDirection(), -1)
-        self.assertEqual(hstack.returnedUpDirection(), 1)
-
 
     def test_SimpleStackCopy(self):
         # Test getCopy()

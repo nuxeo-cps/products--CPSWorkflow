@@ -54,9 +54,6 @@ STATE_BEHAVIOR_PUSH_DELEGATEES = 101
 STATE_BEHAVIOR_POP_DELEGATEES = 102
 STATE_BEHAVIOR_WORKFLOW_UP = 103
 STATE_BEHAVIOR_WORKFLOW_DOWN = 104
-STATE_BEHAVIOR_RETURNED_UP_HIERARCHY = 105
-STATE_BEHAVIOR_WORKFLOW_LOCK = 106
-STATE_BEHAVIOR_WORKFLOW_UNLOCK = 107
 STATE_BEHAVIOR_WORKFLOW_RESET = 108
 
 state_behavior_export_dict = {
@@ -64,9 +61,6 @@ state_behavior_export_dict = {
     STATE_BEHAVIOR_POP_DELEGATEES  : 'Pop Delegatees',
     STATE_BEHAVIOR_WORKFLOW_UP     : 'Workflow Up',
     STATE_BEHAVIOR_WORKFLOW_DOWN   : 'Workflow Down',
-    STATE_BEHAVIOR_RETURNED_UP_HIERARCHY  : 'Return up hierarchy',
-    STATE_BEHAVIOR_WORKFLOW_LOCK     : 'Workflow Lock',
-    STATE_BEHAVIOR_WORKFLOW_UNLOCK   : 'Workflow UnLock',
     STATE_BEHAVIOR_WORKFLOW_RESET : 'Workflow Reset',
     }
 
@@ -101,11 +95,8 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
     # State Behaviors depend on a workflow variables
     push_on_workflow_variable = []
     pop_on_workflow_variable = []
-    returned_up_hierarchy_on_workflow_variable = []
     workflow_up_on_workflow_variable = []
     workflow_down_on_workflow_variable = []
-    workflow_lock_on_workflow_variable = []
-    workflow_unlock_on_workflow_variable = []
     workflow_reset_on_workflow_variable = []
 
     def setProperties(self,
@@ -116,11 +107,8 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
                       stackdefs={},
                       push_on_workflow_variable = None,
                       pop_on_workflow_variable = None,
-                      returned_up_hierarchy_on_workflow_variable = None,
                       workflow_up_on_workflow_variable = None,
                       workflow_down_on_workflow_variable = None,
-                      workflow_lock_on_workflow_variable = None,
-                      workflow_unlock_on_workflow_variable = None,
                       workflow_reset_on_workflow_variable = None,
                       REQUEST=None,
                       **kw
@@ -147,21 +135,12 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
             self.push_on_workflow_variable = push_on_workflow_variable
         if pop_on_workflow_variable is not None:
             self.pop_on_workflow_variable = pop_on_workflow_variable
-        if returned_up_hierarchy_on_workflow_variable is not None:
-            self.returned_up_hierarchy_on_workflow_variable = \
-                 returned_up_hierarchy_on_workflow_variable
         if workflow_up_on_workflow_variable is not None:
             self.workflow_up_on_workflow_variable = \
                  workflow_up_on_workflow_variable
         if workflow_down_on_workflow_variable is not None:
             self.workflow_down_on_workflow_variable = \
                  workflow_down_on_workflow_variable
-        if workflow_lock_on_workflow_variable is not None:
-            self.workflow_lock_on_workflow_variable = \
-                 workflow_lock_on_workflow_variable
-        if workflow_unlock_on_workflow_variable is not None:
-            self.workflow_unlock_on_workflow_variable = \
-                 workflow_unlock_on_workflow_variable
         if workflow_reset_on_workflow_variable is not None:
             self.workflow_reset_on_workflow_variable = \
                  workflow_reset_on_workflow_variable

@@ -81,11 +81,8 @@ TRANSITION_BEHAVIOR_MERGE = 38
 
 TRANSITION_BEHAVIOR_PUSH_DELEGATEES = 41
 TRANSITION_BEHAVIOR_POP_DELEGATEES = 42
-TRANSITION_BEHAVIOR_RETURN_UP_DELEGATEES_HIERARCHY = 43
 TRANSITION_BEHAVIOR_WORKFLOW_UP = 44
 TRANSITION_BEHAVIOR_WORKFLOW_DOWN = 45
-TRANSITION_BEHAVIOR_WORKFLOW_LOCK = 46
-TRANSITION_BEHAVIOR_WORKFLOW_UNLOCK = 47
 TRANSITION_BEHAVIOR_WORKFLOW_RESET = 48
 
 trigger_export_dict = {
@@ -124,12 +121,8 @@ transition_behavior_export_dict = {
 
     TRANSITION_BEHAVIOR_PUSH_DELEGATEES: 'behavior_push_delegatees',
     TRANSITION_BEHAVIOR_POP_DELEGATEES: 'behavior_pop_delegatees',
-    TRANSITION_BEHAVIOR_RETURN_UP_DELEGATEES_HIERARCHY:
-    'behavior_return_up_delegatees_hierarchy',
     TRANSITION_BEHAVIOR_WORKFLOW_UP : 'behavior_workflow_up',
     TRANSITION_BEHAVIOR_WORKFLOW_DOWN : 'behavior_workflow_down',
-    TRANSITION_BEHAVIOR_WORKFLOW_LOCK : 'behavior_workflow_lock',
-    TRANSITION_BEHAVIOR_WORKFLOW_UNLOCK : 'behavior_workflow_unlock',
     TRANSITION_BEHAVIOR_WORKFLOW_RESET : 'behavior_workflow_reset',
     }
 
@@ -163,11 +156,8 @@ class TransitionDefinition(DCWFTransitionDefinition):
 
     push_on_workflow_variable = []
     pop_on_workflow_variable = []
-    returned_up_hierarchy_on_workflow_variable = []
     workflow_up_on_workflow_variable = []
     workflow_down_on_workflow_variable = []
-    workflow_lock_on_workflow_variable = []
-    workflow_unlock_on_workflow_variable = []
     workflow_reset_on_workflow_variable = []
 
     _properties_form = DTMLFile('zmi/workflow_transition_properties',
@@ -182,11 +172,8 @@ class TransitionDefinition(DCWFTransitionDefinition):
                       checkin_allowed_transitions=None,
                       push_on_workflow_variable = None,
                       pop_on_workflow_variable = None,
-                      returned_up_hierarchy_on_workflow_variable = None,
                       workflow_up_on_workflow_variable = None,
                       workflow_down_on_workflow_variable = None,
-                      workflow_lock_on_workflow_variable = None,
-                      workflow_unlock_on_workflow_variable = None,
                       workflow_reset_on_workflow_variable = None,
                       REQUEST=None,
                       **kw):
@@ -207,21 +194,12 @@ class TransitionDefinition(DCWFTransitionDefinition):
             self.push_on_workflow_variable = push_on_workflow_variable
         if pop_on_workflow_variable is not None:
             self.pop_on_workflow_variable = pop_on_workflow_variable
-        if returned_up_hierarchy_on_workflow_variable is not None:
-            self.returned_up_hierarchy_on_workflow_variable = \
-                 returned_up_hierarchy_on_workflow_variable
         if workflow_up_on_workflow_variable is not None:
             self.workflow_up_on_workflow_variable = \
                  workflow_up_on_workflow_variable
         if workflow_down_on_workflow_variable is not None:
             self.workflow_down_on_workflow_variable = \
                  workflow_down_on_workflow_variable
-        if workflow_lock_on_workflow_variable is not None:
-            self.workflow_lock_on_workflow_variable = \
-                 workflow_lock_on_workflow_variable
-        if workflow_unlock_on_workflow_variable is not None:
-            self.workflow_unlock_on_workflow_variable = \
-                 workflow_unlock_on_workflow_variable
         if workflow_reset_on_workflow_variable is not None:
             self.workflow_reset_on_workflow_variable = \
                  workflow_reset_on_workflow_variable
@@ -251,16 +229,10 @@ class TransitionDefinition(DCWFTransitionDefinition):
                 self.push_on_workflow_variable,
             TRANSITION_BEHAVIOR_POP_DELEGATEES  :
                 self.pop_on_workflow_variable,
-            TRANSITION_BEHAVIOR_RETURN_UP_DELEGATEES_HIERARCHY :
-                self.returned_up_hierarchy_on_workflow_variable,
             TRANSITION_BEHAVIOR_WORKFLOW_UP   :
                 self.workflow_up_on_workflow_variable,
             TRANSITION_BEHAVIOR_WORKFLOW_DOWN :
                 self.workflow_down_on_workflow_variable,
-            TRANSITION_BEHAVIOR_WORKFLOW_LOCK :
-                self.workflow_lock_on_workflow_variable,
-            TRANSITION_BEHAVIOR_WORKFLOW_UNLOCK :
-                self.workflow_unlock_on_workflow_variable,
             TRANSITION_BEHAVIOR_WORKFLOW_RESET  :
                 self.workflow_reset_on_workflow_variable,
             }

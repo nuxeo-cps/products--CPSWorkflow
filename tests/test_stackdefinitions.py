@@ -124,13 +124,6 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertRaises(NotImplementedError, base._canManageStack,
                           None, None, None, None)
 
-        # Lock / unlock
-        self.assertEqual(base.isLocked(), 0)
-        base.doLockStack()
-        self.assertEqual(base.isLocked(), 1)
-        base.doUnLockStack()
-        self.assertEqual(base.isLocked(), 0)
-
     def test_SimpleStackDefinition(self):
         self.login('user1', ('Owner',))
         simple = SimpleStackDefinition('Simple Stack',
@@ -144,13 +137,6 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertEqual(simple.meta_type, 'Simple Stack Definition')
         self.assertEqual(simple.getStackDataStructureType(), 'Simple Stack')
         self.assertEqual(simple.getStackWorkflowVariableId(), 'toto')
-
-        # Lock / unlock
-        self.assertEqual(simple.isLocked(), 0)
-        simple.doLockStack()
-        self.assertEqual(simple.isLocked(), 1)
-        simple.doUnLockStack()
-        self.assertEqual(simple.isLocked(), 0)
 
         # Stack ds preparation
 
@@ -455,13 +441,6 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertEqual(
             hierarchical.getStackDataStructureType(), 'Hierarchical Stack')
         self.assertEqual(hierarchical.getStackWorkflowVariableId(), 'toto')
-
-        # Lock / unlock
-        self.assertEqual(hierarchical.isLocked(), 0)
-        hierarchical.doLockStack()
-        self.assertEqual(hierarchical.isLocked(), 1)
-        hierarchical.doUnLockStack()
-        self.assertEqual(hierarchical.isLocked(), 0)
 
         # Stack ds preparation
         ds = hierarchical._prepareStack(ds=None)
@@ -794,13 +773,6 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertEqual(
             hierarchical.getStackDataStructureType(), 'Hierarchical Stack')
         self.assertEqual(hierarchical.getStackWorkflowVariableId(), 'toto')
-
-        # Lock / unlock
-        self.assertEqual(hierarchical.isLocked(), 0)
-        hierarchical.doLockStack()
-        self.assertEqual(hierarchical.isLocked(), 1)
-        hierarchical.doUnLockStack()
-        self.assertEqual(hierarchical.isLocked(), 0)
 
         # Stack ds preparation
         ds = hierarchical._prepareStack(ds=None)

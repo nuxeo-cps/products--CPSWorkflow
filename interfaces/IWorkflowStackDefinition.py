@@ -50,24 +50,10 @@ class IWorkflowStackDefinition(Interface.Base):
         This method has to be implemented by a child class
         """
 
-    def isLocked():
-        """Is the stack locked
-        """
-
     def resetStack(ds, **kw):
         """Reset stack.
 
         ds contains the data structure.
-        """
-
-    ########################################################################
-
-    def doLockStack():
-        """Lock the stack
-        """
-
-    def doUnLockStack():
-        """UnLock stack
         """
 
     ########################################################################
