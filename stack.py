@@ -127,7 +127,8 @@ class Stack(SimpleItem):
     def __deepcopy__(self, ob):
         """Deep copy. Just to call a clean API while calling getCopy()
 
-        Cope with mutable attrs to break reference
+        Cope with mutable attrs to break reference, and deep copy stack
+        elements too.
         """
         raise NotImplementedError
 
