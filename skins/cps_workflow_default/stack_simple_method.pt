@@ -1,0 +1,9 @@
+<tal:block define="stack options/stack;
+                   mode options/mode">
+  <tal:block condition="python:mode=='view'">
+    <h2>View mode </h2>
+  </tal:block>
+  <tal:block condition="python:mode=='edit'">
+    <h2>zEdit mode </h2>
+  </tal:block>
+</tal:block>
