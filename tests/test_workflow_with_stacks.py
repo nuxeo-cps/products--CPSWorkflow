@@ -545,7 +545,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Note the status is not yet set for stacks
         #
 
-        ds = wftool.getDelegateesDataStructures(content)
+        ds = wftool.getStacks(content)
         self.assert_(isinstance(ds, DictType))
         keys = ds.keys()
         keys.sort()
@@ -559,19 +559,19 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # def getDelegateesDataStructureFor(self, ob, stack_id)
         #
 
-        ds_assos = wftool.getDelegateesDataStructureFor(content, 'associates')
-        ds_obs = wftool.getDelegateesDataStructureFor(content, 'observers')
-        ds_pilots = wftool.getDelegateesDataStructureFor(content, 'pilots')
+        ds_assos = wftool.getStackFor(content, 'associates')
+        ds_obs = wftool.getStackFor(content, 'observers')
+        ds_pilots = wftool.getStackFor(content, 'pilots')
 
         self.assertEqual(ds_assos, None)
         self.assertEqual(ds_obs, None)
         self.assertEqual(ds_pilots, None)
 
         # concistency
-        self.assertEqual(wftool.getDelegateesDataStructureFor(content, 'associates'),
-                         wftool.getDelegateesDataStructures(content)['associates'])
-        self.assertEqual(wftool.getDelegateesDataStructureFor(content, 'observers'),
-                         wftool.getDelegateesDataStructures(content)['observers'])
+        self.assertEqual(wftool.getStackFor(content, 'associates'),
+                         wftool.getStacks(content)['associates'])
+        self.assertEqual(wftool.getStackFor(content, 'observers'),
+                         wftool.getStacks(content)['observers'])
 
     def test_current_state(self):
 
@@ -582,7 +582,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         wftool = self.wftool
         content = getattr(self.portal.f, 'dummy')
 
-        self.assertEqual(wftool.getInfoFor(content, 'review_state'), 'delegating')
+        self.assertEqual(wftool.getInfoFor(content, 'review_state'),
+                         'delegating')
 
         # Check current state fixtures
         wf = wftool['wf']
