@@ -390,7 +390,7 @@ class HierarchicalStackDefinition(StackDefinition):
 
         #
         # Cope with member id.
-        # It can be passed within th kw (member_id)
+        # It can be passed within the kw (member_id)
         #
 
         member_id = kw.get('member_id')
@@ -401,7 +401,7 @@ class HierarchicalStackDefinition(StackDefinition):
             member = mtool.getMemberById(member_id)
 
         #
-        # Check first if the member is granted because of irts position within
+        # Check first if the member is granted because of its position within
         # the stack content
         #
 
@@ -421,11 +421,10 @@ class HierarchicalStackDefinition(StackDefinition):
                     pass
 
         #
-        # Now let's cope with the first case when the stack is not et
-        # intialized.
+        # Now let's cope with the first case when the stack is not yet
+        # initialized.
         #
-
-        if ds.getLevelContent() == []:
+        if ds.getStackContent() == {}:
             wf_def = self._getWorkflowDefinition()
             return self.getEmptyStackManageGuard().check(
                 getSecurityManager(), wf_def, context)
