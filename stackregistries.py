@@ -54,6 +54,7 @@ class WorkflowStackRegistryCls:
             except DoesNotImplement:
                 LOG("WorkflowStackRegistry error : ", INFO,
                     "Cannot import class %s" %str(cls))
+                raise
             else:
                 meta_type = cls.meta_type
                 if meta_type not in self.listWorkflowStackTypes():
@@ -104,6 +105,7 @@ class WorkflowStackDefRegistryCls:
             except DoesNotImplement:
                 LOG("WorkflowStackDefRegistry error : ", INFO,
                     "Cannot import class %s" %str(cls))
+                raise
             else:
                 meta_type = cls.meta_type
                 if meta_type not in self.listWorkflowStackDefTypes():
@@ -157,6 +159,7 @@ class WorkflowStackElementRegistryCls:
             except DoesNotImplement:
                 LOG("WorkflowStackElementRegistry error : ", INFO,
                     "Cannot import class %s" %str(cls))
+                raise
             else:
                 meta_type = cls.meta_type
                 if meta_type not in self.listWorkflowStackElementTypes():
