@@ -193,7 +193,7 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
         stackdefs = {}
         for k, v in self.__dict__.items():
             if isinstance(v, StackDefinition):
-                stackdefs[k] = v
+                stackdefs[k] = self._getOb(k)
         return stackdefs
 
     def getStackDefinitionFor(self, var_id):
@@ -258,9 +258,6 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
             **kw)
 
         if stackdef is not None:
-            # XXX change this
-            stackdef.parent = self
-
             # Managed role exprs
             managed_role_exprs = kw.get('managed_role_exprs', {})
             if isinstance(managed_role_exprs, DictType):
