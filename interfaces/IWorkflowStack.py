@@ -70,12 +70,9 @@ class IWorkflowStack(Interface.Base):
     def push(elt=None):
         """Push elt in the queue
         """
-    
-    def pop(elt=None):
-        """Remove elt from within the queue
-        
-        If elt is None then remove the last one
-        """
+
+    def pop(pop_ids=[]):
+        """Remove element in pop_ids from within the queue"""
 
     def reset(**kw):
         """Reset the stack
