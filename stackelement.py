@@ -19,8 +19,10 @@
 # $Id$
 """Stack Element
 
-A Stack ELement is stored within a stack.
+A Stack ELement is an element stored within a stack type.
 """
+
+from types import StringType
 
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
@@ -33,7 +35,11 @@ from interfaces import IStackElement
 class StackElement(SimpleItem):
     """Stack Element
 
-    A Stack Element has a guard as attribut.
+    All the user defined stack elements ho have to inherit from StackElement
+    and override the following methodds :
+        - __call__()
+        - __str__()
+        - __cmp__()
     """
 
     meta_type = 'Stack Element'
@@ -43,6 +49,19 @@ class StackElement(SimpleItem):
     security = ClassSecurityInfo()
 
     guard = None
+
+    def __call__(self):
+        raise NotImplementedError
+
+    def __str__(self):
+        raise NotImplementedError
+
+    def __cmp__(self, other):
+        if isinstance(other, StackElement):
+            return cmp(self(), other())
+        elif isinstance(other, StringType):
+            return cmp(self(), other)
+        return 0
 
     def getGuard(self):
         """Return a temporarly guard instance
