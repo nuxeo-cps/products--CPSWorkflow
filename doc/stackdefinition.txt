@@ -4,7 +4,7 @@ $Id$
 Stack Definition :
 -------------------
 
-A stack definition is an object stored within a stated definition
+A stack definition is an object stored within a state definition object
 implementing an abstraction layer on a stack object instance.
 
 A stack definition :
