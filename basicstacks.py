@@ -136,6 +136,18 @@ class SimpleStack(Stack):
                 res.append('not_visible')
         return res
 
+    def getStackContentForRoleSettings(self):
+        """Return the stack content for role settings
+        """
+        res = []
+        for each in self._getElementsContainer():
+            if each.getGuard().check(getSecurityManager(),
+                                     None, aq_parent(aq_inner(self))):
+                res.append(each.getIdForRoleSettings())
+            else:
+                res.append('not_visible')
+        return res
+
     def getCopy(self):
         """Duplicate self
 
@@ -273,6 +285,14 @@ class HierarchicalStack(SimpleStack):
             res[clevel] = self.getLevelContentValues(level=clevel)
         return res
 
+    def getStackContentForRoleSettings(self):
+        """Return the stack content for role settings
+        """
+        res = {}
+        for clevel in self.getAllLevels():
+            res[clevel] = self.getLevelContentValuesForRoleSettings(level=clevel)
+        return res
+
     def getCurrentLevel(self):
         """Return the current level
         """
@@ -327,6 +347,15 @@ class HierarchicalStack(SimpleStack):
         res = []
         for each in content:
             res.append(each())
+
+        return res
+
+    def getLevelContentValuesForRoleSettings(self, level=None):
+        content = self.getLevelContent(level)
+        res = []
+        for each in content:
+            res.append(each.getIdForRoleSettings())
+
         return res
 
     def getAllLevels(self):
@@ -347,9 +376,10 @@ class HierarchicalStack(SimpleStack):
 
     def push(self, elt=None, level=0):
         """Push elt at given level
-         1  : ok
+        1  : ok
         0  : queue id full
         -1 : elt is None
+        -2 : already in here
         """
         if elt is None:
             return -1
