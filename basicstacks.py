@@ -78,11 +78,6 @@ class SimpleStack(Stack):
                 for each in value:
                     new_container_ref.append(each)
                 copy.__dict__[attr] = new_container_ref
-            elif attr == '_former_localroles_mapping':
-                new_mapping = {}
-                for k,v in value.items():
-                    new_mapping[k] = v
-                copy.__dict__[attr] = new_mapping
             else:
                 copy.__dict__[attr] = value
         return copy
@@ -186,11 +181,6 @@ class HierarchicalStack(SimpleStack):
                 for key in value.keys():
                     new_container_ref[key] = value[key]
                 copy.__dict__[attr] = new_container_ref
-            elif attr == '_former_localroles_mapping':
-                new_mapping = {}
-                for k,v in value.items():
-                    new_mapping[k] = v
-                copy.__dict__[attr] = new_mapping
             else:
                 copy.__dict__[attr] = value
         return copy

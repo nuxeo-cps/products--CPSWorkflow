@@ -192,20 +192,7 @@ class SimpleStackDefinition(StackDefinition):
             new = mapping.get(each, ()) + (self.getAssociatedLocalRole(),)
             mapping[each] = new
 
-        #
-        # Put the information within the ds
-        #
-
-        ds.setFormerLocalRolesMapping(mapping)
         return mapping
-
-    security.declareProtected(View, 'getFormerLocalRolesMapping')
-    def getFormerLocalRolesMapping(self, ds):
-        """Give the former local roles mapping for the member / group ids
-        within the stack
-        """
-        ds = self._prepareStack(ds)
-        return ds.getFormerLocalRolesMapping()
 
     security.declarePublic('canManageStack')
     def canManageStack(self, ds, aclu, mtool, context, **kw):
@@ -561,20 +548,7 @@ class HierarchicalStackDefinition(StackDefinition):
             new = mapping.get(each, ()) + (self.getAssociatedLocalRole(),)
             mapping[each] = new
 
-        #
-        # Put the information within the ds
-        #
-
-        ds.setFormerLocalRolesMapping(mapping)
         return mapping
-
-    security.declareProtected(View, 'getFormerLocalRolesMapping')
-    def getFormerLocalRolesMapping(self, ds):
-        """Give the former local roles mapping for the member / group ids
-        within the stack
-        """
-        ds = self._prepareStack(ds)
-        return ds.getFormerLocalRolesMapping()
 
     security.declareProtected(ModifyPortalContent, 'doIncLevel')
     def doIncLevel(self, ds):
