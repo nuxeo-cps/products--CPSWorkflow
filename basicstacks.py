@@ -112,7 +112,7 @@ class SimpleStack(Stack):
     def _getStackElementIndex(self, id):
         i = 0
         for each in self._getElementsContainer():
-            if id == each():
+            if id == each.getId():
                 return i
             i += 1
         return -1
@@ -201,7 +201,7 @@ class SimpleStack(Stack):
         for pop_id in pop_ids:
             self._pop(pop_id, **kw)
 
-    def getStackContent(self, type='str', level=None,
+    def getStackContent(self, type='id', level=None,
                         context=None, **kw):
         """Return the stack content
 
@@ -216,7 +216,9 @@ class SimpleStack(Stack):
                 each = ElementReg.makeWorkflowStackElementTypeInstance(
                     each.getHiddenMetaType(), 'hidden'
                     )
-            if type == 'str':
+            if type == 'id':
+                res.append(each.getId())
+            elif type == 'str':
                 res.append(str(each))
             elif type == 'call':
                 res.append(each())
@@ -328,13 +330,17 @@ class HierarchicalStack(SimpleStack):
                 copy.__dict__[attr] = value
         return copy
 
-    def _getStackElementIndex(self, id, level=None):
+    def _getStackElementIndex(self, elt, level=None):
+        """Find the index of the given element within the stack at a
+        given level given the elt itself or its id. It supports both
+        since the __cmp__ method of stackelement supports the
+        operation.
+        """
         if level is None:
             level = self.getCurrentLevel()
         i = 0
-        # compare string representations
-        for each in self.getLevelContent(level=level):
-            if id == each:
+        for each in self.getLevelContent(level=level, type='object'):
+            if elt == each:
                 return i
             i += 1
         return -1
@@ -366,7 +372,6 @@ class HierarchicalStack(SimpleStack):
         # Simply insert a new elt at a given level
         if level is not None:
             content_level = self.getLevelContent(level, type='object')
-            # compare string representations
             if elt not in self.getLevelContent(level):
                 elt = self._prepareElement(elt)
                 content_level.append(elt)
@@ -473,7 +478,7 @@ class HierarchicalStack(SimpleStack):
 
     ###################################################
 
-    def getStackContent(self, type='str', context=None, **kw):
+    def getStackContent(self, type='id', context=None, **kw):
         """Return the stack content
         """
         res = {}
@@ -531,7 +536,7 @@ class HierarchicalStack(SimpleStack):
 
         return value
 
-    def getLevelContent(self, level=None, type='str', context=None, **kw):
+    def getLevelContent(self, level=None, type='id', context=None, **kw):
         content = self._getLevelContentValues(level)
         res = []
         for each in content:
@@ -541,7 +546,9 @@ class HierarchicalStack(SimpleStack):
                 each = ElementReg.makeWorkflowStackElementTypeInstance(
                     each.getHiddenMetaType()
                     )
-            if type == 'str':
+            if type == 'id':
+                res.append(each.getId())
+            elif type == 'str':
                 res.append(str(each))
             elif type == 'call':
                 res.append(each())
