@@ -98,7 +98,7 @@ class StackDefinition(SimpleItem):
                 if isinstance(v, DictType):
                     for role, expr in v.items():
                         self.addManagedRole(role, expr)
-            if k == 'manager_stack_ids': 
+            if k == 'manager_stack_ids':
                 setattr(self, k, v)
             if k == 'empty_stack_manage_guard':
                 self.setEmptyStackManageGuard(**v)
@@ -120,7 +120,7 @@ class StackDefinition(SimpleItem):
     def setEmptyStackManageGuard(self, guard_permissions='',
                                  guard_roles='', guard_groups='',
                                  guard_expr='', stackdef_id='', REQUEST=None):
-        """ Set the empty stack manage guard 
+        """ Set the empty stack manage guard
 
         This Guard defines the manage policy on the stack when nobody
         is stored within
@@ -136,7 +136,6 @@ class StackDefinition(SimpleItem):
             url = aq_parent(aq_inner(self)).absolute_url() + \
                   '/manage_stackdefinition?stackdef_id=%s'%stackdef_id
             REQUEST.RESPONSE.redirect(url)
-                  
 
     def getEditStackElementGuard(self):
         """ """
@@ -165,7 +164,7 @@ class StackDefinition(SimpleItem):
     # Boring accessors
     #
     def _getWorkflowDefinition(self):
-        statedef = aq_parent(aq_inner(self)) 
+        statedef = aq_parent(aq_inner(self))
         states = aq_parent(aq_inner(statedef))
         return aq_parent(aq_inner(states))
 
@@ -189,7 +188,7 @@ class StackDefinition(SimpleItem):
         within the 'Pilots' stack can manage 'Associates' and 'Watchers'
         stacks.
         """
-        # XXX has to be refactore 
+        # XXX has to be refactored
         return self.manager_stack_ids
 
     #
@@ -273,7 +272,7 @@ class StackDefinition(SimpleItem):
 
         - stack : the current stack
         - stackdef : the stack definition where the stack is defined
-        - elt : the current element (UserElement child)
+        - elt : the current element (StackElement call result)
         - level : the level given as an argument where the elt is
         - role : the role we want to check
         - portal : the portal itself
