@@ -8,6 +8,7 @@ New features:
 - #505 : Be able to reuse stacks
 - #507 : Delegatees managment
 - #509 : Inserting people in hierarchical stacks
+- #529 : New: api misc
 Bug fixes:
 ~~~~~~~~~~
 - Keep former local roles mapping during non stack flaged transition
