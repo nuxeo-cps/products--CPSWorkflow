@@ -57,6 +57,7 @@ class StackElement(SimpleItem):
     view_guard = None
     edit_guaed = None
 
+
     #
     # PRIVATE
     #
@@ -152,6 +153,7 @@ class StackElement(SimpleItem):
         # Evaluate the default guard for view of the stackdef within
         # the stack context
         else:
+            # XXX 
             for k, v in wftool.getStacks(context).items():
                 if v == stack:
                     stackdef = wftool.getStackDefinitionFor(context, k)

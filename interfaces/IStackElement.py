@@ -43,10 +43,3 @@ class IStackElement(Interface.Base):
         """Comparaison can be done against another stack element or against a
         string """
 
-    def getGuard():
-        """Return a temporarly guard instance
-        """
-
-    def getGuardSummary():
-        """Return a guard summary for display purpose
-        """

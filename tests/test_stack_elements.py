@@ -36,6 +36,9 @@ from Products.CPSWorkflow.basicstackelements import GroupSubstituteStackElement
 from Products.CPSWorkflow.basicstackelements import \
      USER_STACK_ELEMENT_NOT_VISIBLE, GROUP_STACK_ELEMENT_NOT_VISIBLE
 
+from Products.CPSWorkflow.stackdefinitionguard import \
+     StackDefinitionGuard as Guard
+
 from Products.CPSWorkflow.interfaces import IStackElement
 
 class TestStackElements(ZopeTestCase):
@@ -43,17 +46,17 @@ class TestStackElements(ZopeTestCase):
     def test_interface(self):
         verifyClass(IStackElement, StackElement)
 
-    def test_stack_element_guard(self):
+    def test_stack_element_viewguard(self):
 
         #
         # Test the guard of the stack element
         #
 
         stack_elt = StackElement()
-        guard = stack_elt.getGuard()
 
-        # XXX fix API
-        stack_elt.guard = guard
+        stack_elt.view_guard = Guard()
+
+        guard = stack_elt.getViewGuard()
         self.assertNotEqual(guard, None)
 
         # Test default values
@@ -180,7 +183,6 @@ class TestStackElements(ZopeTestCase):
 
         # Summary
         summary = """Requires permission: <code>ManagePortal</code> <br/> Requires role: <code>Manager</code> <br/> Requires expr: <code>string:</code>"""
-        self.assertEqual(stack_elt.getGuardSummary(), summary)
         self.assertEqual(guard.getSummary(), summary)
 
         # reinit the guard
@@ -199,12 +201,166 @@ class TestStackElements(ZopeTestCase):
         self.assertEqual(guard.getPermissionsText(), '')
         self.assertEqual(guard.getRolesText(), '')
         self.assertEqual(guard.getExprText(), '')
+    
+    def test_stack_element_editguard(self):
 
-        ##
-        ## XXX need to test the check() API
-        ##
+        #
+        # Test the guard of the stack element
+        #
 
+        stack_elt = StackElement()
+
+        stack_elt.view_guard = Guard()
+
+        guard = stack_elt.getViewGuard()
+        self.assertNotEqual(guard, None)
+
+        # Test default values
+        self.assertEqual(guard.getPermissionsText(), '')
+        self.assertEqual(guard.getRolesText(), '')
+        self.assertEqual(guard.getExprText(), '')
+
+        # Initialize the guard with empty values
+        # not initialization
+        guard_props = {'guard_permissions':'',
+                       'guard_roles':'',
+                       'guard_expr' :''}
+        res = guard.changeFromProperties(guard_props)
+        self.assert_(res==0)
+
+        # Test default values
+        self.assertEqual(guard.getPermissionsText(), '')
+        self.assertEqual(guard.getRolesText(), '')
+        self.assertEqual(guard.getExprText(), '')
+
+        # Change guard
+        guard_props = {'guard_roles':'Manager',
+                       'guard_permissions':'',
+                       'guard_expr' :''}
+        res = guard.changeFromProperties(guard_props)
+        self.assert_(res==1)
+        self.assertEqual(guard.getRolesText(), 'Manager')
+        self.assertEqual(guard.getPermissionsText(), '')
+        self.assertEqual(guard.getExprText(), '')
+
+        # Change guard
+        guard_props = {'guard_roles':'Manager;',
+                       'guard_permissions':'',
+                       'guard_expr' :''}
+        res = guard.changeFromProperties(guard_props)
+        self.assert_(res==1)
+        # With one space after the ';'
+        self.assertEqual(guard.getRolesText(), 'Manager; ')
+        self.assertEqual(guard.getPermissionsText(), '')
+        self.assertEqual(guard.getExprText(), '')
+
+        # Change guard
+        guard_props = {'guard_roles':'Manager;Member',
+                       'guard_permissions':'',
+                       'guard_expr' :''}
+        res = guard.changeFromProperties(guard_props)
+        self.assert_(res==1)
+        # With one space after the ';'
+        self.assertEqual(guard.getRolesText(), 'Manager; Member')
+        self.assertEqual(guard.getPermissionsText(), '')
+        self.assertEqual(guard.getExprText(), '')
+
+        # Change guard
+        guard_props = {'guard_roles':'Manager;Member',
+                       'guard_permissions':'',
+                       'guard_expr' :''}
+        res = guard.changeFromProperties(guard_props)
+        self.assert_(res==1)
+        # With one space after the ';'
+        self.assertEqual(guard.getRolesText(), 'Manager; Member')
+        self.assertEqual(guard.getPermissionsText(), '')
+        self.assertEqual(guard.getExprText(), '')
+
+        # Change guard
+        guard_props = {'guard_roles':'Manager',
+                       'guard_permissions':'',
+                       'guard_expr' :''}
+        res = guard.changeFromProperties(guard_props)
+        self.assert_(res==1)
+        self.assertEqual(guard.getRolesText(), 'Manager')
+        self.assertEqual(guard.getPermissionsText(), '')
+        self.assertEqual(guard.getExprText(), '')
+
+        # Change guard
+        guard_props = {'guard_roles':'Manager',
+                       'guard_permissions':'ManagePortal;',
+                       'guard_expr' :''}
+        res = guard.changeFromProperties(guard_props)
+        self.assert_(res==1)
+        self.assertEqual(guard.getRolesText(), 'Manager')
+        self.assertEqual(guard.getPermissionsText(), 'ManagePortal; ')
+        self.assertEqual(guard.getExprText(), '')
+
+        # Change guard
+        guard_props = {'guard_roles':'Manager',
+                       'guard_permissions':'ManagePortal',
+                       'guard_expr' :''}
+        res = guard.changeFromProperties(guard_props)
+        self.assert_(res==1)
+        self.assertEqual(guard.getRolesText(), 'Manager')
+        self.assertEqual(guard.getPermissionsText(), 'ManagePortal')
+        self.assertEqual(guard.getExprText(), '')
+
+        # Change guard
+        guard_props = {'guard_roles':'Manager',
+                       'guard_permissions':'ManagePortal',
+                       'guard_expr' :'python:1'}
+        res = guard.changeFromProperties(guard_props)
+        self.assert_(res==1)
+        self.assertEqual(guard.getRolesText(), 'Manager')
+        self.assertEqual(guard.getPermissionsText(), 'ManagePortal')
+        self.assertEqual(guard.getExprText(), 'python:1')
+
+        # Change guard
+        guard_props = {'guard_roles':'Manager',
+                       'guard_permissions':'ManagePortal',
+                       'guard_expr' :'string:'}
+        res = guard.changeFromProperties(guard_props)
+        self.assert_(res==1)
+        self.assertEqual(guard.getRolesText(), 'Manager')
+        self.assertEqual(guard.getPermissionsText(), 'ManagePortal')
+        self.assertEqual(guard.getExprText(), 'string:')
+
+        # Change guard with wrong TALES
+        guard_props = {'guard_roles':'Manager',
+                       'guard_permissions':'ManagePortal',
+                       'guard_expr' :'python:'}
+        self.assertRaises(CompilerError,
+                          guard.changeFromProperties, guard_props)
+
+        self.assertEqual(guard.getRolesText(), 'Manager')
+        self.assertEqual(guard.getPermissionsText(), 'ManagePortal')
+        self.assertEqual(guard.getExprText(), 'string:')
+
+        # Summary
+        summary = """Requires permission: <code>ManagePortal</code> <br/> Requires role: <code>Manager</code> <br/> Requires expr: <code>string:</code>"""
+        self.assertEqual(guard.getSummary(), summary)
+
+        # reinit the guard
+        guard_props = {'guard_permissions':'',
+                       'guard_roles':'',
+                       'guard_expr' :''}
+        res = guard.changeFromProperties(guard_props)
+        self.assert_(res==0)
+
+        # No API on DCWorkflow guard to reset properly....
+        guard.permissions = ''
+        guard.roles = ''
+        guard.expr = None
+
+        # Test default values
+        self.assertEqual(guard.getPermissionsText(), '')
+        self.assertEqual(guard.getRolesText(), '')
+        self.assertEqual(guard.getExprText(), '')
+        
     def test_UserStackElement(self):
+
+        # XXX supported for compatibility
         elt = UserStackElement('anguenot')
         self.assertEqual(elt(), 'anguenot')
         self.assertEqual(str(elt), 'anguenot')
@@ -219,22 +375,27 @@ class TestStackElements(ZopeTestCase):
         self.assertEqual(elt.getIdForRoleSettings(), 'anguenot')
         self.assertEqual(elt.getPrefix(), 'user')
 
+        self.assertEqual(elt.getHiddenMetaType(), 'Hidden User Stack Element')
+
     def test_GroupStackElement(self):
         elt = GroupStackElement('group:nuxeo')
         self.assertEqual(elt(), 'group:nuxeo')
+
         self.assertEqual(str(elt), 'group:nuxeo')
         self.assert_('group:nuxeo' == elt)
         self.assertEqual(elt.getIdForRoleSettings(), 'group:nuxeo')
-        self.assertEqual(elt.getPrefix(), 'group')        
+        self.assertEqual(elt.getPrefix(), 'group')
+
+        self.assertEqual(elt.getHiddenMetaType(), 'Hidden Group Stack Element')
 
     def test_HiddenUserStackElement(self):
-        elt = HiddenUserStackElement()
+        elt = HiddenUserStackElement('fake')
         self.assertEqual(elt(),  USER_STACK_ELEMENT_NOT_VISIBLE)
         self.assertEqual(str(elt),  USER_STACK_ELEMENT_NOT_VISIBLE)
         self.assertEqual(elt.getIdForRoleSettings(), '')
 
     def test_HiddenGroupStackElement(self):
-        elt = HiddenGroupStackElement()
+        elt = HiddenGroupStackElement('fake')
         self.assertEqual(elt(),  GROUP_STACK_ELEMENT_NOT_VISIBLE)
         self.assertEqual(str(elt),  GROUP_STACK_ELEMENT_NOT_VISIBLE)
         self.assertEqual(elt.getIdForRoleSettings(), '')
@@ -246,6 +407,8 @@ class TestStackElements(ZopeTestCase):
         self.assert_('user_substitute:anguenot' == elt)
         self.assertEqual(elt.getIdForRoleSettings(), 'anguenot')
         self.assertEqual(elt.getPrefix(), 'user_substitute')
+
+        self.assertEqual(elt.getHiddenMetaType(), 'Hidden User Stack Element')
         
     def test_GroupSubstituteStackElement(self):
         elt = GroupSubstituteStackElement('group_substitute:group:nuxeo')
@@ -254,6 +417,8 @@ class TestStackElements(ZopeTestCase):
         self.assert_('group_substitute:group:nuxeo' == elt)
         self.assertEqual(elt.getIdForRoleSettings(), 'group:nuxeo')
         self.assertEqual(elt.getPrefix(), 'group_substitute')
+
+        self.assertEqual(elt.getHiddenMetaType(), 'Hidden Group Stack Element')
 
 def test_suite():
     loader = unittest.TestLoader()

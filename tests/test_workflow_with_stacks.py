@@ -1659,6 +1659,107 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Manager
         self.assert_(not wftool.canManageStack(content, 'Associates'))
 
+    def test_stack_element_security(self):
+        self.login('manager')
+        wftool = self.wftool
+
+        content = getattr(self.portal.f, 'dummy')
+        self.assertEqual(wftool.getInfoFor(content, 'review_state'),
+                         'delegating')
+
+        ##################################################################
+        # Add a default guard on the stackdef for viewing stack elements
+        ##################################################################
+
+        stackdef = wftool.getStackDefinitionFor(content, 'Associates')
+        stackdef.setViewStackElementGuard(guard_roles='Manager')
+
+        #########################################
+        # Check current state fixtures
+        #########################################
+
+        wf = wftool['wf']
+        current_state = wf._getWorkflowStateOf(content)
+        self.assertEqual(current_state.getId(), 'delegating')
+
+        #########################################
+        # Check stack intialization
+        # It should not be empty
+        #########################################
+
+        pstacks = wftool.getStackFor(content, 'Associates')
+        self.assert_(pstacks is not None)
+
+        ############################
+        # PUSH me within
+        ############################
+
+        kw = {'push_ids': ('user:manager',),
+              'levels':(0,),
+              'current_wf_var_id' : 'Associates'}
+        wftool.doActionFor(content,'delegate',
+                           **kw)
+
+        pstacks = wftool.getStackFor(content, 'Associates')
+
+        # Without security checks
+        scontent = pstacks.getStackContent(type='object')
+        elt = scontent[0]
+        self.assertEqual(str(elt), 'user:manager')
+
+        # With security checks
+        scontent = pstacks.getStackContent(type='object', context=content)
+        elt = scontent[0]
+        self.assertEqual(str(elt), 'user:manager')
+        self.logout()
+
+        ##############################################
+        # LOGIN WITH toto who's not Manager
+        # not allowed to view the element because of the guard
+        ##############################################
+
+        self.login('toto')
+        scontent = pstacks.getStackContent(type='object', context=content)
+        elt = scontent[0]
+        self.assertEqual(elt.meta_type, 'Hidden User Stack Element')
+
+        ##################################################################
+        # Change the default guard on the stackdef for viewing stack elements
+        ##################################################################
+
+        self.logout()
+
+        self.login('manager')
+        stackdef = wftool.getStackDefinitionFor(content, 'Associates')
+        stackdef.setViewStackElementGuard(guard_roles='')
+        self.logout()
+
+        self.login('toto')
+        scontent = pstacks.getStackContent(type='object', context=content)
+        elt = scontent[0]
+        self.assertEqual(elt.meta_type, 'User Stack Element')
+        self.logout()
+
+        ###############################################################
+        # Ovverride the default guard with a guard on the element
+        ###############################################################
+
+        self.login('manager')
+        scontent = pstacks.getStackContent(type='object', context=content)
+        elt = scontent[0]
+        elt.setViewGuard(guard_roles='Manager')
+
+        scontent = pstacks.getStackContent(type='object', context=content)
+        elt = scontent[0]
+        self.assertEqual(str(elt), 'user:manager')
+
+        self.logout()
+
+        self.login('toto)
+        scontent = pstacks.getStackContent(type='object', context=content)
+        elt = scontent[0]
+        self.assertEqual(elt.meta_type, 'Hidden User Stack Element')
+        self.logout()
 
 def test_suite():
     suite = unittest.TestSuite()

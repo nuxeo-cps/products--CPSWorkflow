@@ -201,19 +201,20 @@ class SimpleStack(Stack):
         for pop_id in pop_ids:
             self._pop(pop_id)
 
-    def getStackContent(self, type='str', level=None, **kw):
+    def getStackContent(self, type='str', level=None,
+                        context=None, **kw):
         """Return the stack content
 
-        It returns strings but not objects
+        context is the context in which will check the
+        security on the element.
         """
         res = []
         for each in self._getElementsContainer():
-            if not each.getGuard().check(getSecurityManager(),
-                                         None, aq_parent(aq_inner(self))):
-                # XXX hack
-                hidden_meta_type = 'Hidden ' + each.meta_type
+            if (context is not None and
+                not each.isVisible(sm=getSecurityManager(), stack=self,
+                                   context=context)):
                 each = ElementReg.makeWorkflowStackElementTypeInstance(
-                    hidden_meta_type
+                    each.getHiddenMetaType(), 'hidden'
                     )
             if type == 'str':
                 res.append(str(each))
@@ -470,7 +471,7 @@ class HierarchicalStack(SimpleStack):
 
     ###################################################
 
-    def getStackContent(self, type='str', **kw):
+    def getStackContent(self, type='str', context=None, **kw):
         """Return the stack content
         """
         res = {}
@@ -527,16 +528,15 @@ class HierarchicalStack(SimpleStack):
 
         return value
 
-    def getLevelContent(self, level=None, type='str'):
+    def getLevelContent(self, level=None, type='str', context=None, **kw):
         content = self._getLevelContentValues(level)
         res = []
         for each in content:
-            if not each.getGuard().check(getSecurityManager(),
-                                         None, aq_parent(aq_inner(self))):
-                # XXX hack
-                hidden_meta_type = 'Hidden ' + each.meta_type
+            if (context is not None and
+                not each.isVisible(sm=getSecurityManager(), stack=self,
+                                   context=context)):
                 each = ElementReg.makeWorkflowStackElementTypeInstance(
-                    hidden_meta_type
+                    each.getHiddenMetaType()
                     )
             if type == 'str':
                 res.append(str(each))
