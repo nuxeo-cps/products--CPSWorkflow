@@ -1,0 +1,29 @@
+$Id$
+
+ o views on stack objects (edit / view)
+   o stack.render(mode='edit')
+   o use schema / layout / widgets to render them
+
+ o views on stack elements
+
+ o stack registries
+
+ o stack def registries
+
+ o stack elements (to be able to store any kind of object, not just users)
+
+ o WorkflowStackDelegate
+   + class representing a member within a stack
+   + think about the substitutes
+
+ o WorkflowStackGroupDelegate
+   + think about the substitutes
+
+ o Former local roles for a given stack stored within the status of the object
+   + for the moment stored as an attribute of the ds
+
+ o Hierchical stack: be able to insert users at intermediate levels
+   (e.g. move forward the already affected delegatees, and insert users at
+   the (now free) given level)
+ 
+ o Control security on stack elements

@@ -1,0 +1,11 @@
+$Id :$
+
+Below are the product versions on which it's been tested :
+
+- CMF-1.4.7
+- Zope-2.7.3
+- Plone 2.x (based on CMF-1.4.x)
+
+Optional  :
+
+ - CPSCore > 3.19.0
