@@ -179,7 +179,9 @@ class SimpleStack(Stack):
         for member_id in member_ids:
             self._push(member_id, **kw)
         for group_id in group_ids:
-            prefixed_group_id = 'group:'+group_id
+            prefixed_group_id = group_id
+            if not group_id.startswith('group:'):
+                prefixed_group_id = 'group:'+group_id
             self._push(prefixed_group_id, **kw)
 
     def pop(self, element=None, **kw):
@@ -243,19 +245,18 @@ class SimpleStack(Stack):
         """
         new_stack = kw.get('new_stack')
 
-        # Translate for push
-        new_users = kw.get('new_users', ())
-        new_groups = kw.get('new_groups', ())
+        # Translate for push()
+        kw['member_ids'] = kw.get('new_users', ())
+        kw['group_ids']  = kw.get('new_groups', ())
 
+        # Replace the stack container
         if new_stack is not None:
             self._elements_container = new_stack._getElementsContainer()
         else:
             self.__init__()
 
-        for new_user in new_users:
-            self.push(new_user)
-        for new_group in new_groups:
-            self.push(new_group)
+        # Push the elements if needed
+        self.push(**kw)
 
         return self
 
@@ -591,7 +592,9 @@ class HierarchicalStack(SimpleStack):
                 pass
         i = 0
         for group_id in group_ids:
-            prefixed_group_id = 'group:'+group_id
+            prefixed_group_id = group_id
+            if not group_id.startswith('group:'):
+                prefixed_group_id = 'group:'+group_id
             try:
                 self._push(prefixed_group_id, int(levels[i]))
                 i += 1
@@ -628,6 +631,34 @@ class HierarchicalStack(SimpleStack):
                 self._elements_container[level][index_level] = new_elt
             except ValueError:
                 pass
+
+    def reset(self, **kw):
+        """Reset the stack
+
+        new_stack  : stack that might be a substitute of self
+        new_users  : users to add at current level
+        new_groups : groups to add ar current level
+        """
+        new_stack = kw.get('new_stack')
+        if new_stack is not None:
+            self._elements_container = new_stack._getElementsContainer()
+        else:
+            self.__init__()
+
+        # Translate for push
+        new_users  = kw['member_ids'] = kw.get('new_users', ())
+        new_groups = kw['group_ids']  = kw.get('new_groups', ())
+
+        if kw.get('levels') is None:
+            levels = ()
+            for i in range(max(len(new_users), len(new_groups))):
+                levels += (0,)
+                kw['levels'] = levels
+
+        # Push elements
+        self.push(**kw)
+
+        return self
 
     #
     # MISC
