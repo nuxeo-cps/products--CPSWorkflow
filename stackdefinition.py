@@ -31,7 +31,7 @@ from OFS.SimpleItem import SimpleItem
 
 from Products.CMFCore.CMFCorePermissions import View, ModifyPortalContent
 
-from interfaces.IWorkflowStackDefinition import IWorkflowStackDefinition
+from interfaces import IWorkflowStackDefinition
 
 class BaseWorkflowStackDefinition(SimpleItem):
     """BaseWorkflowStackConfiguration

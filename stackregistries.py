@@ -26,8 +26,8 @@ from AccessControl import ClassSecurityInfo
 
 from Products.CMFCore.CMFCorePermissions import ManagePortal
 
-from interfaces.IWorkflowStackRegistry import IWorkflowStackRegistry
-from interfaces.IWorkflowStackDefRegistry import IWorkflowStackDefRegistry
+from interfaces import IWorkflowStackRegistry
+from interfaces import IWorkflowStackDefRegistry
 
 class WorkflowStackRegistryCls:
     """Registry of the available stack types

@@ -36,9 +36,9 @@ from AccessControl import ClassSecurityInfo
 from ZODB.PersistentMapping import PersistentMapping
 from ZODB.PersistentList import PersistentList
 
-from interfaces.IWorkflowStack import IWorkflowStack
-from interfaces.ISimpleWorkflowStack import ISimpleWorkflowStack
-from interfaces.IHierarchicalWorkflowStack import IHierarchicalWorkflowStack
+from interfaces import IWorkflowStack
+from interfaces import ISimpleWorkflowStack
+from interfaces import IHierarchicalWorkflowStack
 
 
 DATA_STRUCT_STACK_TYPE_LIFO = 201

@@ -35,7 +35,7 @@ from basicstacks import SimpleStack, HierarchicalStack
 from stackdefinition import BaseWorkflowStackDefinition
 from stackregistries import WorkflowStackDefRegistry
 
-from interfaces.IWorkflowStackDefinition import IWorkflowStackDefinition
+from interfaces import IWorkflowStackDefinition
 
 class SimpleWorkflowStackDefinition(BaseWorkflowStackDefinition):
     """Simple Workflow Stack Definition

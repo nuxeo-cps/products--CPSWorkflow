@@ -38,9 +38,9 @@ from ZODB.PersistentList import PersistentList
 from stack import BaseStack
 from stackregistries import WorkflowStackRegistry
 
-from interfaces.IWorkflowStack import IWorkflowStack
-from interfaces.ISimpleWorkflowStack import ISimpleWorkflowStack
-from interfaces.IHierarchicalWorkflowStack import IHierarchicalWorkflowStack
+from interfaces import IWorkflowStack
+from interfaces import ISimpleWorkflowStack
+from interfaces import IHierarchicalWorkflowStack
 
 class SimpleStack(BaseStack):
     """Simple Stack
