@@ -459,7 +459,7 @@ class WorkflowTool(BaseWorkflowTool):
             if hasattr(aq_base(wf), 'insertIntoWorkflow'):
                 wf.insertIntoWorkflow(ob, initial_transition, initial_behavior,
                                       kwargs)
-            reindex = 1
+                reindex = 1
         if reindex:
             self._reindexWorkflowVariables(ob)
             # XXX this should be done in reindexObject really...
