@@ -122,6 +122,11 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Put a folder and an object here
         self._makeTree()
 
+        # Create users (as members)
+        aclu = self.portal.acl_users
+        aclu._doAddUser('toto', '','', ['Member'],)
+        aclu._doAddUser('tata', '','', ['Member'],)
+
     ####################################################################
 
     def _makeTree(self):
@@ -263,12 +268,45 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                                                    'Observers'],)
 
 
-        #self._setStackDefinitionsFor(s)
+        #
+        # test creation success
+        #
+
+        stackdefs = s.getStackDefinitions()
+        self.assert_(len(stackdefs)==3)
+        self.assertNotEqual(s.getStackDefinitionFor('Pilots'), None)
+        self.assertNotEqual(s.getStackDefinitionFor('Associates'), None)
+        self.assertNotEqual(s.getStackDefinitionFor('Observers'), None)
 
         s = wf.states.get('writing')
         s.setProperties(
             title='Writing',
             description='Writing',
+            stackdefs={'Pilots': {'stackdef_type': 'Hierarchical Stack Definition',
+                                  'stack_type'   : 'Hierarchical Stack',
+                                  'var_id'    : 'Pilots',
+                                  'managed_role_exprs' :{'WorkspaceManager': "python:level == stack.getCurrentLevel() and 1 or nothing",
+                                                         'WorkspaceMember' : "python:level < stack.getCurrentLevel() and 1 or nothing",
+                                                         'WorkspaceReader' : "python:level > stack.getCurrentLevel() and 1 or nothing",
+                                                         },
+                                  'master_role': 'WorkspaceManager',
+                                  'manager_stack_ids':['Associates', 'Observers'],
+                                  },
+                       'Associates': {'stackdef_type' : 'Simple Stack Definition',
+                                      'stack_type': 'Simple Stack',
+                                      'var_id':'Associates',
+                                      'managed_role_exprs':{'WorkspaceMember': 'python:1',},
+                                      'master_role':'WorkspaceMember',
+                                      'manager_stack_ids':['Observers'],
+                                      },
+                       'Observers': {'stackdef_type' : 'Simple Stack Definition',
+                                     'stack_type': 'Simple Stack',
+                                     'var_id':'Observers',
+                                     'managed_role_exprs':{'WorkspaceReader': 'python:1',},
+                                     'master_role':'WorkspaceReader',
+                                     'manager_stack_ids':[],
+                                     },
+                       },
             state_behaviors = (STATE_BEHAVIOR_WORKFLOW_LOCK,
                                STATE_BEHAVIOR_WORKFLOW_UNLOCK,
                                STATE_BEHAVIOR_RETURNED_UP_HIERARCHY,
@@ -280,6 +318,16 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
             returned_up_hierarchy_on_workflow_variable = ['Pilots'],
             workflow_reset_on_workflow_variable = ['Pilots', 'Associates',
                                                    'Observers'],)
+
+        #
+        # test creation success
+        #
+
+        stackdefs = s.getStackDefinitions()
+        self.assert_(len(stackdefs)==3)
+        self.assertNotEqual(s.getStackDefinitionFor('Pilots'), None)
+        self.assertNotEqual(s.getStackDefinitionFor('Associates'), None)
+        self.assertNotEqual(s.getStackDefinitionFor('Observers'), None)
 
 
         s = wf.states.get('validating')
@@ -681,6 +729,17 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         self.assert_(pstacks is not None)
 
         #
+        # Test with other members
+        #
+
+        self.login('toto')
+        self.assert_(not wftool.canManageStack(content, 'Pilots'))
+        self.login('tata')
+        self.assert_(not wftool.canManageStack(content, 'Pilots'))
+
+        self.login('manager')
+
+        #
         # Delegate toto
         #
 
@@ -807,6 +866,9 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                 self.assert_('WorkspaceManager' in v)
 
         # Manager can't manage the stack
+        self.assert_(wftool.canManageStack(content, 'Pilots'))
+
+        self.login('toto')
         self.assert_(wftool.canManageStack(content, 'Pilots'))
 
 def test_suite():
