@@ -43,6 +43,7 @@ class StackElement(SimpleItem):
     """
 
     meta_type = 'Stack Element'
+    prefix = ''
 
     __implements__ = (IStackElement,)
 
