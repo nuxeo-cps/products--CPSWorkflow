@@ -32,10 +32,17 @@ site. It includes :
  - Group Subsctitute Stack Element : a stack element that can be used to store
    a group substitute.
 
-Each stack element *MUST* have a meta_type. It is compulsory to register you
-new stack element within the WorkflowStackElementRegistry. Furthermore, it is a
-quite practical way to introspect your stack element and to known what's the
-nature of a given stack element.
+ - Hidden User Stack Element : a stack element used when a given user stack
+   element is not visible
+
+ - Hidden Group Stack Element : a stack element used when a given group stack
+   element is not visible
+
+Each stack element *MUST* have a meta_type and a prefix.  It is
+compulsory to register you new stack element within the
+WorkflowStackElementRegistry. Furthermore, it is a quite practical way
+to introspect your stack element and to known what's the nature of a
+given stack element.
 
 """
 
@@ -122,18 +129,79 @@ class GroupStackElement(UserStackElement):
     def __str__(self):
         return self.group_id
 
-    def _getGroupPrefix(self):
-        return self.prefix
-
-    def getGroupIdWithoutPrefix(self):
-        """Return the group id without the 'group:' prefix
-        """
-        return self()[len(self._getGroupPrefix())+1:]
-
     def getIdForRoleSettings(self):
         return self.group_id
 
 InitializeClass(GroupStackElement)
+
+#########################################################################
+#########################################################################
+
+USER_STACK_ELEMENT_NOT_VISIBLE  = 'label_user_stack_element_not_visible'
+GROUP_STACK_ELEMENT_NOT_VISIBLE = 'label_group_stack_element_not_visible'
+
+class HiddenUserStackElement(UserStackElement):
+    """Hidden User Stack Element
+
+    Hidden User Stack Element is a stack element proposed to end users
+    when this last doesn't have the view permissions on the element.
+
+    Note, this is never stored within a stack element container.
+    """
+    meta_type = 'Hidden User Stack Element'
+    prefix = 'hidden_user'
+    
+    __implement__ = (IStackElement,)
+
+    def __init__(self):
+        pass
+    
+    def __call__(self):
+        return USER_STACK_ELEMENT_NOT_VISIBLE
+
+    def __str__(self):
+        return USER_STACK_ELEMENT_NOT_VISIBLE
+
+    def getIdForRoleSettings(self):
+        return ''
+
+InitializeClass(HiddenUserStackElement)
+
+class HiddenGroupStackElement(GroupStackElement):
+    """Hidden Group Stack Element
+
+    Hidden Group Stack Element is a stack element proposed to end users
+    when this last doesn't have the view permissions on the element.
+
+    Note, this is never stored within a stack element container.
+    """
+    meta_type = 'Hidden Group Stack Element'
+    prefix = 'hidden_group'
+    
+    __implement__ = (IStackElement,)
+
+    def __init__(self):
+        pass
+
+    def __call__(self):
+        return GROUP_STACK_ELEMENT_NOT_VISIBLE
+
+    def __str__(self):
+        return GROUP_STACK_ELEMENT_NOT_VISIBLE
+
+    def getGroupIdWithoutPrefix(self):
+        """Return the group id without the 'group:' prefix
+        """
+        return GROUP_STACK_ELEMENT_NOT_VISIBLE
+
+    def getIdForRoleSettings(self):
+        return ''
+    
+
+InitializeClass(HiddenGroupStackElement)
+
+#########################################################################
+#########################################################################
 
 class UserSubstituteStackElement(UserStackElement):
     """User Substitute Stack Element
@@ -142,8 +210,9 @@ class UserSubstituteStackElement(UserStackElement):
     prefix = 'user_substitute'
 
     __implement__ = (IStackElement,)
-
-    # XXX to implement
+    
+    def getIdForRoleSettings(self):
+        return self.getIdWithoutPrefix()
 
 InitializeClass(UserSubstituteStackElement)
 
@@ -155,7 +224,11 @@ class GroupSubstituteStackElement(GroupStackElement):
 
     __implement__ = (IStackElement,)
 
-    # XXX to implement
+    prefix = 'group_substitute'
+
+    def getIdForRoleSettings(self):
+        return self.getIdWithoutPrefix()
+
 
 InitializeClass(GroupSubstituteStackElement)
 
@@ -166,3 +239,5 @@ WorkflowStackElementRegistry.register(UserStackElement)
 WorkflowStackElementRegistry.register(GroupStackElement)
 WorkflowStackElementRegistry.register(UserSubstituteStackElement)
 WorkflowStackElementRegistry.register(GroupSubstituteStackElement)
+WorkflowStackElementRegistry.register(HiddenUserStackElement)
+WorkflowStackElementRegistry.register(HiddenGroupStackElement)
