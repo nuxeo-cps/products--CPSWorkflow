@@ -332,6 +332,7 @@ class HierarchicalStack(SimpleStack):
         if level is None:
             level = self.getCurrentLevel()
         i = 0
+        # compare string representations
         for each in self.getLevelContent(level=level):
             if id == each:
                 return i
@@ -365,6 +366,7 @@ class HierarchicalStack(SimpleStack):
         # Simply insert a new elt at a given level
         if level is not None:
             content_level = self.getLevelContent(level, type='object')
+            # compare string representations
             if elt not in self.getLevelContent(level):
                 elt = self._prepareElement(elt)
                 content_level.append(elt)
@@ -476,7 +478,8 @@ class HierarchicalStack(SimpleStack):
         """
         res = {}
         for clevel in self.getAllLevels():
-            res[clevel] = self.getLevelContent(level=clevel, type=type)
+            res[clevel] = self.getLevelContent(level=clevel, type=type,
+                                               context=context, **kw)
         return res
 
     def getCurrentLevel(self):
