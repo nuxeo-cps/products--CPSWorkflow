@@ -29,6 +29,7 @@ import states
 import basicstacks
 import basicstackdefinitions
 import stackregistries
+import stackelement
 
 from configuration import Configuration
 from configuration import addConfiguration
