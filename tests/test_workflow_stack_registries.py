@@ -17,7 +17,7 @@ from Products.CMFDefault.Portal import manage_addCMFSite
 
 from Products.CMFCore.utils import getToolByName
 
-from Products.CPSWorkflow.CPSWorkflowStackRegistryTool import \
+from Products.CPSWorkflow.CPSWorkflowStackRegistries import \
      WorkflowStackRegistryCls, WorkflowStackDefRegistryCls, \
      WorkflowStackRegistry, WorkflowStackDefRegistry
 

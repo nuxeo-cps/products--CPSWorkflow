@@ -28,6 +28,7 @@ import CPSWorkflowStates
 
 import CPSWorkflowStacks
 import CPSWorkflowStackDefinitions
+import CPSWorkflowStackRegistries
 
 from CPSWorkflowConfiguration import CPSWorkflowConfiguration
 from CPSWorkflowConfiguration import addCPSWorkflowConfiguration
