@@ -27,6 +27,7 @@ They are public objects right now. The access will be made through the
 WorkfloStackDefinitions.
 """
 
+from types import StringType
 import copy
 
 from OFS.SimpleItem import SimpleItem
@@ -35,6 +36,8 @@ from AccessControl import ClassSecurityInfo
 
 from ZODB.PersistentMapping import PersistentMapping
 from ZODB.PersistentList import PersistentList
+
+from basicstackelements import UserStackElement, GroupStackElement
 
 from interfaces import IWorkflowStack
 from interfaces import ISimpleWorkflowStack
@@ -72,6 +75,7 @@ class Stack(SimpleItem):
     def __init__(self, maxsize=None):
         """ Possiblity to specify a maximum size
         """
+
         self.max_size = maxsize
         self.container = []
 
@@ -109,6 +113,24 @@ class Stack(SimpleItem):
         """
         return self.getSize() == 0
 
+    def _prepareElement(self, elt_str=None):
+        """Prepare the element.
+        """
+        # XXX do not cope with susbstitutes yet
+        # Just deal with User and Group
+        elt = None
+        if isinstance(elt_str, StringType):
+            if elt_str.startswith('group:'):
+                elt = GroupStackElement(elt_str)
+            else:
+                elt = UserStackElement(elt_str)
+        else:
+            # XXX : see how to cope with other kind of stack element Either
+            # with the use of the registry either with the devel will ovverride
+            # this method to cope with it's own case
+            pass
+        return elt
+
     def push(self, elt=None):
         """Push an element in the queue
 
@@ -116,11 +138,17 @@ class Stack(SimpleItem):
         0  : queue id full
         -1 : elt is None
         """
+
+        # Construct a stack element instance
+        elt = self._prepareElement(elt)
+
         if elt is None:
             return -1
         if self.isFull():
             return 0
-        self.container += [elt]
+
+        # ok we push
+        self.container.append(elt)
         return 1
 
     def pop(self):
@@ -129,8 +157,10 @@ class Stack(SimpleItem):
         0 : empty
         1 : ok
         """
+
         if self.isEmpty():
             return 0
+
         last_elt_index = self.getSize() - 1
         res = self.container[last_elt_index]
         del self.container[last_elt_index]
@@ -165,4 +195,3 @@ class Stack(SimpleItem):
         self.__init__()
 
 InitializeClass(Stack)
-
