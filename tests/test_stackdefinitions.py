@@ -79,10 +79,10 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertEqual(base.getStackWorkflowVariableId(), 'toto')
 
         # Not implemented methods
-        self.assertRaises(NotImplementedError, base.push, None)
-        self.assertRaises(NotImplementedError, base.pop, None)
-        self.assertRaises(NotImplementedError, base.listLocalRoles, None)
-        self.assertRaises(NotImplementedError, base.canManageStack,
+        self.assertRaises(NotImplementedError, base._push, None)
+        self.assertRaises(NotImplementedError, base._pop, None)
+        self.assertRaises(NotImplementedError, base._getLocalRolesMapping, None)
+        self.assertRaises(NotImplementedError, base._canManageStack,
                           None, None, None, None)
 
         # Lock / unlock
@@ -137,7 +137,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         sstack = SimpleStack()
 
         # Push one guy in it
-        new_stack = simple.push(sstack, member_ids=['user1'])
+        new_stack = simple._push(sstack, member_ids=['user1'])
 
         # Not the same instance since it's a copy
         self.assertNotEqual(new_stack, sstack)
@@ -146,37 +146,37 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertEqual(new_stack.meta_type, 'Simple Stack')
 
         # Check local roles
-        self.assertEqual(simple.listLocalRoles(new_stack),
+        self.assertEqual(simple._getLocalRolesMapping(new_stack),
                          {'user1': ('WorkspaceManager',)})
 
         # Try to remove the user1
 
         # get a copy of the initial stack
-        self.assertNotEqual(new_stack, simple.pop(new_stack, ids=['user1']))
+        self.assertNotEqual(new_stack, simple._pop(new_stack, ids=['user1']))
         self.assertEqual(new_stack.getStackContent(), [])
         self.assertEqual(new_stack.meta_type, 'Simple Stack')
-        self.assertEqual(simple.listLocalRoles(new_stack),
+        self.assertEqual(simple._getLocalRolesMapping(new_stack),
                          {})
 
         # Check an empty push.
         # We get back an empty stack
-        new_stack = simple.push(new_stack)
+        new_stack = simple._push(new_stack)
         self.assertNotEqual(new_stack, None)
         self.assertEqual(new_stack.getStackContent(), [])
         self.assertEqual(new_stack.meta_type, 'Simple Stack')
 
         # Local roles (current / former)
-        self.assertEqual(simple.listLocalRoles(new_stack),
+        self.assertEqual(simple._getLocalRolesMapping(new_stack),
                          {})
 
         # Push again
-        new_stack = simple.push(new_stack, member_ids=['user1', 'user2'])
+        new_stack = simple._push(new_stack, member_ids=['user1', 'user2'])
         self.assertNotEqual(new_stack, None)
         self.assertEqual(new_stack.meta_type, 'Simple Stack')
         self.assertEqual(new_stack.getStackContent(), ['user1', 'user2'])
 
         # Local Roles
-        self.assertEqual(simple.listLocalRoles(new_stack),
+        self.assertEqual(simple._getLocalRolesMapping(new_stack),
                          {'user1':('WorkspaceManager',),
                           'user2':('WorkspaceManager',)})
 
@@ -184,138 +184,138 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         aclu = FakeUserFolderWithGroups()
         # Add a fake membership tool
         mtool = FakeMembershipTool()
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                member_id='user1',
                                                context=self),
                          1)
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                member_id='user2',
                                                context=self),
                          1)
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                member_id='user3',
                                                context=self),
                          0)
         # No id specified gonna ask the authenticated member (user3)
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                context=self),
                          0)
         # Add user3 wich is the one authenticated within the fake tool
-        new_stack = simple.push(new_stack, member_ids=['user3'])
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        new_stack = simple._push(new_stack, member_ids=['user3'])
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                context=self),
                          1)
         # Remove user1 and user2
-        new_stack = simple.pop(new_stack, ids=['user1', 'user2'])
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        new_stack = simple._pop(new_stack, ids=['user1', 'user2'])
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                member_id='user1',
                                                context=self),
                          0)
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                member_id='user2',
                                                context=self),
                          0)
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                context=self),
                          1)
 
         # Add group group1 where user1 is a user
-        new_stack = simple.push(new_stack, group_ids=['group1'])
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        new_stack = simple._push(new_stack, group_ids=['group1'])
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                member_id='user1',
                                                context=self),
                          1)
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                member_id='user2',
                                                context=self),
                          0)
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                context=self),
                          1)
 
         # Add a group in the stack that doesn't exist
-        new_stack = simple.push(new_stack, group_ids=['group3'])
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        new_stack = simple._push(new_stack, group_ids=['group3'])
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                member_id='user1',
                                                context=self),
                          1)
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                member_id='user2',
                                                context=self),
                          0)
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                context=self),
                          1)
 
         # user1 and user2 defined within group2
-        new_stack = simple.push(new_stack, group_ids=['group2'])
+        new_stack = simple._push(new_stack, group_ids=['group2'])
         self.assertEqual(new_stack.getStackContent(),
                          ['user3', 'group:group1', 'group:group3',
                           'group:group2'])
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                member_id='user1',
                                                context=self),
                          1)
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                member_id='user2',
                                                context=self),
                          1)
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                context=self),
                          1)
 
         # Remove group1 and group3
-        new_stack = simple.pop(new_stack, ids=['group:group1',
+        new_stack = simple._pop(new_stack, ids=['group:group1',
                                                'group:group3',])
         self.assertEqual(new_stack.getStackContent(),
                          ['user3', 'group:group2'])
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                member_id='user1',
                                                context=self),
                          1)
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                member_id='user2',
                                                context=self),
                          1)
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                context=self),
@@ -323,29 +323,29 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         # Remove group2
         # User 1 stil within the stack by himself
-        new_stack = simple.pop(new_stack, ids=['group:group2'])
+        new_stack = simple._pop(new_stack, ids=['group:group2'])
         self.assertEqual(new_stack.getStackContent(),
                          ['user3',])
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                member_id='user1',
                                                context=self),
                          0)
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                member_id='user2',
                                                context=self),
                          0)
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                context=self),
                          1)
 
         # Remove user1
-        new_stack = simple.pop(new_stack, ids=['user3'])
+        new_stack = simple._pop(new_stack, ids=['user3'])
         self.assertEqual(new_stack.getStackContent(), [])
 
 
@@ -358,13 +358,13 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         user1_roles = member_user1.getRolesInContext(self)
         self.assertEqual('WorkspaceManager' in user1_roles, 1)
 
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                member_id='user1',
                                                context=self),
                          1)
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                member_id='user2',
@@ -381,7 +381,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         auth_roles = auth_member.getRolesInContext(self)
         self.assertEqual('Owner' in auth_roles, 1)
 
-        self.assertEqual(simple.canManageStack(ds=new_stack,
+        self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                context=self),
@@ -444,7 +444,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         hstack = HierarchicalStack()
 
         # Push one guy in it
-        new_stack = hierarchical.push(hstack,
+        new_stack = hierarchical._push(hstack,
                                       member_ids=['user1'],
                                       levels=[0])
 
@@ -461,32 +461,32 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
 
         self.assertEqual(new_stack.getCurrentLevel(), 0)
-        self.assertEqual(hierarchical.listLocalRoles(new_stack),
+        self.assertEqual(hierarchical._getLocalRolesMapping(new_stack),
                          {'user1': ('WorkspaceManager',)})
 
         # Try to remove the user1
 
         # get a copy of the initial stack
-        self.assertNotEqual(new_stack, hierarchical.pop(new_stack,
+        self.assertNotEqual(new_stack, hierarchical._pop(new_stack,
                                                         ids=['0,user1',]))
         self.assertEqual(new_stack.getLevelContentValues(), [])
         self.assertEqual(new_stack.meta_type, 'Hierarchical Stack')
-        self.assertEqual(hierarchical.listLocalRoles(new_stack),
+        self.assertEqual(hierarchical._getLocalRolesMapping(new_stack),
                          {})
 
         # Check an empty push.
         # We get back an empty stack
-        new_stack = hierarchical.push(new_stack)
+        new_stack = hierarchical._push(new_stack)
         self.assertNotEqual(new_stack, None)
         self.assertEqual(new_stack.getLevelContentValues(), [])
         self.assertEqual(new_stack.meta_type, 'Hierarchical Stack')
 
         # Local roles (current / former)
-        self.assertEqual(hierarchical.listLocalRoles(new_stack),
+        self.assertEqual(hierarchical._getLocalRolesMapping(new_stack),
                          {})
 
         # Push again
-        new_stack = hierarchical.push(new_stack,
+        new_stack = hierarchical._push(new_stack,
                                       member_ids=['user1', 'user2'],
                                       levels=[0,0])
         self.assertNotEqual(new_stack, None)
@@ -494,7 +494,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertEqual(new_stack.getLevelContentValues(), ['user1', 'user2'])
 
         # Local Roles
-        self.assertEqual(hierarchical.listLocalRoles(new_stack),
+        self.assertEqual(hierarchical._getLocalRolesMapping(new_stack),
                          {'user1':('WorkspaceManager',),
                           'user2':('WorkspaceManager',)})
 
@@ -502,147 +502,147 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         aclu = FakeUserFolderWithGroups()
         # Add a fake membership tool
         mtool = FakeMembershipTool()
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      member_id='user1',
                                                      context=self),
                          1)
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      member_id='user2',
                                                      context=self),
                          1)
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      member_id='user3',
                                                      context=self),
                          0)
         # No id specified gonna ask the authenticated member (user3)
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      context=self),
                          0)
         # Add user3 wich is the one authenticated within the fake tool
-        new_stack = hierarchical.push(new_stack,
+        new_stack = hierarchical._push(new_stack,
                                       member_ids=['user3'],
                                       levels=[0])
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      context=self),
                          1)
         # Remove user1 and user2
-        new_stack = hierarchical.pop(new_stack,
+        new_stack = hierarchical._pop(new_stack,
                                      ids=['0,user1', '0,user2'])
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      member_id='user1',
                                                      context=self),
                          0)
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      member_id='user2',
                                                      context=self),
                          0)
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      context=self),
                          1)
 
         # Add group group1 where user1 is a user
-        new_stack = hierarchical.push(new_stack,
+        new_stack = hierarchical._push(new_stack,
                                       group_ids=['group1'],
                                       levels=[0])
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      member_id='user1',
                                                      context=self),
                          1)
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      member_id='user2',
                                                      context=self),
                          0)
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      context=self),
                          1)
 
         # Add a group in the tack that doesn't exist
-        new_stack = hierarchical.push(new_stack,
+        new_stack = hierarchical._push(new_stack,
                                       group_ids=['group3'],
                                       levels=[0])
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      member_id='user1',
                                                      context=self),
                          1)
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      member_id='user2',
                                                      context=self),
                          0)
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      context=self),
                          1)
 
         # user1 and user2 defined within group2
-        new_stack = hierarchical.push(new_stack,
+        new_stack = hierarchical._push(new_stack,
                                       group_ids=['group2'],
                                       levels=[0])
         self.assertEqual(new_stack.getLevelContentValues(),
                          ['user3', 'group:group1', 'group:group3',
                           'group:group2'])
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      member_id='user1',
                                                      context=self),
                          1)
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      member_id='user2',
                                                      context=self),
                          1)
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      context=self),
                          1)
 
         # Remove group1 and group3
-        new_stack = hierarchical.pop(new_stack,
+        new_stack = hierarchical._pop(new_stack,
                                      ids=['0,group:group1', '0,group:group3',])
         self.assertEqual(new_stack.getLevelContentValues(),
                          ['user3', 'group:group2'])
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      member_id='user1',
                                                      context=self),
                          1)
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      member_id='user2',
                                                      context=self),
                          1)
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      context=self),
@@ -650,30 +650,30 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         # Remove group2
         # User 1 stil within the stack by himself
-        new_stack = hierarchical.pop(new_stack,
+        new_stack = hierarchical._pop(new_stack,
                                      ids=['0,group:group2'])
         self.assertEqual(new_stack.getLevelContentValues(),
                          ['user3',])
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      member_id='user1',
                                                      context=self),
                          0)
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      member_id='user2',
                                                      context=self),
                          0)
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      context=self),
                          1)
 
         # Remove user1
-        new_stack = hierarchical.pop(new_stack,
+        new_stack = hierarchical._pop(new_stack,
                                      ids=['0,user3'])
         self.assertEqual(new_stack.getLevelContentValues(), [])
 
@@ -686,14 +686,14 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         user1_roles = member_user1.getRolesInContext(self)
         self.assertEqual('WorkspaceManager' in user1_roles, 1)
 
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      member_id='user1',
                                                      context=self),
                          1)
 
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      member_id='user2',
@@ -710,7 +710,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         auth_roles = auth_member.getRolesInContext(self)
         self.assertEqual('Owner' in auth_roles, 1)
 
-        self.assertEqual(hierarchical.canManageStack(ds=new_stack,
+        self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
                                                      context=self),
@@ -779,27 +779,27 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         hstack = HierarchicalStack()
 
         # Push one guy in it
-        new_stack = hierarchical.push(hstack,
+        new_stack = hierarchical._push(hstack,
                                       member_ids=['user1'],
                                       levels=[0])
 
-        new_stack = hierarchical.push(new_stack,
+        new_stack = hierarchical._push(new_stack,
                                       member_ids=['user2'],
                                       levels=[0])
 
-        new_stack = hierarchical.push(new_stack,
+        new_stack = hierarchical._push(new_stack,
                                       member_ids=['user3'],
                                       levels=[1])
 
-        new_stack = hierarchical.push(new_stack,
+        new_stack = hierarchical._push(new_stack,
                                       member_ids=['user4'],
                                       levels=[-1])
 
-        new_stack = hierarchical.push(new_stack,
+        new_stack = hierarchical._push(new_stack,
                                       member_ids=['user5'],
                                       levels=[2])
 
-        new_stack = hierarchical.push(new_stack,
+        new_stack = hierarchical._push(new_stack,
                                       member_ids=['user6'],
                                       levels=[-2])
 
@@ -812,7 +812,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         ## Check local roles
 
         # Push the guy in it
-        self.assertEqual(hierarchical.listLocalRoles(new_stack),
+        self.assertEqual(hierarchical._getLocalRolesMapping(new_stack),
                          {'user1': ('WorkspaceManager',),
                           'user2': ('WorkspaceManager',),
                           'user3': ('WorkspaceReader',),
@@ -822,10 +822,10 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                           })
 
         #
-        # Check canManageStack for this guys
+        # Check _canManageStack for this guys
         #
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -833,7 +833,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          1)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -841,7 +841,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          1)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -849,7 +849,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -857,7 +857,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -865,7 +865,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -882,7 +882,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Local roles
 
         # current ones
-        self.assertEqual(hierarchical.listLocalRoles(new_stack),
+        self.assertEqual(hierarchical._getLocalRolesMapping(new_stack),
                          {'user1': ('WorkspaceReader',),
                           'user2': ('WorkspaceReader',),
                           'user3': ('WorkspaceReader',),
@@ -891,9 +891,9 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                           'user6': ('WorkspaceMember',),
                           })
 
-        # Check canManageStack for this guys
+        # Check _canManageStack for this guys
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -901,7 +901,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -909,7 +909,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -917,7 +917,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -925,7 +925,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          1)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -933,7 +933,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -949,7 +949,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         hierarchical.doDecLevel(new_stack)
 
         # Current Local roles mapping
-        self.assertEqual(hierarchical.listLocalRoles(new_stack),
+        self.assertEqual(hierarchical._getLocalRolesMapping(new_stack),
                          {'user1': ('WorkspaceReader',),
                           'user2': ('WorkspaceReader',),
                           'user3': ('WorkspaceReader',),
@@ -958,9 +958,9 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                           'user6': ('WorkspaceManager',),
                           })
 
-        # Check canManageStack for this guys
+        # Check _canManageStack for this guys
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -968,7 +968,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -976,7 +976,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -984,7 +984,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -992,7 +992,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1000,7 +1000,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1016,7 +1016,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         hierarchical.doIncLevel(new_stack)
 
         # Current Local roles mapping
-        self.assertEqual(hierarchical.listLocalRoles(new_stack),
+        self.assertEqual(hierarchical._getLocalRolesMapping(new_stack),
                          {'user1': ('WorkspaceReader',),
                           'user2': ('WorkspaceReader',),
                           'user3': ('WorkspaceReader',),
@@ -1025,9 +1025,9 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                           'user6': ('WorkspaceMember',),
                           })
 
-        # Check canManageStack for this guys
+        # Check _canManageStack for this guys
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1035,7 +1035,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1043,7 +1043,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1051,7 +1051,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1059,7 +1059,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          1)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1067,7 +1067,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1083,7 +1083,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         hierarchical.doIncLevel(new_stack)
 
         # Current Local roles mapping
-        self.assertEqual(hierarchical.listLocalRoles(new_stack),
+        self.assertEqual(hierarchical._getLocalRolesMapping(new_stack),
                          {'user1': ('WorkspaceManager',),
                           'user2': ('WorkspaceManager',),
                           'user3': ('WorkspaceReader',),
@@ -1092,9 +1092,9 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                           'user6': ('WorkspaceMember',),
                           })
 
-        # Check canManageStack for this guys
+        # Check _canManageStack for this guys
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1102,7 +1102,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          1)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1110,7 +1110,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          1)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1118,7 +1118,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1126,7 +1126,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1134,7 +1134,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1150,7 +1150,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         hierarchical.doIncLevel(new_stack)
 
         # Current Local roles mapping
-        self.assertEqual(hierarchical.listLocalRoles(new_stack),
+        self.assertEqual(hierarchical._getLocalRolesMapping(new_stack),
                          {'user1': ('WorkspaceMember',),
                           'user2': ('WorkspaceMember',),
                           'user3': ('WorkspaceManager',),
@@ -1159,9 +1159,9 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                           'user6': ('WorkspaceMember',),
                           })
 
-        # Check canManageStack for this guys
+        # Check _canManageStack for this guys
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1169,7 +1169,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1177,7 +1177,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1185,7 +1185,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          1)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1193,7 +1193,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1201,7 +1201,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1216,7 +1216,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         hierarchical.doIncLevel(new_stack)
 
         # Current Local roles mapping
-        self.assertEqual(hierarchical.listLocalRoles(new_stack),
+        self.assertEqual(hierarchical._getLocalRolesMapping(new_stack),
                          {'user1': ('WorkspaceMember',),
                           'user2': ('WorkspaceMember',),
                           'user3': ('WorkspaceMember',),
@@ -1225,9 +1225,9 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                           'user6': ('WorkspaceMember',),
                           })
 
-        # Check canManageStack for this guys
+        # Check _canManageStack for this guys
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1235,7 +1235,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1243,7 +1243,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1251,7 +1251,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1259,7 +1259,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          0)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1267,7 +1267,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      ),
                          1)
 
-        self.assertEqual(hierarchical.canManageStack(new_stack,
+        self.assertEqual(hierarchical._canManageStack(new_stack,
                                                      aclu,
                                                      mtool,
                                                      self,
@@ -1286,7 +1286,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
             'toto',
             ass_local_role='WorkspaceManager')
 
-        stack = simple.push(None, member_ids=['user1'])
+        stack = simple._push(None, member_ids=['user1'])
         self.assertEqual(stack.getMetaType(),
                          'Simple Stack')
         self.assertEqual(stack.getStackContent(),
@@ -1310,7 +1310,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
             up_local_role='WorkspaceReader',
             down_local_role='WorkspaceReader')
 
-        stack = hierarchical.push(None,
+        stack = hierarchical._push(None,
                                   member_ids=['user1'],
                                   levels=[0])
         self.assertEqual(stack.getMetaType(),

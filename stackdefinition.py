@@ -261,7 +261,6 @@ class StackDefinition(SimpleItem):
     # To be implemented within child class definitions
     #
 
-    security.declarePrivate('_prepareStack')
     def _prepareStack(self, ds):
         """Prepare stack on wich we gonna work one
 
@@ -269,31 +268,27 @@ class StackDefinition(SimpleItem):
         """
         raise NotImplementedError
 
-    security.declareProtected(ModifyPortalContent, 'push')
-    def push(self, ds, **kw):
+    def _getLocalRolesMapping(self, ds):
+        """Give the local roles mapping for the member / group ids within the
+        stack
+        """
+        raise NotImplementedError
+
+    def _push(self, ds, **kw):
         """Push delegatees
 
         This method has to be implemented by a child class
         """
         raise NotImplementedError
 
-    security.declareProtected(ModifyPortalContent, 'pop')
-    def pop(self, ds, **kw):
+    def _pop(self, ds, **kw):
         """Pop delegatees
 
         This method has to be implemented by a child class
         """
         raise NotImplementedError
 
-    security.declareProtected(View, 'listLocalRoles')
-    def listLocalRoles(self, ds):
-        """Give the local roles mapping for the member / group ids within the
-        stack
-        """
-        raise NotImplementedError
-
-    security.declarePublic('canManageStack')
-    def canManageStack(self, ds, aclu, mtool, context, **kw):
+    def _canManageStack(self, ds, aclu, mtool, context, **kw):
         """Can the current member manage the stack ?
 
         It will depend on the stack data structure.  We need the acl_users in

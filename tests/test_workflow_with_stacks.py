@@ -798,8 +798,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
-        self.assert_(pstackdef.listLocalRoles(pstacks))
-        self.assertEqual(pstackdef.listLocalRoles(pstacks),
+        self.assert_(pstackdef._getLocalRolesMapping(pstacks))
+        self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
                          {'toto': ('WorkspaceManager',)})
 
         # Check the former local role mapping
@@ -839,8 +839,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
-        self.assert_(pstackdef.listLocalRoles(pstacks))
-        self.assertEqual(pstackdef.listLocalRoles(pstacks),
+        self.assert_(pstackdef._getLocalRolesMapping(pstacks))
+        self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
                          {'tata': ('WorkspaceManager',),
                           'toto': ('WorkspaceManager',)
                           })
@@ -885,8 +885,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
-        self.assert_(pstackdef.listLocalRoles(pstacks))
-        self.assertEqual(pstackdef.listLocalRoles(pstacks),
+        self.assert_(pstackdef._getLocalRolesMapping(pstacks))
+        self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
                          {'toto': ('WorkspaceManager',),
                           'manager': ('WorkspaceManager',),
                           'tata': ('WorkspaceManager',),
@@ -931,8 +931,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
-        self.assert_(pstackdef.listLocalRoles(pstacks))
-        self.assertEqual(pstackdef.listLocalRoles(pstacks),
+        self.assert_(pstackdef._getLocalRolesMapping(pstacks))
+        self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
                          {'manager': ('WorkspaceManager',),
                           'tata': ('WorkspaceManager',),
                           })
@@ -986,8 +986,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
-        self.assert_(pstackdef.listLocalRoles(pstacks))
-        self.assertEqual(pstackdef.listLocalRoles(pstacks),
+        self.assert_(pstackdef._getLocalRolesMapping(pstacks))
+        self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
                          {'manager': ('WorkspaceManager',),
                           })
 
@@ -1034,8 +1034,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
-        self.assert_(not pstackdef.listLocalRoles(pstacks))
-        self.assertEqual(pstackdef.listLocalRoles(pstacks),
+        self.assert_(not pstackdef._getLocalRolesMapping(pstacks))
+        self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
                          {})
 
         # Check the former local role mapping

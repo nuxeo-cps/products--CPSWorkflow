@@ -158,7 +158,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
             ds = wftool.getInfoFor(ob, stackdef, self.id)
             former_mapping = wftool.getFormerLocalRoleMappingForStack(
                 ob, self.id, stackdef)
-            mapping = stackdefs[stackdef].listLocalRoles(ds)
+            mapping = stackdefs[stackdef]._getLocalRolesMapping(ds)
 
             #
             # First remove associated local roles to the ones who are not
@@ -664,7 +664,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
                 stackdef = new_sdef.getStackDefinitionFor(wf_var)
                 if stackdef is not None:
                     ds = stacks.get(wf_var)
-                    stacks[wf_var] = stackdef.push(ds, **kwargs)
+                    stacks[wf_var] = stackdef._push(ds, **kwargs)
 
         if TRANSITION_BEHAVIOR_POP_DELEGATEES in behavior:
 
@@ -735,7 +735,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
                 stackdef = new_sdef.getStackDefinitionFor(wf_var)
                 if stackdef is not None:
                     ds = stacks.get(wf_var)
-                    stacks[wf_var] = stackdef.pop(ds, **kwargs)
+                    stacks[wf_var] = stackdef._pop(ds, **kwargs)
 
         if TRANSITION_BEHAVIOR_RETURN_UP_DELEGATEES_HIERARCHY in behavior:
 

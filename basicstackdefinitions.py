@@ -61,8 +61,7 @@ class SimpleStackDefinition(StackDefinition):
             ds = SimpleStack()
         return ds
 
-    security.declareProtected(ModifyPortalContent, 'push')
-    def push(self, ds, **kw):
+    def _push(self, ds, **kw):
         """Push delegatees
 
         This method has to be implemented by a child class
@@ -109,8 +108,7 @@ class SimpleStackDefinition(StackDefinition):
         ds = ds.getCopy()
         return ds
 
-    security.declareProtected(ModifyPortalContent, 'pop')
-    def pop(self, ds, **kw):
+    def _pop(self, ds, **kw):
         """pop delegatees
         """
 
@@ -146,8 +144,7 @@ class SimpleStackDefinition(StackDefinition):
         ds = ds.getCopy()
         return ds
 
-    security.declareProtected(View, 'listLocalRoles')
-    def listLocalRoles(self, ds):
+    def _getLocalRolesMapping(self, ds):
         """Give the local roles mapping for the member / group ids within the
         stack
 
@@ -172,8 +169,7 @@ class SimpleStackDefinition(StackDefinition):
                     mapping[elt] = mapping.get(elt, ()) + (role_id,)
         return mapping
 
-    security.declarePublic('canManageStack')
-    def canManageStack(self, ds, aclu, mtool, context, **kw):
+    def _canManageStack(self, ds, aclu, mtool, context, **kw):
         """Check if the current authenticated member scan manage stack
 
         Simple case in here. If a user is in the stack it can manage it we need
@@ -268,8 +264,7 @@ class HierarchicalStackDefinition(StackDefinition):
             ds = HierarchicalStack()
         return ds
 
-    security.declareProtected(ModifyPortalContent, 'push')
-    def push(self, ds, **kw):
+    def _push(self, ds, **kw):
         """Push delegatees
 
         This method has to be implemented by a child class
@@ -329,8 +324,7 @@ class HierarchicalStackDefinition(StackDefinition):
         ds = ds.getCopy()
         return ds
 
-    security.declareProtected(ModifyPortalContent, 'pop')
-    def pop(self, ds, **kw):
+    def _pop(self, ds, **kw):
         """pop delegatees
         """
 
@@ -372,8 +366,7 @@ class HierarchicalStackDefinition(StackDefinition):
         ds = ds.getCopy()
         return ds
 
-    security.declarePublic('canManageStack')
-    def canManageStack(self, ds, aclu, mtool, context, **kw):
+    def _canManageStack(self, ds, aclu, mtool, context, **kw):
         """Check if the current authenticated member scan manage stack
 
         Here, only the people at the current level are allowed to manage the
@@ -439,8 +432,7 @@ class HierarchicalStackDefinition(StackDefinition):
 
         return 0
 
-    security.declareProtected(View, 'listLocalRoles')
-    def listLocalRoles(self, ds):
+    def _getLocalRolesMapping(self, ds):
         """Give the local roles mapping for the member / group ids within the
         stack
 
