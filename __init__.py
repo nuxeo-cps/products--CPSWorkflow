@@ -19,6 +19,7 @@
 
 from Products.CMFCore.CMFCorePermissions import ManagePortal
 from Products.CMFCore.utils import ToolInit
+from Products.CMFCore.DirectoryView import registerDirectory
 
 import workflow
 import workflowtool
@@ -42,6 +43,8 @@ from configuration import addConfiguration
 tools = (
     workflowtool.WorkflowTool,
     )
+
+registerDirectory('skins/cps_workflow_default', globals())
 
 def initialize(registrar):
     # Workflow Configuration Object
