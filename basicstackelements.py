@@ -64,6 +64,7 @@ class UserStackElement(StackElement):
         True
     """
     meta_type = 'User Stack Element'
+    prefix = 'user'
 
     __implement__ = (IStackElement,)
 
@@ -107,13 +108,13 @@ class GroupStackElement(UserStackElement):
 
     __implement__ = (IStackElement,)
 
-    group_prefix = 'group:'
+    prefix = 'group'
     group_id = ''
 
     def __init__(self, group_id, prefix=''):
         self.group_id = group_id
         if prefix:
-            self.group_prefix = 'group:'
+            self.prefix = 'group'
 
     def __call__(self):
         return self.group_id
@@ -122,12 +123,12 @@ class GroupStackElement(UserStackElement):
         return self.group_id
 
     def _getGroupPrefix(self):
-        return self.group_prefix
+        return self.prefix
 
     def getGroupIdWithoutPrefix(self):
         """Return the group id without the 'group:' prefix
         """
-        return self()[len(self._getGroupPrefix()):]
+        return self()[len(self._getGroupPrefix())+1:]
 
     def getIdForRoleSettings(self):
         return self.group_id
@@ -138,6 +139,7 @@ class UserSubstituteStackElement(UserStackElement):
     """User Substitute Stack Element
     """
     meta_type = 'User Substitute Stack Element'
+    prefix = 'user_substitute'
 
     __implement__ = (IStackElement,)
 
@@ -149,6 +151,7 @@ class GroupSubstituteStackElement(GroupStackElement):
     """Group Substitute Stack Element
     """
     meta_type = 'Group Substitute Stack Element'
+    prefix = 'group_substitute'
 
     __implement__ = (IStackElement,)
 
