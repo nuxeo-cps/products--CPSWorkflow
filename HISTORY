@@ -1,4 +1,33 @@
 *******************************************
+** CPSWorkflow V0.2.0 [R1 build 2005/01/28-15:20 by madarche]
+
+Requires:
+~~~~~~~~~
+-
+New features:
+~~~~~~~~~~~~~
+- managed roles expressions on stack definition instead of the former hardcoded
+properties
+
+Bug fixes:
+~~~~~~~~~~
+- Fix bug on states that was preventing the use of acquisition on
+- Fix on stackdefinitions local roles update after _executeTranstion()
+stackdefs. (Use _getOb())
+New internal features:
+~~~~~~~~~~~~~~~~~~~~~~
+- Former local roles are now stored within the status of the object and not
+  within the stack itself.
+- No access to former local roles from the stack and stackdef
+- wftool.getInfoFor() overriden since we want to use the StateChangeInfo from
+  within CPSWorkflow.expression.
+- API : wftool.getFormerLocalRoleMappingForStack()
+- API : wftool.updateFormerLocalRoleMappingForStack()
+- CPS State refactored
+- Workflow API :
+  - updateDelegateesLocalRolesFor() -> updateStackDefinitionsRoleMappingsFor()
+
+*******************************************
 ** CPSWorkflow V0.1.0 [R1 build 2005/01/20-11:48 by ben]
 
 Requires:
