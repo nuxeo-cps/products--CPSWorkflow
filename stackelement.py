@@ -22,6 +22,7 @@
 A Stack ELement is an element stored within a stack type.
 """
 
+import copy
 from types import StringType
 
 from Globals import InitializeClass
@@ -31,6 +32,7 @@ from OFS.SimpleItem import SimpleItem
 
 from Products.CMFCore.utils import getToolByName
 
+from stackregistries import WorkflowStackElementRegistry as ElementRegistry
 from stackdefinitionguard import StackDefinitionGuard as Guard
 
 from interfaces import IStackElement
@@ -72,6 +74,13 @@ class StackElement(SimpleItem):
     def __str__(self):
         return self.getId()
 
+    def __deepcopy__(self, ob):
+        """Deep copy. Just to call a clean API while calling getCopy()
+        """
+        copy = ElementRegistry.makeWorkflowStackElementTypeInstance(
+            self.meta_type, self.getId())
+        return copy
+
     #
     # API
     #
@@ -88,6 +97,13 @@ class StackElement(SimpleItem):
 
     def getHiddenMetaType(self):
         return self.hidden_meta_type
+
+    def getCopy(self):
+        """Duplicate self
+
+        Return a new object instance of the same type
+        """
+        return copy.deepcopy(self)
 
     #
     # SECURITY
