@@ -374,26 +374,75 @@ class HierarchicalStack(SimpleStack):
 
     ###################################################
 
-    def push(self, elt=None, level=0):
-        """Push elt at given level
-        1  : ok
-        0  : queue id full
-        -1 : elt is None
-        -2 : already in here
+    def push(self, elt=None, level=0, **kw):
+        """Push elt at given level or in between two levels
+
+        Coderrors are : 
+
+           1  : ok
+           0  : queue id full
+          -1  : elt is None
+          -2  : elt already within the stack
         """
+
         if elt is None:
             return -1
         if self.isFull():
             return 0
 
-        content_level = self.getLevelContent(level)
-        content_level_values = self.getLevelContentValues(level)
-        if elt not in content_level_values:
-            elt = self._prepareElement(elt)
-            content_level.append(elt)
-            self._getElementsContainer()[level] = content_level
-        else:
-            return -2
+        low_level = kw.get('low_level', None) 
+        high_level = kw.get('high_level', None)
+
+        # Compatibility
+        if (low_level is not None and
+            high_level is not None):
+            level = None
+        
+        # Simply insert a new elt at a given level
+        if level is not None:
+            content_level = self.getLevelContent(level)
+            content_level_values = self.getLevelContentValues(level)
+            if elt not in content_level_values:
+                elt = self._prepareElement(elt)
+                content_level.append(elt)
+                self._getElementsContainer()[level] = content_level
+            else:
+                return -2
+
+        #
+        # Check if this is an insertion in between two levels either
+        # the high_level and low_level are equal and then this is the
+        # same as a regular insertion at a given level, either it's an
+        # insertion in between two levels and then we need to inset
+        # and change levels. The current level is invariant
+        #
+
+        elif (low_level is not None and
+              high_level is not None and
+              abs(low_level - high_level) <= 1):
+            levels = self.getAllLevels()
+            if low_level == high_level:
+                self.push(elt, level=low_level)
+            elif (low_level not in levels and
+                  abs(min(levels) - low_level) <= 1):
+                self.push(elt, level=low_level)
+            elif (high_level not in levels and
+                  abs(max(levels) - high_level) <= 1):
+                self.push(elt, level=high_level)
+            elif (low_level in levels and
+                    high_level in levels):
+                container = self._getElementsContainer()
+                if low_level < self.getCurrentLevel():
+                    clevels = [x for x in levels if x <= low_level]
+                    for clevel in clevels:
+                        container[clevel-1] = container[clevel]
+                    container[low_level] = [self._prepareElement(elt)]
+                elif low_level >= self.getCurrentLevel():
+                    clevels = [x for x in levels if x > low_level]
+                    clevels.reverse()
+                    for clevel in clevels:
+                        container[clevel+1] = container[clevel]
+                    container[low_level+1] = [self._prepareElement(elt)]
         return 1
 
     def pop(self, level=None):
@@ -454,13 +503,23 @@ class HierarchicalStack(SimpleStack):
         old_elt = self._prepareElement(old)
         for level in self.getAllLevels():
             try:
-                index_level = self.getLevelContent(
+                index_level = self.getLevelContent( 
                     level=level).index(old_elt())
                 self._elements_container[level][index_level] = new_elt
             except ValueError:
                 pass
 
-    ################################################################
+    def insert(self, elt, low_level=0, high_level=0):
+        """Insert an element in between two levels.
+
+        If low_level and high_level are equal then just insert at this
+        given level
+        """
+        if low_level == high_level:
+            self.push(elt, level=low_level)
+        elif (low_level in self.getAllLevels() and
+              high_level in self.getAllLevels()):
+            pass
 
     def getCopy(self):
         """Duplicate self

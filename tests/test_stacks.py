@@ -1294,6 +1294,68 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         self.assertEqual(stack.getLevelContent(level=1), ['string_elt2',
                                                           'elt2'])
         self.assertEqual(stack.getLevelContent(level=-1), ['string_elt2'])
+
+    def test_insertInBetweenLevelsWithHierarchical(self):
+
+        hstack = HierarchicalStack()
+        self.assertEqual(hstack.getStackContent(), {})
+
+        # Normal 
+        hstack.push('elt1')
+        hstack.push('elt3', level=1)
+        self.assertEqual(hstack.getStackContent(), {0:['elt1'],
+                                                    1:['elt3']})
+
+        # Insert in between 0 and 1
+        # current_level is 0
+        self.assertEqual(hstack.getCurrentLevel(), 0)
+        hstack.push('elt2', low_level=0, high_level=1)
+        self.assertEqual(hstack.getStackContent(), {0:['elt1'],
+                                                    1:['elt2'],
+                                                    2:['elt3'],
+                                                    })
+        # Change current level and try to insert
+        # 0 is the edge level where we need to test
+        hstack.doIncLevel()
+        self.assertEqual(hstack.getCurrentLevel(), 1)
+        hstack.push('elt4', low_level=0, high_level=1)
+        self.assertEqual(hstack.getStackContent(), {-1:['elt1'],
+                                                    0:['elt4'],
+                                                    1:['elt2'],
+                                                    2:['elt3'],
+                                                    })
+        hstack.push('elt5', low_level=2, high_level=3)
+        self.assertEqual(hstack.getStackContent(), {-1:['elt1'],
+                                                    0:['elt4'],
+                                                    1:['elt2'],
+                                                    2:['elt3'],
+                                                    3:['elt5'],
+                                                    })
+        hstack.push('elt6', low_level=-2, high_level=-1)
+        self.assertEqual(hstack.getStackContent(), {-2:['elt6'],
+                                                    -1:['elt1'],
+                                                    0:['elt4'],
+                                                    1:['elt2'],
+                                                    2:['elt3'],
+                                                    3:['elt5'],
+                                                    })
+        hstack.push('elt7', low_level=-4, high_level=-3)
+        self.assertEqual(hstack.getStackContent(), {-2:['elt6'],
+                                                    -1:['elt1'],
+                                                    0:['elt4'],
+                                                    1:['elt2'],
+                                                    2:['elt3'],
+                                                    3:['elt5'],
+                                                    })
+        hstack.push('elt7', low_level=4, high_level=5)
+        self.assertEqual(hstack.getStackContent(), {-2:['elt6'],
+                                                    -1:['elt1'],
+                                                    0:['elt4'],
+                                                    1:['elt2'],
+                                                    2:['elt3'],
+                                                    3:['elt5'],
+                                                    })
+        
         
 def test_suite():
     loader = unittest.TestLoader()
