@@ -77,19 +77,8 @@ class Stack(SimpleItem):
     def __init__(self, maxsize=None):
         """ Possiblity to specify a maximum size
         """
-
         self.max_size = maxsize
         self.container = []
-
-        #
-        # We need that for being able to perform diffs on the previous local
-        # roles mapping and the current one and thus being able to update the
-        # local roles according to that.
-        # XXX I'd like to see this moving somewhere else and being accessible
-        # from the stackdef.
-        #
-
-        self._former_localroles_mapping = {}
 
     def getMetaType(self):
         """Returns the meta_type of the class
@@ -167,25 +156,6 @@ class Stack(SimpleItem):
         res = self.container[last_elt_index]
         del self.container[last_elt_index]
         return res
-
-    #
-    # XXX Former local roles are recorded in here for the moment I would like
-    # to see this somewhere else and accessible from the stackdef
-    #
-
-    def getFormerLocalRolesMapping(self):
-        """Return the former local roles mapping
-
-        So that we can make diff and update local roles.
-        """
-        return getattr(self, '_former_localroles_mapping', {})
-
-    def setFormerLocalRolesMapping(self, mapping):
-        """Set the former local roles mapping information
-
-        So that we can make diff and update local roles.
-        """
-        setattr(self, '_former_localroles_mapping', mapping)
 
     #################################################################
 
