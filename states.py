@@ -32,11 +32,17 @@ Check the documentation within the doc sub-folder
 
 from zLOG import LOG, ERROR, DEBUG
 
-from Globals import DTMLFile
+from types import StringType
 
+from Globals import DTMLFile
+from OFS.ObjectManager import ObjectManager
+from Acquisition import aq_parent, aq_inner, aq_base
+
+from Products.DCWorkflow.ContainerTab import ContainerTab
 from Products.DCWorkflow.States import StateDefinition as DCWFStateDefinition
 from Products.DCWorkflow.States import States as DCWFStates
 
+from stackdefinition import StackDefinition
 from stackregistries import WorkflowStackDefRegistry
 
 #
@@ -65,7 +71,7 @@ state_behavior_export_dict = {
     STATE_BEHAVIOR_WORKFLOW_RESET : 'Workflow Reset',
     }
 
-class StateDefinition(DCWFStateDefinition):
+class StateDefinition(DCWFStateDefinition, ObjectManager):
     """ CPS State Definition
     """
 
@@ -84,6 +90,11 @@ class StateDefinition(DCWFStateDefinition):
     _advanced_properties_form = DTMLFile(
         'zmi/workflow_state_advanced_properties',
         globals())
+
+    _stackdefinition_properties_form = DTMLFile(
+        'zmi/workflow_state_stackdef_edit',
+        globals()
+        )
 
     state_behaviors = ()
     stackdefs = {}
@@ -162,8 +173,14 @@ class StateDefinition(DCWFStateDefinition):
         """
         return self._advanced_properties_form(
             REQUEST,
-            management_view='Advanced Properties',
             manage_tabs_message=manage_tabs_message,)
+
+    def manage_stackdefinition(self, stackdef_id, REQUEST):
+        """
+        """
+        return self._stackdefinition_properties_form(
+            stackdef_id,
+            REQUEST)
 
     #
     # API
@@ -172,7 +189,11 @@ class StateDefinition(DCWFStateDefinition):
     def getStackDefinitions(self):
         """Returns all stack definitions defined on this state
         """
-        return self.stackdefs
+        stackdefs = {}
+        for k, v in self.__dict__.items():
+            if isinstance(v, StackDefinition):
+                stackdefs[k] = v
+        return stackdefs
 
     def getStackDefinitionFor(self, var_id):
         """Return the stack definition given its id
@@ -189,6 +210,8 @@ class StateDefinition(DCWFStateDefinition):
 
         var_id : workflow variable id used to store this new variable
         """
+        self._p_changes = 1
+
         if REQUEST is not None:
             kw = REQUEST.form
 
@@ -201,12 +224,6 @@ class StateDefinition(DCWFStateDefinition):
                 return self.manage_advanced_properties(
                     REQUEST,
                     'You need to specify a variable id')
-            return -1
-        if not kw.get('ass_local_role'):
-            if REQUEST is not None:
-                return self.manage_advanced_properties(
-                    REQUEST,
-                    'Please, specify an associated local roles for this stack')
             return -1
 
         # Add a workflow variable with new_stack_id as id
@@ -228,6 +245,10 @@ class StateDefinition(DCWFStateDefinition):
 
         stackdef = None
 
+        # Clean the kw before passing it to constructor
+        if kw.get('stack_type'):
+            del kw['stack_type']
+
         # Call the stack def registries to get an instance associated to a
         # given stack type
         stackdef = WorkflowStackDefRegistry.makeWorkflowStackDefTypeInstance(
@@ -237,9 +258,9 @@ class StateDefinition(DCWFStateDefinition):
             **kw)
 
         if stackdef is not None:
-            stackdefs = self.getStackDefinitions()
-            stackdefs[var_id] = stackdef
-            self.stackdefs = stackdefs
+            # XXX change this
+            stackdef.parent = self
+            self._setObject(var_id, stackdef)
 
         if REQUEST is not None:
             return self.manage_advanced_properties(
@@ -259,11 +280,74 @@ class StateDefinition(DCWFStateDefinition):
                     workflow.variables.deleteVariables([id])
                 except KeyError:
                     pass
-                del self.stackdefs[id]
+                self._delObject(id)
         if REQUEST is not None:
             return self.manage_advanced_properties(
-                REQUEST,
-                'Delegate workflow variables removed !')
+                REQUEST, 'Delegate workflow variables removed !')
+
+    def updateStackDefinition(self, stackdef_type, stack_type, old_wf_var_id,
+                              wf_var_id, REQUEST=None, **kw):
+        """Update an existing stack definition
+        """
+
+        # Purge the kw to avoid multiple keyword args while passing the kw
+        # to the stack defs constructors.
+        if REQUEST is not None:
+            kw.update(REQUEST.form)
+            for elt in ('stack_type', 'stackdef_type', 'wf_var_id'):
+                del kw[elt]
+
+        updated = 0
+        # Here stackdef type doesn't change
+        stackdef = self.getStackDefinitionFor(old_wf_var_id)
+        if stackdef_type == stackdef.meta_type:
+            # Workflow variable id doesn't changed
+            if old_wf_var_id == wf_var_id:
+                stackdef.__init__(stack_type, wf_var_id, **kw)
+                updated = 1
+
+        if not updated:
+            if (old_wf_var_id != wf_var_id and
+                self.getStackDefinitionFor(wf_var_id) is not None):
+                # Workflow variable already exists
+                if REQUEST is not None:
+                    return self.manage_advanced_properties(
+                        REQUEST, 'Workflow variable Id already exists !')
+            # Save manage_roles
+            managed_roles = stackdef._managed_role_exprs
+            self.delStackDefinitionsById(ids=[old_wf_var_id])
+            self.addStackDefinition(stackdef_type, stack_type, wf_var_id,
+                                    REQUEST=None, **kw)
+            stackdef = self.getStackDefinitionFor(wf_var_id)
+            stackdef._managed_role_exprs = managed_roles
+
+        if REQUEST is not None:
+            return self.manage_advanced_properties(
+                REQUEST, 'Stack definition updated !')
+
+    def addManagedRoleExpressionFor(self, wf_var_id, role_id, expression, master_role=1,
+                                    REQUEST=None):
+        """Add managed role expression to a stack definition
+        """
+        stackdef = self.getStackDefinitionFor(wf_var_id)
+        if stackdef is not None:
+            stackdef.addManagedRole(role_id, expression, master_role)
+        if REQUEST is not None:
+            return self.manage_advanced_properties(
+                REQUEST, 'Stack definition updated !')
+
+    def delManagedRoleExpressionsFor(self, wf_var_id, role_ids, REQUEST=None):
+        """Remove managed role expression to a stack definition
+        """
+        if isinstance(role_ids, StringType):
+            role_ids = [role_ids]
+        stackdef = self.getStackDefinitionFor(wf_var_id)
+        if stackdef is not None:
+            for role_id in role_ids:
+                stackdef.delManagedRole(role_id)
+        if REQUEST is not None:
+            return self.manage_advanced_properties(
+                REQUEST, 'Stack definition updated !')
 
     #
     # Misc
