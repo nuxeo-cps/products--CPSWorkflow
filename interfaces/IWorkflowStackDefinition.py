@@ -70,11 +70,6 @@ class IWorkflowStackDefinition(Interface.Base):
         stack
         """
 
-    def getFormerLocalRolesMapping(ds):
-        """Give the former local roles mapping for the member / group ids
-        within the stack
-        """
-
     def isLocked():
         """Is the stack locked
         """
