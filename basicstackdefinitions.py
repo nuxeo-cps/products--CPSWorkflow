@@ -134,6 +134,7 @@ class SimpleStackDefinition(StackDefinition):
             return ds
 
         for id in ids:
+            # XXX AT: why do not use the classic stack api (e.g method pop)?
             ds.removeElement(id)
 
         #
@@ -349,6 +350,7 @@ class HierarchicalStackDefinition(StackDefinition):
         for id in ids:
             level = int(id.split(',')[0])
             the_id = id.split(',')[1]
+            # XXX AT: why do not use the classic stack api (e.g method pop)?
             ds.removeElement(the_id, int(level))
 
         #
