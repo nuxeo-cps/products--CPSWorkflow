@@ -37,7 +37,7 @@ class IWorkflowStackElementRegistry(Interface.Base):
         """Return the list of workflow stack element types
         """
 
-    def makeWorkflowStackElementTypeInstance(stack_elt_type, **kw):
+    def makeWorkflowStackElementTypeInstance(stack_elt_type, elt_str, **kw):
         """Factory to make a workflow s tack type instancec of the given
         workflow stack elt type with id = <id>
         """
