@@ -262,7 +262,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
         # Check if stack workflow flags are defined on the transition
         if not _interested_behaviors:
-            return 0
+            return 1
 
         #
         # Now check each interesting behaviors on this transition We will check
@@ -274,6 +274,25 @@ class WorkflowDefinition(DCWorkflowDefinition):
             var_ids = t.getStackWorkflowVariablesForBehavior(behavior)
             for var_id in var_ids:
                 if wftool.canManageStack(ob, var_id):
+
+                    #
+                    # Check in here if the transition flag is compatible with
+                    # the current stack and stackdef context
+                    #
+
+                    stack = wftool.getStackFor(ob, var_id)
+                    if var_id in t.workflow_down_on_workflow_variable:
+                        stack = wftool.getStackFor(var_id)
+                        if (not stack or
+                            not stack.hasUpperLevel()):
+                            return 0
+
+                    if var_id in t.workflow_up_on_workflow_variable:
+                        if (not stack or
+                            not stack.hasLowerLevel()):
+                            return 0
+
+                    # XXX cope with other cases if needed
                     return 1
 
         return 0
@@ -285,7 +304,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
         """
         guard = t.guard
         return (guard is None or
-                guard.check(getSecurityManager(), self, ob) or
+                guard.check(getSecurityManager(), self, ob) and
                 self._checkStackGuards(t, ob))
 
     def _changeStateOf(self, ob, tdef=None, kwargs=None):
