@@ -3,7 +3,7 @@ import unittest
 from Testing.ZopeTestCase import ZopeTestCase
 from Interface.Verify import verifyClass
 
-from Products.CPSWorkflow.basicstacks import BaseStack, SimpleStack, \
+from Products.CPSWorkflow.basicstacks import Stack, SimpleStack, \
      HierarchicalStack
 
 from Products.CPSWorkflow.interfaces import IWorkflowStack
@@ -14,7 +14,7 @@ class TestCPSWorkflowStacks(ZopeTestCase):
 
     def test_interface(self):
 
-        verifyClass(IWorkflowStack, BaseStack)
+        verifyClass(IWorkflowStack, Stack)
         verifyClass(IWorkflowStack, SimpleStack)
         verifyClass(IWorkflowStack, HierarchicalStack)
 
@@ -22,10 +22,10 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         verifyClass(IHierarchicalWorkflowStack, HierarchicalStack)
         verifyClass(ISimpleWorkflowStack, HierarchicalStack)
 
-    def test_BaseStackNoMaxSize(self):
+    def test_StackNoMaxSize(self):
 
         # Test Base Stack with no initialization
-        bstack = BaseStack()
+        bstack = Stack()
         self.assertEqual(bstack.getSize(), 0)
         self.assertEqual(bstack.isEmpty(), 1)
         self.assertEqual(bstack.isFull(), 0)
@@ -86,10 +86,10 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         res = bstack.push(None)
         self.assertEqual(res, -1)
 
-    def test_BaseStackWithMaxSize(self):
+    def test_StackWithMaxSize(self):
 
         # Test Base Stack with no initialization
-        bstack = BaseStack(maxsize=2)
+        bstack = Stack(maxsize=2)
         self.assertEqual(bstack.getSize(), 0)
         self.assertEqual(bstack.isEmpty(), 1)
         self.assertEqual(bstack.isFull(), 0)
@@ -891,7 +891,7 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         # mapping
         #
 
-        base = BaseStack()
+        base = Stack()
         simple = SimpleStack()
         hierarchical = HierarchicalStack()
 

@@ -32,7 +32,7 @@ from Products.CPSWorkflow.workflowtool import Config_id
 from Products.CPSWorkflow.states import StateDefinition, \
      state_behavior_export_dict
 from Products.CPSWorkflow.stack import data_struct_types_export_dict
-from Products.CPSWorkflow.basicstacks import BaseStack, SimpleStack, \
+from Products.CPSWorkflow.basicstacks import Stack, SimpleStack, \
      HierarchicalStack
 
 from Products.CPSWorkflow.transitions import TransitionDefinition, \

@@ -35,14 +35,14 @@ from AccessControl import ClassSecurityInfo
 from ZODB.PersistentMapping import PersistentMapping
 from ZODB.PersistentList import PersistentList
 
-from stack import BaseStack
+from stack import Stack
 from stackregistries import WorkflowStackRegistry
 
 from interfaces import IWorkflowStack
 from interfaces import ISimpleWorkflowStack
 from interfaces import IHierarchicalWorkflowStack
 
-class SimpleStack(BaseStack):
+class SimpleStack(Stack):
     """Simple Stack
 
     Base Stack extended :
@@ -63,7 +63,7 @@ class SimpleStack(BaseStack):
     def __init__(self, **kw):
         """Default constructor
         """
-        BaseStack.__init__(self, **kw)
+        Stack.__init__(self, **kw)
         self.container = []
 
     def __deepcopy__(self, ob):
@@ -97,7 +97,7 @@ class SimpleStack(BaseStack):
         -2 : already in here
         """
         if elt not in self.getStackContent():
-            return BaseStack.push(self, elt)
+            return Stack.push(self, elt)
         else:
             return -2
 

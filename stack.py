@@ -52,7 +52,7 @@ data_struct_types_export_dict = {
 ################################################################
 ##############################################################
 
-class BaseStack(SimpleItem):
+class Stack(SimpleItem):
     """Base Stack
 
     Stack Implementation. Generic storage. LIFO
@@ -62,7 +62,7 @@ class BaseStack(SimpleItem):
     The container is a simple list type.
     """
 
-    meta_type = 'Base Stack'
+    meta_type = 'Stack'
 
     security = ClassSecurityInfo()
     security.declareObjectPublic()
@@ -164,5 +164,5 @@ class BaseStack(SimpleItem):
         """
         self.__init__()
 
-InitializeClass(BaseStack)
+InitializeClass(Stack)
 
