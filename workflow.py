@@ -43,7 +43,6 @@ from Products.CMFCore.WorkflowCore import WorkflowException
 from Products.CMFCore.WorkflowTool import addWorkflowFactory
 
 from Products.DCWorkflow.DCWorkflow import DCWorkflowDefinition
-
 from Products.DCWorkflow.Transitions \
     import TransitionDefinition as DCWFTransitionDefinition
 from Products.DCWorkflow.Transitions import Transitions as DCWFTransitions
@@ -51,8 +50,12 @@ from Products.DCWorkflow.Transitions import TRIGGER_AUTOMATIC
 from Products.DCWorkflow.Transitions import TRIGGER_USER_ACTION
 from Products.DCWorkflow.Transitions import TRIGGER_WORKFLOW_METHOD
 
+from transitions import TRANSITION_INITIAL_CREATE
+
 from expression import CPSStateChangeInfo as StateChangeInfo
 from expression import createExprContext
+
+from stackregistries import WorkflowStackRegistry as StackReg
 
 #
 # CPSCore is optional now.
@@ -279,6 +282,62 @@ class WorkflowDefinition(DCWorkflowDefinition):
                 guard.check(getSecurityManager(), self, ob) or
                 self._checkStackGuards(t, ob))
 
+    def _changeStateOf(self, ob, tdef=None, kwargs=None):
+        """
+        Changes state.  Can execute multiple transitions if there are
+        automatic transitions.
+        If on a CMF site tdef set to None means the object
+        was just created.
+        Of on a CPS site tdef is not None but has a TRANSITION_INITIAL_CREATE
+        """
+        moved_exc = None
+        while 1:
+            try:
+                sdef = self._executeTransition(ob, tdef, kwargs)
+                # Check if it's creation time
+                # If on a CMF site tdef is None
+                # If on a CPS site tdef is not None but has a
+                # TRANSITION_INITIAL_CREATE
+                if (tdef is None or
+                    TRANSITION_INITIAL_CREATE in tdef.transition_behavior):
+                    stacks = {}
+                    tool = aq_parent(aq_inner(self))
+                    # Call the registry and construct stack instances if the
+                    # value of the stacks is None
+                    stackdefs = tool.getStackDefinitionsFor(ob)
+                    for k in stackdefs.keys():
+                        old_stack = tool.getStackFor(ob, k)
+                        if old_stack is None:
+                            stype = stackdefs[k].getStackDataStructureType()
+                            new_stack = StackReg.makeWorkflowStackTypeInstance(
+                                stype)
+                            stacks[k] = new_stack
+                        else:
+                            stacks[k] = old_stackxs
+                    if stacks:
+                        # Update status
+                        status = self._getStatusOf(ob)
+                        for k, v in stacks.items():
+                            status[k] = v
+                        # We can't use the setStatus of otherweise it will add
+                        # a new status within the workflow_history var and thus
+                        # we will see two creation action.
+                        ob.workflow_history[self.id] = [status]
+            except ObjectMoved, moved_exc:
+                ob = moved_exc.getNewObject()
+                sdef = self._getWorkflowStateOf(ob)
+                # Re-raise after all transitions.
+            if sdef is None:
+                break
+            tdef = self._findAutomaticTransition(ob, sdef)
+            if tdef is None:
+                # No more automatic transitions.
+                break
+            # Else continue.
+        if moved_exc is not None:
+            # Re-raise.
+            raise moved_exc
+
     def _executeTransition(self, ob, tdef=None, kwargs=None):
         """Put the object in a new state, following transition tdef.
 
@@ -292,12 +351,9 @@ class WorkflowDefinition(DCWorkflowDefinition):
         utool = getToolByName(self, 'portal_url') # CPS
         wftool = aq_parent(aq_inner(self))
 
-        #
-        # Ask the tool about stack definition instances. They will be
-        # responsible for taking care about the actions to take
-        # XXX change the name of this method
-        #
-        delegatees = wftool.getDelegateesDataStructures(ob)
+        # Get the stack ds defined for this object in this current state
+        # If it's the creation time no stacks are defined
+        stacks = wftool.getStacks(ob)
 
         # Figure out the old and new states.
         old_sdef = self._getWorkflowStateOf(ob)
@@ -451,7 +507,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
             script = self.scripts[tdef.script_name]
             # Pass lots of info to the script in a single parameter.
             sci = StateChangeInfo(
-                ob, self, former_status, tdef, old_sdef, new_sdef, delegatees, kwargs, )
+                ob, self, former_status, tdef, old_sdef, new_sdef, stacks, kwargs, )
             try:
                 script(sci)  # May throw an exception.
             except ObjectMoved, moved_exc:
@@ -578,8 +634,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
                 stackdef = new_sdef.getDelegateesVarInfoFor(wf_var)
                 if stackdef is not None:
-                    ds = delegatees.get(wf_var)
-                    delegatees[wf_var] = stackdef.push(ds, **kwargs)
+                    ds = stacks.get(wf_var)
+                    stacks[wf_var] = stackdef.push(ds, **kwargs)
 
         if TRANSITION_BEHAVIOR_POP_DELEGATEES in behavior:
 
@@ -649,8 +705,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
                 stackdef = new_sdef.getDelegateesVarInfoFor(wf_var)
                 if stackdef is not None:
-                    ds = delegatees.get(wf_var)
-                    delegatees[wf_var] = stackdef.pop(ds, **kwargs)
+                    ds = stacks.get(wf_var)
+                    stacks[wf_var] = stackdef.pop(ds, **kwargs)
 
         if TRANSITION_BEHAVIOR_RETURN_UP_DELEGATEES_HIERARCHY in behavior:
 
@@ -719,8 +775,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
                 stackdef = new_sdef.getDelegateesVarInfoFor(wf_var)
                 if stackdef is not None:
-                    ds = delegatees.get(wf_var)
-                    delegatees[wf_var] = stackdef.returnedUpDirection(ds, **kwargs)
+                    ds = stacks.get(wf_var)
+                    stacks[wf_var] = stackdef.returnedUpDirection(ds, **kwargs)
 
         if TRANSITION_BEHAVIOR_WORKFLOW_UP in behavior:
 
@@ -789,8 +845,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
                 stackdef = new_sdef.getDelegateesVarInfoFor(wf_var)
                 if stackdef is not None:
-                    ds = delegatees.get(wf_var)
-                    delegatees[wf_var] = stackdef.doIncLevel(ds)
+                    ds = stacks.get(wf_var)
+                    stacks[wf_var] = stackdef.doIncLevel(ds)
 
         if TRANSITION_BEHAVIOR_WORKFLOW_DOWN in behavior:
 
@@ -859,8 +915,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
                 stackdef = new_sdef.getDelegateesVarInfoFor(wf_var)
                 if stackdef is not None:
-                    ds = delegatees.get(wf_var)
-                    delegatees[wf_var] = stackdef.doDecLevel(ds)
+                    ds = stacks.get(wf_var)
+                    stacks[wf_var] = stackdef.doDecLevel(ds)
 
         if TRANSITION_BEHAVIOR_WORKFLOW_LOCK in behavior:
 
@@ -1067,8 +1123,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
                 stackdef = new_sdef.getDelegateesVarInfoFor(wf_var)
                 if stackdef is not None:
-                    ds = delegatees.get(wf_var)
-                    delegatees[wf_var] = stackdef.resetStack(ds, **kwargs)
+                    ds = stacks.get(wf_var)
+                    stacks[wf_var] = stackdef.resetStack(ds, **kwargs)
 
         #######################################################################
         #######################################################################
@@ -1106,7 +1162,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
                     if sci is None:
                         sci = StateChangeInfo(
                             ob, self, former_status, tdef,
-                            old_sdef, new_sdef, delegatees, kwargs)
+                            old_sdef, new_sdef, stacks, kwargs)
                     econtext = createExprContext(sci)
                 value = expr(econtext)
 
@@ -1139,7 +1195,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
             script = self.scripts[tdef.after_script_name]
             # Pass lots of info to the script in a single parameter.
             sci = StateChangeInfo(
-                ob, self, status, tdef, old_sdef, new_sdef, delegatees, kwargs)
+                ob, self, status, tdef, old_sdef, new_sdef, stacks, kwargs)
             script(sci)  # May throw an exception.
 
         ### CPS: Event notification. This has to be done after all the
