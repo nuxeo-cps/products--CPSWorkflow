@@ -1453,6 +1453,12 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertEqual(sstackdef._getExpressionForRole('WorkspaceManager',
                                                          sstack),
                          None)
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:elt')
+        self.assertEqual(sstackdef._getExpressionForRole('WorkspaceManager',
+                                                         sstack,
+                                                         None,
+                                                         'elt1'),
+                         'elt1')
         sstackdef._addExpressionForRole('WorkspaceManager', 'python:DateTime')
         self.assert_(sstackdef._getExpressionForRole('WorkspaceManager',
                                                      sstack) is not None)
@@ -1510,10 +1516,21 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertEqual(sstackdef._getExpressionForRole('WorkspaceManager',
                                                          sstack),
                          0)
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:level')
+        self.assertEqual(sstackdef._getExpressionForRole('WorkspaceManager',
+                                                         sstack,
+                                                         1),
+                         1)
         sstackdef._addExpressionForRole('WorkspaceManager', 'python:elt')
         self.assertEqual(sstackdef._getExpressionForRole('WorkspaceManager',
                                                          sstack),
                          None)
+        sstackdef._addExpressionForRole('WorkspaceManager', 'python:elt')
+        self.assertEqual(sstackdef._getExpressionForRole('WorkspaceManager',
+                                                         sstack,
+                                                         1,
+                                                         'elt1'),
+                         'elt1')
         sstackdef._addExpressionForRole('WorkspaceManager', 'python:DateTime')
         self.assert_(sstackdef._getExpressionForRole('WorkspaceManager',
                                                      sstack) is not None)
@@ -1540,6 +1557,114 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         sstackdef._addExpressionForRole('WorkspaceManager', 'python:portal')
         self.assert_(sstackdef._getExpressionForRole('WorkspaceManager',
                                                      sstack) is not None)
+
+    def test_getlocalRolesMappings_with_simple(self):
+
+        #
+        # test namespace:
+        # - stack
+        # - elt
+        #
+        sstackdef = SimpleStackDefinition('Simple Stack Definition',
+                                          'Simple Stack')
+
+        # Add WorkspaceManager as managed role
+        sstackdef.addManagedRole('WorkspaceManager')
+        self.assertEqual(sstackdef.getManagedRoles(), ['WorkspaceManager'])
+
+        # test that local role is given only if number of stack elements is even
+        sstack = SimpleStack()
+        sstackdef._addExpressionForRole('WorkspaceManager',
+                                        'python:len(stack.getStackContent())%2==1')
+        self.assertEqual(sstackdef._getLocalRolesMapping(sstack), {})
+        sstack = sstackdef._push(sstack, **{'member_ids': ('elt1',)})
+        self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
+                         {'elt1': ('WorkspaceManager',)})
+        sstack = sstackdef._push(sstack, **{'member_ids': ('elt2',)})
+        self.assertEqual(sstackdef._getLocalRolesMapping(sstack), {})
+        sstack = sstackdef._push(sstack, **{'member_ids': ('elt3',)})
+        self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
+                         {'elt1': ('WorkspaceManager',),
+                          'elt2': ('WorkspaceManager',),
+                          'elt3': ('WorkspaceManager',),
+                          })
+
+        # test that local role is given only if elt starts with 'hello'
+        sstack = SimpleStack()
+        sstackdef._addExpressionForRole('WorkspaceManager',
+                                        "python:elt.startswith('hello')")
+        self.assertEqual(sstackdef._getLocalRolesMapping(sstack), {})
+        sstack = sstackdef._push(sstack, **{'member_ids': ('hello_elt1',)})
+        self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
+                         {'hello_elt1': ('WorkspaceManager',)})
+        sstack = sstackdef._push(sstack, **{'member_ids': ('elt2',)})
+        self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
+                         {'hello_elt1': ('WorkspaceManager',)})
+
+    def test_getlocalRolesMappings_with_hierarchical(self):
+
+        #
+        # test namespace:
+        # - stack
+        # - elt
+        # - level
+        #
+        hstack = HierarchicalStack()
+        hstackdef = HierarchicalStackDefinition('Hierarchical Stack Definition',
+                                                'Hierarchical Stack')
+
+        # Add WorkspaceManager as managed role
+        hstackdef.addManagedRole('WorkspaceManager')
+        self.assertEqual(hstackdef.getManagedRoles(), ['WorkspaceManager'])
+
+        # test that local role is given only if there an uneven number of
+        # people at given level
+        hstackdef._addExpressionForRole('WorkspaceManager',
+                                        'python:len(stack.getLevelContent(level))%2==1')
+        self.assertEqual(hstackdef._getLocalRolesMapping(hstack), {})
+        kw = {
+            'member_ids': ('elt1',),
+            'levels': (0,)
+            }
+        hstack = hstackdef._push(hstack, **kw)
+        # NB: expression is evaluated after elt1 has been inserted into the
+        # stack
+        self.assertEqual(hstackdef._getLocalRolesMapping(hstack),
+                         {'elt1': ('WorkspaceManager',)})
+        kw = {
+            'member_ids': ('elt2',),
+            'levels': (0,)
+            }
+        hstack = hstackdef._push(hstack, **kw)
+        self.assertEqual(hstackdef._getLocalRolesMapping(hstack), {})
+        kw = {
+            'member_ids': ('elt3',),
+            'levels': (1,)
+            }
+        hstack = hstackdef._push(hstack, **kw)
+        self.assertEqual(hstackdef._getLocalRolesMapping(hstack),
+                         {'elt3': ('WorkspaceManager',),})
+
+        # test that local role is given only if elt starts with 'hello'
+        hstack = HierarchicalStack()
+        hstackdef._addExpressionForRole('WorkspaceManager',
+                                        "python:elt.startswith('hello')")
+        self.assertEqual(hstackdef._getLocalRolesMapping(hstack), {})
+        kw = {
+            'member_ids': ('hello_elt1',),
+            'levels': (0,)
+            }
+        hstack = hstackdef._push(hstack, **kw)
+        self.assertEqual(hstackdef._getLocalRolesMapping(hstack),
+                         {'hello_elt1': ('WorkspaceManager',)})
+        kw = {
+            'member_ids': ('elt2',),
+            'levels': (0,)
+            }
+        hstack = hstackdef._push(hstack, **kw)
+        self.assertEqual(hstackdef._getLocalRolesMapping(hstack),
+                         {'hello_elt1': ('WorkspaceManager',)})
+
 
     def test_ResetOnSimpleStackDefinition(self):
 
