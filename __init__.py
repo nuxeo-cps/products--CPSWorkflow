@@ -26,10 +26,15 @@ import expression
 import transitions
 import states
 
+import stack
+import stackdefinition
+import stackelement
+
 import basicstacks
 import basicstackdefinitions
+import basicstackelements
+
 import stackregistries
-import stackelement
 
 from configuration import Configuration
 from configuration import addConfiguration
