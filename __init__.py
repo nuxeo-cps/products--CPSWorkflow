@@ -28,12 +28,14 @@ import CPSWorkflowStates
 
 import CPSWorkflowStacks
 import CPSWorkflowStackDefinitions
+import CPSWorkflowStackRegistryTool
 
 from CPSWorkflowConfiguration import CPSWorkflowConfiguration
 from CPSWorkflowConfiguration import addCPSWorkflowConfiguration
 
 tools = (
     CPSWorkflowTool.CPSWorkflowTool,
+    CPSWorkflowStackRegistryTool.WorkflowStackRegistryTool,
     )
 
 def initialize(registrar):
