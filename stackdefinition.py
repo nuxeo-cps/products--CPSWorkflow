@@ -40,6 +40,8 @@ A stack definition is defined by :
 
 """
 
+from types import StringType
+
 from DateTime import DateTime
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
@@ -112,6 +114,21 @@ class StackDefinition(SimpleItem):
         """
         return self.wf_var_id
 
+    security.declareProtected(View, 'getMasterRole')
+    def getMasterRole(self):
+        """Returns the master role for this stack definition.
+
+        The master role is the role
+        """
+        return self._master_role
+
+    security.declareProtected(ManagePortal, 'setMasterRole')
+    def setMasterRole(self, role_id):
+        """Set the master role for this stack definition.
+        """
+        if isinstance(role_id, StringType):
+            self._master_role = role_id
+
     #
     # API : Lock / Unlock
     #
@@ -174,7 +191,7 @@ class StackDefinition(SimpleItem):
         may use within your TALES expression
         """
         if master_role:
-            self._master_role = role_id
+            self.setMasterRole(role_id)
         self._managed_role_exprs[role_id] = expression
 
     security.declareProtected(ManagePortal, 'delManagedRole')
