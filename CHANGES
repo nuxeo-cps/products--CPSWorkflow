@@ -27,3 +27,6 @@ New internal features:
 - YAGNI (reversed). Remove useless API for direction and locking
 stuffs.
 - Internal API refactoring
+- Security on getStackContent(). Filter depending the the stack def
+edit stack element guard or the guard on the element itself
+- Use getId() instead of __str__ for stack elements.

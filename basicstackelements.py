@@ -62,36 +62,26 @@ class UserStackElement(StackElement):
 
     You may use it like this :
 
-        >>> use = UserStackElement('anguenot')
-        >>> use()
-        'anguenot'
-        >>> str(use)
-        'anguenot'
-        >>> 'anguenot' == use
-        True
+	>>> use = UserStackElement('anguenot')
+	>>> use()
+	'anguenot'
+	>>> str(use)
+	'anguenot'
+	>>> 'anguenot' == use
+	True
     """
     meta_type = 'User Stack Element'
     prefix = 'user'
+    id = ''
     hidden_meta_type = 'Hidden User Stack Element'
 
     __implement__ = (IStackElement,)
 
-    user_id = ''
-
-    def __init__(self, user_id):
-        self.user_id = user_id
-
-    def __call__(self):
-        return self.user_id
-
-    def __str__(self):
-        return self.user_id
-
     def getIdForRoleSettings(self):
-        # XXX change this when no empty prefix are given anymore
-        if self.user_id.startswith('user:'):
-            return self.getIdWithoutPrefix()
-        return self.user_id
+	# XXX change this when no empty prefix are given anymore
+	if self.getId().startswith('user:'):
+	    return self.getIdWithoutPrefix()
+	return self.getId()
 
 InitializeClass(UserStackElement)
 
@@ -104,16 +94,16 @@ class GroupStackElement(UserStackElement):
 
     You may use it like this :
 
-        >>> gse = GroupStackElement('group:nuxeo')
-        >>> gse()
-        'group:nuxeo'
-        >>> str(gse)
-        'group:nuxeo'
-        >>> 'group:nuxeo' == gse
-        True
+	>>> gse = GroupStackElement('group:nuxeo')
+	>>> gse()
+	'group:nuxeo'
+	>>> str(gse)
+	'group:nuxeo'
+	>>> 'group:nuxeo' == gse
+	True
 
-        >>> gse.getGroupIdWithoutPrefix()
-        'nuxeo'
+	>>> gse.getGroupIdWithoutPrefix()
+	'nuxeo'
     """
 
     meta_type = 'Group Stack Element'
@@ -121,23 +111,17 @@ class GroupStackElement(UserStackElement):
     __implement__ = (IStackElement,)
 
     prefix = 'group'
-    group_id = ''
+    id = ''
 
     hidden_meta_type = 'Hidden Group Stack Element'
 
     def __init__(self, group_id, prefix=''):
-        self.group_id = group_id
-        if prefix:
-            self.prefix = 'group'
-
-    def __call__(self):
-        return self.group_id
-
-    def __str__(self):
-        return self.group_id
+	StackElement.__init__(self, group_id)
+	if prefix:
+	    self.prefix = 'group'
 
     def getIdForRoleSettings(self):
-        return self.group_id
+	return self.getId()
 
 InitializeClass(GroupStackElement)
 
@@ -157,17 +141,17 @@ class HiddenUserStackElement(UserStackElement):
     """
     meta_type = 'Hidden User Stack Element'
     prefix = 'hidden_user'
-    
+
     __implement__ = (IStackElement,)
 
     def __call__(self):
-        return USER_STACK_ELEMENT_NOT_VISIBLE
+	return USER_STACK_ELEMENT_NOT_VISIBLE
 
     def __str__(self):
-        return USER_STACK_ELEMENT_NOT_VISIBLE
+	return USER_STACK_ELEMENT_NOT_VISIBLE
 
     def getIdForRoleSettings(self):
-        return ''
+	return ''
 
 InitializeClass(HiddenUserStackElement)
 
@@ -181,23 +165,23 @@ class HiddenGroupStackElement(GroupStackElement):
     """
     meta_type = 'Hidden Group Stack Element'
     prefix = 'hidden_group'
-    
+
     __implement__ = (IStackElement,)
 
     def __call__(self):
-        return GROUP_STACK_ELEMENT_NOT_VISIBLE
+	return GROUP_STACK_ELEMENT_NOT_VISIBLE
 
     def __str__(self):
-        return GROUP_STACK_ELEMENT_NOT_VISIBLE
+	return GROUP_STACK_ELEMENT_NOT_VISIBLE
 
     def getGroupIdWithoutPrefix(self):
-        """Return the group id without the 'group:' prefix
-        """
-        return GROUP_STACK_ELEMENT_NOT_VISIBLE
+	"""Return the group id without the 'group:' prefix
+	"""
+	return GROUP_STACK_ELEMENT_NOT_VISIBLE
 
     def getIdForRoleSettings(self):
-        return ''
-    
+	return ''
+
 
 InitializeClass(HiddenGroupStackElement)
 
@@ -213,9 +197,9 @@ class UserSubstituteStackElement(UserStackElement):
     hidden_meta_type = 'Hidden User Stack Element'
 
     __implement__ = (IStackElement,)
-    
+
     def getIdForRoleSettings(self):
-        return self.getIdWithoutPrefix()
+	return self.getIdWithoutPrefix()
 
 InitializeClass(UserSubstituteStackElement)
 
@@ -232,7 +216,7 @@ class GroupSubstituteStackElement(GroupStackElement):
     prefix = 'group_substitute'
 
     def getIdForRoleSettings(self):
-        return self.getIdWithoutPrefix()
+	return self.getIdWithoutPrefix()
 
 
 InitializeClass(GroupSubstituteStackElement)

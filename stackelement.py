@@ -37,16 +37,11 @@ from interfaces import IStackElement
 
 class StackElement(SimpleItem):
     """Stack Element
-
-    All the user defined stack elements ho have to inherit from StackElement
-    and override the following methodds :
-        - __call__()
-        - __str__()
-        - __cmp__()
     """
 
     meta_type = 'Stack Element'
     prefix = ''
+    id = ''
 
     hidden_meta_type = ''
 
@@ -55,8 +50,10 @@ class StackElement(SimpleItem):
     security = ClassSecurityInfo()
 
     view_guard = None
-    edit_guaed = None
+    edit_guard = None
 
+    def __init__(self, id):
+        self.id = id
 
     #
     # PRIVATE
@@ -64,16 +61,16 @@ class StackElement(SimpleItem):
 
     def __cmp__(self, other):
         if isinstance(other, StackElement):
-            return cmp(self(), other())
+            return cmp(self.getId(), other())
         elif isinstance(other, StringType):
-            return cmp(self(), other)
+            return cmp(self.getId(), other)
         return 0
 
     def __call__(self):
-        raise NotImplementedError
+        return self.getId()
 
     def __str__(self):
-        raise NotImplementedError
+        return self.getId()
 
     #
     # API

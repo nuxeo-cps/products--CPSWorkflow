@@ -52,7 +52,7 @@ class TestStackElements(ZopeTestCase):
         # Test the guard of the stack element
         #
 
-        stack_elt = StackElement()
+        stack_elt = StackElement('fake')
 
         stack_elt.view_guard = Guard()
 
@@ -208,7 +208,7 @@ class TestStackElements(ZopeTestCase):
         # Test the guard of the stack element
         #
 
-        stack_elt = StackElement()
+        stack_elt = StackElement('fake')
 
         stack_elt.view_guard = Guard()
 
