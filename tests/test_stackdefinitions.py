@@ -146,14 +146,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertEqual(new_stack.meta_type, 'Simple Stack')
 
         # Check local roles
-
-        # No former local roles mapping
-        self.assertEqual(new_stack.getFormerLocalRolesMapping(),
-                         {})
         self.assertEqual(simple.listLocalRoles(new_stack),
-                         {'user1': ('WorkspaceManager',)})
-        # Check if the former local roles are recorded
-        self.assertEqual(new_stack.getFormerLocalRolesMapping(),
                          {'user1': ('WorkspaceManager',)})
 
         # Try to remove the user1
@@ -162,11 +155,6 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertNotEqual(new_stack, simple.pop(new_stack, ids=['user1']))
         self.assertEqual(new_stack.getStackContent(), [])
         self.assertEqual(new_stack.meta_type, 'Simple Stack')
-
-
-        # Check if the former local roles are recorded
-        self.assertEqual(new_stack.getFormerLocalRolesMapping(),
-                         {'user1': ('WorkspaceManager',)})
         self.assertEqual(simple.listLocalRoles(new_stack),
                          {})
 
@@ -178,8 +166,6 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertEqual(new_stack.meta_type, 'Simple Stack')
 
         # Local roles (current / former)
-        self.assertEqual(new_stack.getFormerLocalRolesMapping(),
-                         {})
         self.assertEqual(simple.listLocalRoles(new_stack),
                          {})
 
@@ -190,12 +176,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertEqual(new_stack.getStackContent(), ['user1', 'user2'])
 
         # Local Roles
-        self.assertEqual(new_stack.getFormerLocalRolesMapping(),
-                         {})
         self.assertEqual(simple.listLocalRoles(new_stack),
-                         {'user1':('WorkspaceManager',),
-                          'user2':('WorkspaceManager',)})
-        self.assertEqual(new_stack.getFormerLocalRolesMapping(),
                          {'user1':('WorkspaceManager',),
                           'user2':('WorkspaceManager',)})
 
@@ -465,13 +446,8 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Check local roles
 
         # No former local roles mapping
-        self.assertEqual(new_stack.getFormerLocalRolesMapping(),
-                         {})
         # Push the guy in it
         self.assertEqual(hierarchical.listLocalRoles(new_stack),
-                         {'user1': ('WorkspaceManager',)})
-        # Check if the former local roles are recorded
-        self.assertEqual(new_stack.getFormerLocalRolesMapping(),
                          {'user1': ('WorkspaceManager',)})
 
         # Try to remove the user1
@@ -481,9 +457,6 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                         ids=['0,user1',]))
         self.assertEqual(new_stack.getLevelContentValues(), [])
         self.assertEqual(new_stack.meta_type, 'Hierarchical Stack')
-        # Check if the former local roles are recorded
-        self.assertEqual(new_stack.getFormerLocalRolesMapping(),
-                         {'user1': ('WorkspaceManager',)})
         self.assertEqual(hierarchical.listLocalRoles(new_stack),
                          {})
 
@@ -495,8 +468,6 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertEqual(new_stack.meta_type, 'Hierarchical Stack')
 
         # Local roles (current / former)
-        self.assertEqual(new_stack.getFormerLocalRolesMapping(),
-                         {})
         self.assertEqual(hierarchical.listLocalRoles(new_stack),
                          {})
 
@@ -509,12 +480,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertEqual(new_stack.getLevelContentValues(), ['user1', 'user2'])
 
         # Local Roles
-        self.assertEqual(new_stack.getFormerLocalRolesMapping(),
-                         {})
         self.assertEqual(hierarchical.listLocalRoles(new_stack),
-                         {'user1':('WorkspaceManager',),
-                          'user2':('WorkspaceManager',)})
-        self.assertEqual(new_stack.getFormerLocalRolesMapping(),
                          {'user1':('WorkspaceManager',),
                           'user2':('WorkspaceManager',)})
 
@@ -821,21 +787,8 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         ## Check local roles
 
-        # No former local roles mapping
-        self.assertEqual(new_stack.getFormerLocalRolesMapping(),
-                         {})
         # Push the guy in it
         self.assertEqual(hierarchical.listLocalRoles(new_stack),
-                         {'user1': ('WorkspaceManager',),
-                          'user2': ('WorkspaceManager',),
-                          'user3': ('WorkspaceReader',),
-                          'user4': ('WorkspaceMember',),
-                          'user5': ('WorkspaceReader',),
-                          'user6': ('WorkspaceMember',),
-                          })
-
-        # Check if the former local roles are recorded
-        self.assertEqual(new_stack.getFormerLocalRolesMapping(),
                          {'user1': ('WorkspaceManager',),
                           'user2': ('WorkspaceManager',),
                           'user3': ('WorkspaceReader',),
@@ -904,28 +857,8 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         # Local roles
 
-        # Check if the former local roles
-        self.assertEqual(new_stack.getFormerLocalRolesMapping(),
-                         {'user1': ('WorkspaceManager',),
-                          'user2': ('WorkspaceManager',),
-                          'user3': ('WorkspaceReader',),
-                          'user4': ('WorkspaceMember',),
-                          'user5': ('WorkspaceReader',),
-                          'user6': ('WorkspaceMember',),
-                          })
-
         # current ones
         self.assertEqual(hierarchical.listLocalRoles(new_stack),
-                         {'user1': ('WorkspaceReader',),
-                          'user2': ('WorkspaceReader',),
-                          'user3': ('WorkspaceReader',),
-                          'user4': ('WorkspaceManager',),
-                          'user5': ('WorkspaceReader',),
-                          'user6': ('WorkspaceMember',),
-                          })
-
-        # they are now recorded
-        self.assertEqual(hierarchical.getFormerLocalRolesMapping(new_stack),
                          {'user1': ('WorkspaceReader',),
                           'user2': ('WorkspaceReader',),
                           'user3': ('WorkspaceReader',),
@@ -990,16 +923,6 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         #
 
         hierarchical.doDecLevel(new_stack)
-
-        # current ones
-        self.assertEqual(hierarchical.getFormerLocalRolesMapping(new_stack),
-                         {'user1': ('WorkspaceReader',),
-                          'user2': ('WorkspaceReader',),
-                          'user3': ('WorkspaceReader',),
-                          'user4': ('WorkspaceManager',),
-                          'user5': ('WorkspaceReader',),
-                          'user6': ('WorkspaceMember',),
-                          })
 
         # Current Local roles mapping
         self.assertEqual(hierarchical.listLocalRoles(new_stack),
@@ -1068,15 +991,6 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         hierarchical.doIncLevel(new_stack)
 
-        self.assertEqual(hierarchical.getFormerLocalRolesMapping(new_stack),
-                         {'user1': ('WorkspaceReader',),
-                          'user2': ('WorkspaceReader',),
-                          'user3': ('WorkspaceReader',),
-                          'user4': ('WorkspaceReader',),
-                          'user5': ('WorkspaceReader',),
-                          'user6': ('WorkspaceManager',),
-                          })
-
         # Current Local roles mapping
         self.assertEqual(hierarchical.listLocalRoles(new_stack),
                          {'user1': ('WorkspaceReader',),
@@ -1143,15 +1057,6 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         #
 
         hierarchical.doIncLevel(new_stack)
-
-        self.assertEqual(hierarchical.getFormerLocalRolesMapping(new_stack),
-                         {'user1': ('WorkspaceReader',),
-                          'user2': ('WorkspaceReader',),
-                          'user3': ('WorkspaceReader',),
-                          'user4': ('WorkspaceManager',),
-                          'user5': ('WorkspaceReader',),
-                          'user6': ('WorkspaceMember',),
-                          })
 
         # Current Local roles mapping
         self.assertEqual(hierarchical.listLocalRoles(new_stack),
@@ -1220,15 +1125,6 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         hierarchical.doIncLevel(new_stack)
 
-        self.assertEqual(hierarchical.getFormerLocalRolesMapping(new_stack),
-                         {'user1': ('WorkspaceManager',),
-                          'user2': ('WorkspaceManager',),
-                          'user3': ('WorkspaceReader',),
-                          'user4': ('WorkspaceMember',),
-                          'user5': ('WorkspaceReader',),
-                          'user6': ('WorkspaceMember',),
-                          })
-
         # Current Local roles mapping
         self.assertEqual(hierarchical.listLocalRoles(new_stack),
                          {'user1': ('WorkspaceMember',),
@@ -1294,15 +1190,6 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         #
 
         hierarchical.doIncLevel(new_stack)
-
-        self.assertEqual(hierarchical.getFormerLocalRolesMapping(new_stack),
-                         {'user1': ('WorkspaceMember',),
-                          'user2': ('WorkspaceMember',),
-                          'user3': ('WorkspaceManager',),
-                          'user4': ('WorkspaceMember',),
-                          'user5': ('WorkspaceReader',),
-                          'user6': ('WorkspaceMember',),
-                          })
 
         # Current Local roles mapping
         self.assertEqual(hierarchical.listLocalRoles(new_stack),
