@@ -1402,11 +1402,12 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                 return self
 
         self.portal_url = URLTool()
-        sstackdef.parent = self
+        sstackdef.portal_url = URLTool()
 
         # Test again and check we have one now
         sstackdef._addExpressionForRole('WorkspaceManager', 'python:portal')
-        self.assert_(sstackdef._getExpressionForRole('WorkspaceManager', sstack) is not None)
+        self.assert_(sstackdef._getExpressionForRole('WorkspaceManager',
+                                                     sstack) is not None)
 
     def test_role_expression_NS_with_hierarchical(self):
 
@@ -1453,7 +1454,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                 return self
 
         self.portal_url = URLTool()
-        sstackdef.parent = self
+        sstackdef.portal_url = URLTool()
 
         # Test again and check we have one now
         sstackdef._addExpressionForRole('WorkspaceManager', 'python:portal')
