@@ -1936,7 +1936,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         self.logout()
 
 
-    def test_role_mappings_with_several_stacks(self):
+    def test_role_settings_with_several_stacks(self):
 
         self.login('manager')
         wftool = self.wftool
