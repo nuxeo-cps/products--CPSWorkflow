@@ -15,6 +15,7 @@ Bug fixes:
 - Keep former local roles mapping during non stack flaged transition
   and non stack flaged states for further use.
 - stack element available in managed roles expression namespace was always None
+- deep copy of the stack did not use copies of stack elements.
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
 - Set the proxy into the datamodel as early as possible during construction.
