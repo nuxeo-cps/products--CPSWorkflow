@@ -38,7 +38,6 @@ from Globals import DTMLFile
 from OFS.ObjectManager import ObjectManager
 from Acquisition import aq_parent, aq_inner, aq_base
 
-from Products.DCWorkflow.ContainerTab import ContainerTab
 from Products.DCWorkflow.States import StateDefinition as DCWFStateDefinition
 from Products.DCWorkflow.States import States as DCWFStates
 

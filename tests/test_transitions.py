@@ -26,17 +26,18 @@ from Products.CMFCore.tests.base.testcase import SecurityRequestTest
 
 from Products.CPSWorkflow.workflow import WorkflowDefinition
 from Products.CPSWorkflow.workflow import TRIGGER_USER_ACTION
+
 from Products.CPSWorkflow.configuration import addConfiguration
 from Products.CPSWorkflow.workflowtool import Config_id
 
-from Products.CPSWorkflow.states import StateDefinition, \
-     state_behavior_export_dict
-from Products.CPSWorkflow.stack import data_struct_types_export_dict
-from Products.CPSWorkflow.basicstacks import Stack, SimpleStack, \
-     HierarchicalStack
+from Products.CPSWorkflow.states import StateDefinition
+from Products.CPSWorkflow.states import state_behavior_export_dict
 
-from Products.CPSWorkflow.transitions import TransitionDefinition, \
-     Transitions
+from Products.CPSWorkflow.stack import Stack
+from Products.CPSWorkflow.basicstacks import SimpleStack, HierarchicalStack
+
+from Products.CPSWorkflow.transitions import TransitionDefinition
+from Products.CPSWorkflow.transitions import Transitions
 
 class TestCPSWorkflowTransitions(SecurityRequestTest):
 

@@ -43,15 +43,6 @@ from interfaces import IWorkflowStack
 from interfaces import ISimpleWorkflowStack
 from interfaces import IHierarchicalWorkflowStack
 
-
-DATA_STRUCT_STACK_TYPE_LIFO = 201
-DATA_STRUCT_STACK_TYPE_HIERARCHICAL = 202
-
-data_struct_types_export_dict = {
-    DATA_STRUCT_STACK_TYPE_LIFO : 'lifo_stack',
-    DATA_STRUCT_STACK_TYPE_HIERARCHICAL : 'hierarchical_stack',
-    }
-
 ################################################################
 ##############################################################
 
