@@ -27,7 +27,7 @@ from Globals import InitializeClass, DTMLFile
 from AccessControl import ClassSecurityInfo
 from Interface.Verify import verifyClass, DoesNotImplement
 
-from Products.CMFCore.CMFCorePermissions import ManagePortal
+from Products.CMFCore.permissions import ManagePortal
 
 from interfaces import IStackElement
 from interfaces import IWorkflowStack

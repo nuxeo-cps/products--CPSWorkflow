@@ -797,7 +797,6 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         # Manager can't manage the stack
         self.assert_(wftool.canManageStack(content, 'Pilots'))
-        
 
 def test_suite():
     suite = unittest.TestSuite()

@@ -24,16 +24,15 @@ stack workflows support.
 """
 
 from zLOG import LOG, ERROR, DEBUG, TRACE, INFO
+
 from types import StringType
 from Acquisition import aq_base, aq_parent, aq_inner
 from Globals import InitializeClass, DTMLFile
 from AccessControl import ClassSecurityInfo, Unauthorized
 
-from Products.CMFCore.utils import _checkPermission
-from Products.CMFCore.utils import getToolByName
-from Products.CMFCore.CMFCorePermissions import View
-from Products.CMFCore.CMFCorePermissions import ModifyPortalContent
-from Products.CMFCore.CMFCorePermissions import ManagePortal
+from Products.CMFCore.utils import _checkPermission, getToolByName
+from Products.CMFCore.permissions import View, ModifyPortalContent
+from Products.CMFCore.permissions import ManagePortal
 from Products.CMFCore.WorkflowCore import WorkflowException
 from Products.CMFCore.WorkflowTool import WorkflowTool as BaseWorkflowTool
 

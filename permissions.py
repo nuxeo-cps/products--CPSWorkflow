@@ -24,7 +24,7 @@
 
 """
 
-from Products.CMFCore.CMFCorePermissions import setDefaultRoles
+from Products.CMFCore.permissions import setDefaultRoles
 
 ManageWorkflows = 'Manage workflows'
 setDefaultRoles(ManageWorkflows, ('Manager',))

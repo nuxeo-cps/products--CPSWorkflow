@@ -31,7 +31,7 @@ from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
 from OFS.SimpleItem import SimpleItem
 
-from Products.CMFCore.CMFCorePermissions import View, ModifyPortalContent
+from Products.CMFCore.permissions import View, ModifyPortalContent
 
 from basicstacks import SimpleStack, HierarchicalStack
 from stackdefinition import StackDefinition
