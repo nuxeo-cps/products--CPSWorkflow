@@ -23,8 +23,9 @@
 Base stack type definition. It does :
 
   + store stack element instances
-  + implement a default LIFO
   + have a render() method linked to a given template within the skins
+  + have a _prepareElement() that construct stack element instances
+  before the storage
 """
 
 from types import StringType
