@@ -152,13 +152,25 @@ class StackDefinition(SimpleItem):
                   'guard_groups':guard_groups,
                   'guard_expr':guard_expr,
                   }
-        self.getEmptyStackManageGuard().changeFromProperties(_props)
+        self.getEditStackElementGuard().changeFromProperties(_props)
 
     def getViewStackElementGuard(self):
         """ """
         if self._view_stack_element_guard is None:
             self._view_stack_element_guard  = Guard()
         return self._view_stack_element_guard
+
+    def setViewStackElementGuard(self, guard_permissions=None,
+                                 guard_roles=None, guard_groups=None,
+                                 guard_expr=None):
+        """ """
+        _props = {'guard_permissions':guard_permissions,
+                  'guard_roles':guard_roles,
+                  'guard_groups':guard_groups,
+                  'guard_expr':guard_expr,
+                  }
+        self._view_stack_element_guard = None
+        self.getViewStackElementGuard().changeFromProperties(_props)
 
     #
     # Boring accessors
