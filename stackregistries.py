@@ -149,7 +149,8 @@ class WorkflowStackElementRegistryCls:
 
     def __init__(self):
         self._stack_element_classes = {}
-
+        self._prefix_meta_types = {}
+        
     def register(self, cls=None):
         """Register a class for a stack element type
         """
@@ -162,8 +163,10 @@ class WorkflowStackElementRegistryCls:
                 raise
             else:
                 meta_type = cls.meta_type
+                prefix = cls.prefix
                 if meta_type not in self.listWorkflowStackElementTypes():
                     self._stack_element_classes[meta_type] = cls
+                    self._prefix_meta_types[prefix] = meta_type
                     return 1
         return 0
 
@@ -187,6 +190,12 @@ class WorkflowStackElementRegistryCls:
         """Get the instance class for a workflow stack elt of the given type
         """
         return self._stack_element_classes.get(stack_elt_type)
+
+    def getMetaTypeForPrefix(self, prefix):
+        """Returns the meta_type of the elements to construct giving a prefix
+        """
+        if prefix is not None:
+            return self._prefix_meta_types.get(prefix)
 
 InitializeClass(WorkflowStackElementRegistryCls)
 
