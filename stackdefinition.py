@@ -46,7 +46,7 @@ from DateTime import DateTime
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
 from OFS.SimpleItem import SimpleItem
-from Acquisition import aq_parent, aq_inner
+from Acquisition import aq_parent, aq_inner, Implicit
 from ZODB.PersistentMapping import PersistentMapping
 
 from Products.CMFCore.permissions import View, ModifyPortalContent
@@ -222,12 +222,11 @@ class StackDefinition(SimpleItem):
 
         Check the documentation within the doc sub-folder of this component
         """
-
-        # We might be in standalone instanciation (no state parent and thus no portal)
+        # Standalone case
         portal = None
-        if self.parent is not None:
-            portal = getToolByName(self.parent, 'portal_url').getPortalObject(),
-
+        utool = getToolByName(self, 'portal_url', None)
+        if utool is not None:
+            portal = utool.getPortalObject()
         mapping = {'stack': stack,
                    'role' : role_id,
                    'stackdef' : self,
