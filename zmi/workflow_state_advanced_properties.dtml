@@ -2,20 +2,15 @@
 <dtml-var manage_tabs>
 
 <h2>
-  Workflow Stacks
+  Workflow stack definitions
 </h2>
 
+<h3>Add a stack definition</h3>
 <form action="<dtml-var absolute_url>" method="POST">
 
 <table>
 <tr>
-  <td colspan="2">
-    <hr />
-  </td>
-</tr>
-<tr>
-  <th align="left" valign="top">Add workflow variables holding delegatees</th>
-  <td align="right">
+  <td align="left">
     <small>Stack Definition Type&nbsp; :&nbsp; </small>
     <select name="stackdef_type">
       <dtml-in expr="portal_workflow.getWorkflowStackDefRegistry().listWorkflowStackDefTypes()">
@@ -25,8 +20,7 @@
       </dtml-in>
     </select>
     <br /><br />
-
-    <small>Associate Stack Type&nbsp; :&nbsp; </small>
+    <small>Stack Type&nbsp; :&nbsp; </small>
     <select name="stack_type">
       <dtml-in expr="portal_workflow.getWorkflowStackRegistry().listWorkflowStackTypes()">
           <option value="&dtml-sequence-item;">
@@ -35,86 +29,57 @@
       </dtml-in>
     </select>
     <br /><br />
-
-    <b>Common properties</b>
-    <br /><br />
     <small>With workflow variable name :</small>
     <input type="text"
              name="var_id"
              value="" />
-    <br />
-    <small>With associated local role (For hierarchical stack it's the
-    current level):</small>
-    <input type="text"
-             name="ass_local_role"
-             value="" />
-    <br />
-
-    <small>Local role above current level (-1, -2,..-n) (For hierarchical
-    stack only):
-    </small>
-    <input type="text"
-             name="up_ass_local_role"
-             value="" />
-    <br />
-
-    <small>Local role below current level (1, 2,..n) (For hierarchical
-    stack only):
-    </small>
-    <input type="text"
-             name="down_ass_local_role"
-             value="" />
-
-    <br />
-
-    <small>Ids of other stacks where people within those than can manage
+    <br /><br />
+    <small>Ids of other stacks where people within those can manage
     this stack.  </small>
     <input type="text"
              name="manager_stack_ids:tokens"
              value="" />
     <br />
     <br />
-
-    <input type="submit" name="addStackDefinition:method" value="Add" />
+    <input type="submit" name="addStackDefinition:method" value="Add Stack Definition" />
   <td>
 </tr>
 
-<tr>
-  <td colspan="2"><hr /></td>
-</tr>
+</table>
 
 <!-- /////////////////////////////////////////////////////////////////// -->
 
+<hr />
+
+<h3>View stack definitions</h3>
+<form action="<dtml-var absolute_url>" method="POST">
+
 <tr>
-  <th align="left" valign="top">Currently defined variables which hold delegatees</th>
-  <td>
+  <td align="left">
     <dtml-in expr="getStackDefinitions().keys()">
       <dtml-let current_variable_id="_['sequence-item']">
+            <dtml-let stackdef="getStackDefinitionFor(current_variable_id)">
         <input type="checkbox" name="ids:list" value="<dtml-var current_variable_id>" />
-
-        <b><dtml-var current_variable_id></b><br /><br />
-        <dtml-let
-        stackdef="getStackDefinitionFor(current_variable_id)">
-        <b>Type : </b>
+        <b>
+          <a href="<dtml-var
+          absolute_url>/manage_stackdefinition?stackdef_id=<dtml-var current_variable_id>">
+             <dtml-var current_variable_id> (&nbsp;<dtml-var "stackdef.meta_type">&nbsp;)
+          </a>
+        </b>
+        &nbsp;(&nbsp;
+        <i>Stack Type : </i>
           <dtml-var expr="stackdef.getStackDataStructureType()">
-        <br />
-        <b>With variable id : </b><dtml-var expr="current_variable_id"><br />
-        <b>Associated local role (current_level): </b><dtml-var
-        expr="stackdef.getAssociatedLocalRole()"><br />
-        <b>Local role for users above current level (Hierarchical): </b><dtml-var
-        expr="getattr(stackdef, 'up_ass_local_role', 'Not defined')"><br />
-        <b>Local role for users below current level (Hierarchical): </b><dtml-var
-        expr="getattr(stackdef, 'down_ass_local_role', 'Not Defined')"><br
-        />
-        <b>Manager stack ids : </b><dtml-var
-        expr="getattr(stackdef, 'manager_stack_ids', 'Not Defined')"><br
-        />
-        <br />
+        <i>Var id : </i><dtml-var expr="current_variable_id">
+        <i>Manager stack ids : </i><dtml-var
+        expr="getattr(stackdef, 'manager_stack_ids', 'Not Defined')">
         </dtml-let>
-      </dtml-let>
+        </dtml-let>
+        &nbsp;)&nbsp;
+      <br />
     </dtml-in>
+    <br />
     <input type="submit" name="delStackDefinitionsById:method"
-        value="Remove selected" />
+        value="Remove selected stack definition(s)" />
   </td>
 </tr>
 <tr>
