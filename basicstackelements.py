@@ -72,6 +72,7 @@ class UserStackElement(StackElement):
     """
     meta_type = 'User Stack Element'
     prefix = 'user'
+    hidden_meta_type = 'Hidden User Stack Element'
 
     __implement__ = (IStackElement,)
 
@@ -114,12 +115,15 @@ class GroupStackElement(UserStackElement):
         >>> gse.getGroupIdWithoutPrefix()
         'nuxeo'
     """
+
     meta_type = 'Group Stack Element'
 
     __implement__ = (IStackElement,)
 
     prefix = 'group'
     group_id = ''
+
+    hidden_meta_type = 'Hidden Group Stack Element'
 
     def __init__(self, group_id, prefix=''):
         self.group_id = group_id
@@ -156,9 +160,6 @@ class HiddenUserStackElement(UserStackElement):
     
     __implement__ = (IStackElement,)
 
-    def __init__(self):
-        pass
-    
     def __call__(self):
         return USER_STACK_ELEMENT_NOT_VISIBLE
 
@@ -182,9 +183,6 @@ class HiddenGroupStackElement(GroupStackElement):
     prefix = 'hidden_group'
     
     __implement__ = (IStackElement,)
-
-    def __init__(self):
-        pass
 
     def __call__(self):
         return GROUP_STACK_ELEMENT_NOT_VISIBLE
@@ -212,6 +210,8 @@ class UserSubstituteStackElement(UserStackElement):
     meta_type = 'User Substitute Stack Element'
     prefix = 'user_substitute'
 
+    hidden_meta_type = 'Hidden User Stack Element'
+
     __implement__ = (IStackElement,)
     
     def getIdForRoleSettings(self):
@@ -224,6 +224,8 @@ class GroupSubstituteStackElement(GroupStackElement):
     """
     meta_type = 'Group Substitute Stack Element'
     prefix = 'group_substitute'
+
+    hidden_meta_type = 'Hidden Group Stack Element'
 
     __implement__ = (IStackElement,)
 
