@@ -131,6 +131,17 @@ class Stack(SimpleItem):
         """
         raise NotImplementedError
 
+    def getStackContent(self, type='str', **kw):
+        """Return the actual content of the stack.
+
+        It has to supports at least three types of returned values:
+
+         + str
+         + role
+         + call
+        """
+        raise NotImplementedError
+
     #
     # MISC
     #

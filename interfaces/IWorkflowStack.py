@@ -57,6 +57,16 @@ class IWorkflowStack(Interface.Base):
         Needs to be public for non restricted code
         """
 
+    def getStackContent(type='str', **kw):
+        """Return the actual content of the stack.
+
+        It has to supports at least three types of returned values:
+
+         + str
+         + role
+         + call
+        """
+
     def push(elt=None):
         """Push elt in the queue
         """
