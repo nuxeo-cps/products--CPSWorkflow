@@ -134,8 +134,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
         """
         pass
 
-    security.declarePrivate('updateDelegateesLocalRolesFor')
-    def updateDelegateesLocalRolesFor(self, ob, **kw):
+    security.declarePrivate('updateStackDefinitionsRoleMappingFor')
+    def updateStackDefinitionsRoleMappingsFor(self, ob, **kw):
         """Update local roles for delegatees that are within workflow stacks
         """
         changed = 0
@@ -236,7 +236,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
         """Change the object permissions according to the current state.
 
         Change the local roles of the people eventually within workflow
-        stacks. (CPS)
+        stacks according to stackdefinition rules.
 
         Returns True if some change on an object was done.
         """
@@ -244,10 +244,11 @@ class WorkflowDefinition(DCWorkflowDefinition):
         # Update permissions according to the current state
         changed = DCWorkflowDefinition.updateRoleMappingsFor(self, ob)
 
-        # Update Local roles according the workflow stack definitions
-        delegatees_changed = self.updateDelegateesLocalRolesFor(ob, **kw)
+        # Update Local roles according the workflow stack definitions rules
+        stackdefs_changed = self.updateStackDefinitionsRoleMappingsFor(ob,
+                                                                       **kw)
 
-        return (changed and delegatees_changed)
+        return (changed and stackdefs_changed)
 
     def _checkStackGuards(self, t, ob):
         """Check the stack workflow transition guards on the transition for ob

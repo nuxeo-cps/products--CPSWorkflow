@@ -17,3 +17,5 @@ New internal features:
 - API : wftool.getFormerLocalRoleMappingForStack()
 - API : wftool.updateFormerLocalRoleMappingForStack()
 - CPS State refactored
+- Workflow API :
+  - updateDelegateesLocalRolesFor() -> updateStackDefinitionsRoleMappingsFor()
