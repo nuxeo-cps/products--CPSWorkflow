@@ -197,7 +197,7 @@ class SimpleStack(Stack):
         for id in ids:
             self._pop(id)
 
-    def getStackContent(self, level=None):
+    def getStackContent(self, type='str', level=None, **kw):
         """Return the stack content
 
         It returns strings but not objects
@@ -467,7 +467,7 @@ class HierarchicalStack(SimpleStack):
 
     ###################################################
 
-    def getStackContent(self):
+    def getStackContent(self, type='str', **kw):
         """Return the stack content
         """
         res = {}
@@ -615,6 +615,7 @@ class HierarchicalStack(SimpleStack):
         for id in ids:
             level = int(id.split(',')[0])
             the_id = id.split(',')[1]
+
             self._pop(elt=the_id, level=int(level))
 
     def replace(self, old, new):
