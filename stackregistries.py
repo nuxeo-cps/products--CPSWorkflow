@@ -174,12 +174,13 @@ class WorkflowStackElementRegistryCls:
         _types.sort()
         return _types
 
-    def makeWorkflowStackElementTypeInstance(self, stack_elt_type, **kw):
+    def makeWorkflowStackElementTypeInstance(self, stack_elt_type,
+                                             elt_str, **kw):
         """Factory to make a workflow stack element type instance of the given
         workflow stack type with id = <id>
         """
         if stack_elt_type in self.listWorkflowStackElementTypes():
-            return self._stack_element_classes[stack_elt_type](**kw)
+            return self._stack_element_classes[stack_elt_type](elt_str, **kw)
         return None
 
     def getClass(self, stack_elt_type):
