@@ -21,11 +21,16 @@
 """ CPS Workflow Stack Registries and Registry Tool
 """
 
+from zLOG import LOG, INFO
+
 from Globals import InitializeClass, DTMLFile
 from AccessControl import ClassSecurityInfo
+from Interface.Verify import verifyClass, DoesNotImplement
 
 from Products.CMFCore.CMFCorePermissions import ManagePortal
 
+from interfaces import IWorkflowStack
+from interfaces import IWorkflowStackDefinition
 from interfaces import IWorkflowStackRegistry
 from interfaces import IWorkflowStackDefRegistry
 
@@ -42,10 +47,16 @@ class WorkflowStackRegistryCls:
         """Register a class for a stack type
         """
         if cls is not None:
-            meta_type = cls.meta_type
-            if meta_type not in self.listWorkflowStackTypes():
-                self._stack_classes[meta_type] = cls
-                return 1
+            try:
+                verifyClass(IWorkflowStack, cls)
+            except DoesNotImplement:
+                LOG("WorkflowStackRegistry error : ", INFO,
+                    "Cannot import class %s" %str(cls))
+            else:
+                meta_type = cls.meta_type
+                if meta_type not in self.listWorkflowStackTypes():
+                    self._stack_classes[meta_type] = cls
+                    return 1
         return 0
 
     def listWorkflowStackTypes(self):
@@ -86,10 +97,16 @@ class WorkflowStackDefRegistryCls:
         """Register a class for a stack def type
         """
         if cls is not None:
-            meta_type = cls.meta_type
-            if meta_type not in self.listWorkflowStackDefTypes():
-                self._stack_def_classes[meta_type] = cls
-                return 1
+            try:
+                verifyClass(IWorkflowStackDefinition, cls)
+            except DoesNotImplement:
+                LOG("WorkflowStackDefRegistry error : ", INFO,
+                    "Cannot import class %s" %str(cls))
+            else:
+                meta_type = cls.meta_type
+                if meta_type not in self.listWorkflowStackDefTypes():
+                    self._stack_def_classes[meta_type] = cls
+                    return 1
         return 0
 
     def listWorkflowStackDefTypes(self):

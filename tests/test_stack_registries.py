@@ -27,10 +27,8 @@ from Products.CPSWorkflow.basicstacks import SimpleStack, \
 from Products.CPSWorkflow.basicstackdefinitions import \
      SimpleWorkflowStackDefinition, HierarchicalWorkflowStackDefinition
 
-from Products.CPSWorkflow.interfaces.IWorkflowStackRegistry import \
-     IWorkflowStackRegistry
-from Products.CPSWorkflow.interfaces.IWorkflowStackDefRegistry import \
-     IWorkflowStackDefRegistry
+from Products.CPSWorkflow.interfaces import IWorkflowStackRegistry
+from Products.CPSWorkflow.interfaces import IWorkflowStackDefRegistry
 
 from Interface.Verify import verifyClass
 
@@ -206,6 +204,35 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
 
         # Recover back the value
         WorkflowStackDefRegistry._stack_def_classes = stackdef_reg_save
+
+    def test_stack_registry_interface_check(self):
+
+        #
+        # Here, we will try to register a stack that is not implementing the
+        # base interface
+        #
+
+        class FakeStack:
+            meta_type = 'Fake Stack'
+
+        self.assertEqual(WorkflowStackRegistry.register(FakeStack), 0)
+        self.assert_(
+            'Fake Stack' not in WorkflowStackRegistry.listWorkflowStackTypes())
+
+    def test_stackdef_registry_interface_check(self):
+
+        #
+        # Here, we will try to register a stackdef that is not implementing the
+        # base interface
+        #
+
+        class FakeStackDef:
+            meta_type = 'Fake Stack Def'
+
+        self.assertEqual(WorkflowStackDefRegistry.register(FakeStackDef), 0)
+        self.assert_(
+            'Fake Stack Def' not in WorkflowStackRegistry.listWorkflowStackTypes())
+
 
 if __name__ == '__main__':
     framework()
