@@ -79,6 +79,8 @@ class StackElement(SimpleItem):
         """
         copy = ElementRegistry.makeWorkflowStackElementTypeInstance(
             self.meta_type, self.getId())
+        for k, v in self.__dict__.items():
+            setattr(copy, k,v)
         return copy
 
     #
