@@ -184,7 +184,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
             #
             # First remove associated local roles to the ones who are not
-            # supposed to have any
+            # supposed to have any (not a single one)
             #
 
             for id in former_mapping.keys():
@@ -193,15 +193,23 @@ class WorkflowDefinition(DCWorkflowDefinition):
                     old_local_roles = former_mapping[id]
                     for old_local_role in old_local_roles:
                         if not id.startswith('group:'):
-                            mtool.deleteLocalRoles(ob,
-                                                   member_ids=[id],
-                                                   member_role=old_local_role,
-                                                   recursive=1)
-                    else:
-                        group_id = id[len('group:'):]
-                        mtool.deleteLocalGroupRoles(ob,
-                                                    ids=[group_id],
-                                                    role=old_local_role)
+                            current_roles = list(
+                                ob.get_local_roles_for_userid(userid=id))
+                            new_roles = [role for role in current_roles
+                                         if role != old_local_role]
+                            ob.manage_delLocalRoles(userids=[id])
+                            if new_roles:
+                                ob.manage_setLocalRoles(id, new_roles)
+                        else:
+                            id = id[len('group:'):]
+                            current_roles = list(
+                                ob.get_local_roles_for_groupid(groupid=id))
+                            new_roles = [role for role in current_roles
+                                         if role != old_local_role]
+                            ob.manage_delLocalGroupRoles(groupids=[id])
+                            if new_roles:
+                                ob.manage_setLocalGroupRoles(id, new_roles)
+
             #
             # Add local roles to member / groups within the mapping
             #
@@ -209,22 +217,23 @@ class WorkflowDefinition(DCWorkflowDefinition):
             for id in mapping.keys():
                 changed = 1
                 local_roles = mapping[id]
-                for local_role in local_roles:
-                    if not id.startswith('group:'):
-                        try:
-                            mtool.setLocalRoles(ob,
-                                                member_ids=[id],
-                                                member_role=local_role)
-                        except KeyError:
-                            pass
-                    else:
-                        try:
-                            group_id = id[len('group:'):]
-                            mtool.setLocalGroupRoles(ob,
-                                                     ids=[group_id],
-                                                     role=local_role)
-                        except KeyError:
-                            pass
+                if not id.startswith('group:'):
+                    try:
+                        current_roles = ob.get_local_roles_for_userid(
+                            userid=id)
+                        new_roles = list(current_roles + local_roles)
+                        ob.manage_setLocalRoles(id, new_roles)
+                    except KeyError:
+                        pass
+                else:
+                    try:
+                        id = id[len('group:'):]
+                        current_roles = ob.get_local_roles_for_groupid(
+                            groupid=id)
+                        new_roles = list(current_roles + local_roles)
+                        ob.manage_setLocalGroupRoles(id, new_roles)
+                    except KeyError:
+                        pass
 
             #
             # Removing local roles for member / group (s) that have been
@@ -237,17 +246,22 @@ class WorkflowDefinition(DCWorkflowDefinition):
                         if old_local_role not in mapping[k]:
                             changed = 1
                             if not k.startswith('group:'):
-                                mtool.deleteLocalRoles(
-                                    ob,
-                                    member_ids=[k],
-                                    member_role=old_local_role,
-                                    recursive=1)
+                                current_roles = list(
+                                    ob.get_local_roles_for_userid(userid=k))
+                                new_roles = [role for role in current_roles
+                                             if role != old_local_role]
+                                ob.manage_delLocalRoles(userids=[k])
+                                if new_roles:
+                                    ob.manage_setLocalRoles(id, new_roles)
                             else:
-                                group_id = k[len('group:'):]
-                                mtool.deleteLocalGroupRoles(
-                                    ob,
-                                    ids=[group_id],
-                                    role=old_local_role)
+                                id = k[len('group:'):]
+                                current_roles = list(
+                                    ob.get_local_roles_for_groupid(groupid=id))
+                                new_roles = [role for role in current_roles
+                                             if role != old_local_role]
+                                ob.manage_delLocalGroupRoles(groupids=[id])
+                                if new_roles:
+                                    ob.manage_setLocalGroupRoles(id, new_roles)
 
             # Update the former local role mapping
             wftool.updateFormerLocalRoleMappingForStack(ob, self.id, stackdef,
@@ -1156,6 +1170,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
                 #
 
                 current_wf_var_id = kwargs.get('current_wf_var_id', '')
+
                 if current_wf_var_id != wf_var:
                     continue
 
