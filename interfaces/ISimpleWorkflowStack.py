@@ -39,7 +39,7 @@ class ISimpleWorkflowStack(Interface.Base):
         O : failed
         1 : sucsess
         """
-    def getStackContent(level=None):
+    def getStackContent():
         """Return the stack content
         """
 
