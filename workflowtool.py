@@ -873,7 +873,7 @@ class WorkflowTool(BaseWorkflowTool):
         if stackdef:
             mtool = getToolByName(self, 'portal_membership')
             aclu = self.acl_users
-            ds = self.getDelegateesDataStructureFor(ob, stack_id)
+            ds = self.getStackFor(ob, stack_id)
             canManage = stackdef.canManageStack(ds, aclu, mtool, ob)
             if canManage:
                 return 1
