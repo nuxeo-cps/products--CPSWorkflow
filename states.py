@@ -236,12 +236,12 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
                 default_expr="python:state_change.getStackFor(var_id='%s')" %var_id,
                 for_status=1,
                 update_always=0)
-        else:
-            if REQUEST is not None:
-                return self.manage_advanced_properties(
-                    REQUEST,
-                    'The id you choose is already taken !')
-            return -1
+        ##else:
+        ##    if REQUEST is not None:
+        ##        return self.manage_advanced_properties(
+        ##            REQUEST,
+        ##            'The id you choose is already taken !')
+        ##    return -1
 
         stackdef = None
 
