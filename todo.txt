@@ -1,12 +1,10 @@
 $Id$
 
- o views on stack objects (edit / view)
-   o stack.render(mode='edit')
-   o use schema / layout / widgets to render them
+ o views on stack elements (edit / view)
+   x stack.render(mode='edit')
+   o default macros
 
- o views on stack elements
-
- x stack registries
+  x stack registries
 
  x stack def registries
 
@@ -19,7 +17,7 @@ $Id$
  x WorkflowStackGroupDelegate
    + think about the substitutes
 
- o Former local roles for a given stack stored within the status of the object
+ x Former local roles for a given stack stored within the status of the object
    + for the moment stored as an attribute of the ds
 
  o Hierchical stack: be able to insert users at intermediate levels
