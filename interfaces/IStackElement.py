@@ -29,6 +29,6 @@ class IStackElement(Interface.Base):
     def getGuard():
         """Return a temporarly guard instance
         """
-    def getGuardSummary(self):
+    def getGuardSummary():
         """Return a guard summary for display purpose
         """
