@@ -141,7 +141,6 @@ class WorkflowDefinition(DCWorkflowDefinition):
         current_wf_var_id = kw.get('current_wf_var_id', '')
 
         wftool = getToolByName(self, 'portal_workflow')
-        mtool = getToolByName(self, 'portal_membership')
         stackdefs = wftool.getStackDefinitionsFor(ob)
         
         changed = 0
@@ -339,9 +338,10 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
         DC workflow + stack def checks
         """
-        dcworkflow_check = DCWorkflowDefinition._checkTransitionGuard(self, t, ob)
-        stack_check = self._checkStackGuards(t, ob)
-        return dcworkflow_check and stack_check
+        guard = t.guard
+        return (guard is None or
+                guard.check(getSecurityManager(), self, ob) and
+                self._checkStackGuards(t, ob))
 
     def _changeStateOf(self, ob, tdef=None, kwargs=None):
         """
