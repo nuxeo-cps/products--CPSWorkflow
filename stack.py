@@ -57,43 +57,43 @@ class Stack(SimpleItem):
     #
 
     def getMetaType(self):
-	"""Returns the meta_type of the class
+        """Returns the meta_type of the class
 
-	Needs to be public for non restricted code
-	"""
-	return self.meta_type
+        Needs to be public for non restricted code
+        """
+        return self.meta_type
 
     #
     # Private API
     #
 
     def _getElementsContainer(self):
-	"""Returns the stack elements container
+        """Returns the stack elements container
 
-	This is PersistentList type
-	"""
-	return self._elements_container
+        This is PersistentList type
+        """
+        return self._elements_container
 
     def _prepareElement(self, elt_str=None, **kw):
-	"""Prepare the element.
+        """Prepare the element.
 
-	Usual format : <prefix : id>
-	Call the registry to construct an instance according to the prefix
-	Check WorkflowStackElementRegistry
-	"""
-	elt = None
-	if isinstance(elt_str, StringType):
-	    if ':' in elt_str:
-		prefix = elt_str.split(':')[0]
-	    else:
-		# XXX compatibility
-		prefix = 'user'
-	    elt_meta_type = ElementRegistry.getMetaTypeForPrefix(prefix)
-	    if elt_meta_type is not None:
-		elt = ElementRegistry.makeWorkflowStackElementTypeInstance(
-		    elt_meta_type, elt_str, **kw)
-		return elt
-	return elt_str
+        Usual format : <prefix : id>
+        Call the registry to construct an instance according to the prefix
+        Check WorkflowStackElementRegistry
+        """
+        elt = None
+        if isinstance(elt_str, StringType):
+            if ':' in elt_str:
+                prefix = elt_str.split(':')[0]
+            else:
+                # XXX compatibility
+                prefix = 'user'
+            elt_meta_type = ElementRegistry.getMetaTypeForPrefix(prefix)
+            if elt_meta_type is not None:
+                elt = ElementRegistry.makeWorkflowStackElementTypeInstance(
+                    elt_meta_type, elt_str, **kw)
+                return elt
+        return elt_str
 
 
     #
@@ -101,63 +101,63 @@ class Stack(SimpleItem):
     #
 
     def push(self, elt=None):
-	"""Push elt in the queue
-	"""
-	raise NotImplementedError
+        """Push elt in the queue
+        """
+        raise NotImplementedError
 
     def pop(self, elt=None):
-	"""Remove elt from within the queue
+        """Remove elt from within the queue
 
-	If elt is None then remove the last one
-	"""
-	raise NotImplementedError
+        If elt is None then remove the last one
+        """
+        raise NotImplementedError
 
     def reset(self, **kw):
-	"""Reset the stack
-	"""
-	raise NotImplementedError
+        """Reset the stack
+        """
+        raise NotImplementedError
 
     def getCopy(self):
-	"""Duplicate self
+        """Duplicate self
 
-	Return a new object instance of the same type
-	"""
-	raise NotImplementedError
+        Return a new object instance of the same type
+        """
+        raise NotImplementedError
 
     def __deepcopy__(self, ob):
-	"""Deep copy. Just to call a clean API while calling getCopy()
+        """Deep copy. Just to call a clean API while calling getCopy()
 
-	Cope with mutable attrs to break reference
-	"""
-	raise NotImplementedError
+        Cope with mutable attrs to break reference
+        """
+        raise NotImplementedError
 
     def getStackContent(self, type='id', **kw):
-	"""Return the actual content of the stack.
+        """Return the actual content of the stack.
 
-	It has to supports at least three types of returned values:
+        It has to supports at least three types of returned values:
 
-	 + id
-	 + str
-	 + role
-	 + call
-	"""
-	raise NotImplementedError
+         + id
+         + str
+         + role
+         + call
+        """
+        raise NotImplementedError
 
     #
     # MISC
     #
 
     def render(self, context, mode, **kw):
-	"""Render in mode
+        """Render in mode
 
-	context is te context. var_id is the wokkflow variable holding this
-	stack
-	"""
-	meth = getattr(context, self.render_method, None)
-	if meth is None:
-	    raise RuntimeError(
-		"Unknown Render method %s for stack type %s"
-		    %(self.render_method, self.meta_type))
-	return meth(context=context, mode=mode, stack=self)
+        context is te context. var_id is the wokkflow variable holding this
+        stack
+        """
+        meth = getattr(context, self.render_method, None)
+        if meth is None:
+            raise RuntimeError(
+                "Unknown Render method %s for stack type %s"
+                    %(self.render_method, self.meta_type))
+        return meth(context=context, mode=mode, stack=self)
 
 InitializeClass(Stack)
