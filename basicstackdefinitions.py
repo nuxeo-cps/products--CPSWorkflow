@@ -49,7 +49,7 @@ class SimpleStackDefinition(StackDefinition):
     #
     # PRIVATE API
     # Overrides the not implemented method of Stack
-    # 
+    #
 
     def _getLocalRolesMapping(self, ds):
         """Give the local roles mapping for the member / group ids within the

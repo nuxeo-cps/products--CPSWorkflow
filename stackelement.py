@@ -53,110 +53,110 @@ class StackElement(SimpleItem):
     edit_guard = None
 
     def __init__(self, id):
-        self.id = id
+	self.id = id
 
     #
     # PRIVATE
     #
 
     def __cmp__(self, other):
-        if isinstance(other, StackElement):
-            return cmp(self.getId(), other())
-        elif isinstance(other, StringType):
-            return cmp(self.getId(), other)
-        return 0
+	if isinstance(other, StackElement):
+	    return cmp(self.getId(), other())
+	elif isinstance(other, StringType):
+	    return cmp(self.getId(), other)
+	return 0
 
     def __call__(self):
-        return self.getId()
+	return self.getId()
 
     def __str__(self):
-        return self.getId()
+	return self.getId()
 
     #
     # API
     #
 
     def getPrefix(self):
-        """Returns the prefix for this stack element
-        """
-        return self.prefix
+	"""Returns the prefix for this stack element
+	"""
+	return self.prefix
 
     def getIdWithoutPrefix(self):
-        """Return the group id without the 'group:' prefix
-        """
-        return self()[len(self.getPrefix())+1:]
+	"""Return the group id without the 'group:' prefix
+	"""
+	return self()[len(self.getPrefix())+1:]
 
     def getHiddenMetaType(self):
-        return self.hidden_meta_type
+	return self.hidden_meta_type
 
     #
     # SECURITY
     #
 
     def isVisible(self, sm, stack, context):
-        """Is the entry visible by the user
+	"""Is the entry visible by the user
 
-        returns a boolean
-        """
+	returns a boolean
+	"""
 
-        # Standalone elt
-        if stack is None or context is None:
-            return 1
+	# Standalone elt
+	if stack is None or context is None:
+	    return 1
 
-        wftool = getToolByName(context, 'portal_workflow', None)
-        if wftool is None:
-            # No workflow tool thus standalone
-            return 1
+	wftool = getToolByName(context, 'portal_workflow', None)
+	if wftool is None:
+	    # No workflow tool thus standalone
+	    return 1
 
-        # XXX CPS assumptions
-        wf_def = wftool.getWorkflowsFor(context)[0]
+	# XXX CPS assumptions
+	wf_def = wftool.getWorkflowsFor(context)[0]
 
-        # First check if there's an override
-        if self.getViewGuard():
-            return self.getViewGuard().check(sm, wf_def, context)
+	# First check if there's an override
+	if self.getViewGuard():
+	    return self.getViewGuard().check(sm, wf_def, context)
 
-        # Evaluate the default guard for view of the stackdef within
-        # the stack context
-        else:
-            for k, v in wftool.getStacks(context).items():
-                if v == stack:
-                    stackdef = wftool.getStackDefinitionFor(context, k)
-                    guard = stackdef.getViewStackElementGuard()
-                    return guard.check(sm, wf_def, context)
-        return 1
+	# Evaluate the default guard for view of the stackdef within
+	# the stack context
+	else:
+	    for k, v in wftool.getStacks(context).items():
+		if v == stack:
+		    stackdef = wftool.getStackDefinitionFor(context, k)
+		    guard = stackdef.getViewStackElementGuard()
+		    return guard.check(sm, wf_def, context)
+	return 1
 
     def isEditable(self, sm, stack, context):
-        """Is the entry editable by the user
+	"""Is the entry editable by the user
 
-        returns a boolean
-        """
+	returns a boolean
+	"""
 
-        # Standalone elt
-        if stack is None or context is None:
-            return 1
+	# Standalone elt
+	if stack is None or context is None:
+	    return 1
 
-        wftool = getToolByName(context, 'portal_workflow', None)
-        if wftool is None:
-            # No workflow tool thus standalone
-            return 1
+	wftool = getToolByName(context, 'portal_workflow', None)
+	if wftool is None:
+	    # No workflow tool thus standalone
+	    return 1
 
-        # XXX CPS assumptions
-        wf_def = wftool.getWorkflowsFor(context)[0]
+	# XXX CPS assumptions
+	wf_def = wftool.getWorkflowsFor(context)[0]
 
-        # First check if there's an override
-        if self.getViewGuard():
-            return self.getViewGuard().check(sm, wf_def, context)
+	# First check if there's an override
+	if self.getViewGuard():
+	    return self.getViewGuard().check(sm, wf_def, context)
 
-        # Evaluate the default guard for view of the stackdef within
-        # the stack context
-        else:
-            # XXX 
-            for k, v in wftool.getStacks(context).items():
-                if v == stack:
-                    stackdef = wftool.getStackDefinitionFor(context, k)
-                    guard = stackdef.getEditStackElementGuard()
-                    return guard.check(sm, wf_def, context)
-        return 1
+	# Evaluate the default guard for view of the stackdef within
+	# the stack context
+	else:
+	    # XXX
+	    for k, v in wftool.getStacks(context).items():
+		if v == stack:
+		    stackdef = wftool.getStackDefinitionFor(context, k)
+		    guard = stackdef.getEditStackElementGuard()
+		    return guard.check(sm, wf_def, context)
+	return 1
 
 
     #
@@ -164,30 +164,30 @@ class StackElement(SimpleItem):
     #
 
     def getViewGuard(self):
-        return self.view_guard
+	return self.view_guard
 
     def setViewGuard(self, guard_permissions='', guard_roles='',
-                     guard_groups='', guard_expr=''):
-        self.view_guard = Guard()
-        _props = {'guard_permissions':guard_permissions,
-                  'guard_roles':guard_roles,
-                  'guard_groups':guard_groups,
-                  'guard_expr':guard_expr,
-                  }
-        self.getViewGuard().changeFromProperties(_props)
+		     guard_groups='', guard_expr=''):
+	self.view_guard = Guard()
+	_props = {'guard_permissions':guard_permissions,
+		  'guard_roles':guard_roles,
+		  'guard_groups':guard_groups,
+		  'guard_expr':guard_expr,
+		  }
+	self.getViewGuard().changeFromProperties(_props)
 
     def getEditGuard(self):
-        return self.edit_guard
+	return self.edit_guard
 
     def setEditGuard(self, guard_permissions='', guard_roles='',
-                     guard_groups='', guard_expr=''):
-        self.edit_guard = Guard()
-        _props = {'guard_permissions':guard_permissions,
-                  'guard_roles':guard_roles,
-                  'guard_groups':guard_groups,
-                  'guard_expr':guard_expr,
-                  }
-        self.getEditGuard().changeFromProperties(_props)
+		     guard_groups='', guard_expr=''):
+	self.edit_guard = Guard()
+	_props = {'guard_permissions':guard_permissions,
+		  'guard_roles':guard_roles,
+		  'guard_groups':guard_groups,
+		  'guard_expr':guard_expr,
+		  }
+	self.getEditGuard().changeFromProperties(_props)
 
 
 InitializeClass(StackElement)

@@ -956,7 +956,7 @@ class WorkflowTool(BaseWorkflowTool):
         """
 
         # XXX code sucks
-        
+
         _wf_history = ob.workflow_history[wf_id]
         if len(_wf_history) > 1:
             return _wf_history[-2].get('sflrm', {}).get(stack_id, {})
