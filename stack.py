@@ -18,17 +18,16 @@
 #
 # $Id$
 
-""" (Workflow) Stack definitions
+""" Stack Type definition
 
-Thus, these classes cope with a data structure and the how to store
-elements within.
+Base stack type definition. It does :
 
-They are public objects right now. The access will be made through the
-WorkfloStackDefinitions.
+  + store stack element instances
+  + implement a default LIFO
+  + have a render() method linked to a given template within the skins
 """
 
 from types import StringType
-import copy
 
 from OFS.SimpleItem import SimpleItem
 from Globals import InitializeClass
@@ -36,24 +35,12 @@ from AccessControl import ClassSecurityInfo
 
 from ZODB.PersistentList import PersistentList
 
-from basicstackelements import UserStackElement, GroupStackElement
 from stackregistries import WorkflowStackElementRegistry as ElementRegistry
 
 from interfaces import IWorkflowStack
-from interfaces import ISimpleWorkflowStack
-from interfaces import IHierarchicalWorkflowStack
-
-################################################################
-##############################################################
 
 class Stack(SimpleItem):
-    """Base Stack
-
-    Stack Implementation. Generic storage. LIFO
-
-    Posssiblity to specify a maximum size for the Stack.
-
-    The container is a simple list type.
+    """Base Stack Type Definition
     """
 
     meta_type = 'Stack'
@@ -71,32 +58,16 @@ class Stack(SimpleItem):
         self.max_size = maxsize
         self._elements_container = PersistentList()
 
+    #
+    # Private API
+    #
+
     def _getElementsContainer(self):
+        """Returns the stack elements container
+
+        This is PersistentList type
+        """
         return self._elements_container
-
-    def getMetaType(self):
-        """Returns the meta_type of the class
-        """
-        return self.meta_type
-
-    def getSize(self):
-        """ Return the current size of the Stack
-        """
-        return len(self._getElementsContainer())
-
-    def isFull(self):
-        """Is the queue Full ?
-
-        Used in the case of max size is specified
-        """
-        if self.max_size is not None:
-            return self.getSize() >= self.max_size
-        return 0
-
-    def isEmpty(self):
-        """Is the Stack empty ?
-        """
-        return self.getSize() == 0
 
     def _prepareElement(self, elt_str=None):
         """Prepare the element.
@@ -118,6 +89,40 @@ class Stack(SimpleItem):
                     elt_meta_type, elt_str)
                 return elt
         return elt_str
+
+    #
+    # Accessors
+    #
+
+    def getMetaType(self):
+        """Returns the meta_type of the class
+
+        Needs to be public for non restricted code
+        """
+        return self.meta_type
+    
+    def getSize(self):
+        """ Return the current size of the Stack
+        """
+        return len(self._getElementsContainer())
+
+    def isFull(self):
+        """Is the queue Full ?
+
+        Used in the case of max size is specified
+        """
+        if self.max_size is not None:
+            return self.getSize() >= self.max_size
+        return 0
+
+    def isEmpty(self):
+        """Is the Stack empty ?
+        """
+        return self.getSize() == 0
+
+    #
+    # API
+    #
 
     def push(self, elt=None):
         """Push an element in the queue
@@ -154,8 +159,6 @@ class Stack(SimpleItem):
         del self._getElementsContainer()[last_elt_index]
         return res
 
-    #################################################################
-
     def reset(self, **kw):
         """Reset the stack
 
@@ -168,7 +171,7 @@ class Stack(SimpleItem):
         new_groups = kw.get('new_groups', ())
 
         if new_stack is not None:
-            self._elements_container = new_stack._elements_container
+            self._elements_container = new_stack._getElementsContainer()
         else:
             self.__init__()
 
@@ -176,9 +179,12 @@ class Stack(SimpleItem):
             self.push(new_user)
         for new_group in new_groups:
             self.push(new_group)
+
+        return self
         
-                
-    ##################################################################
+    #
+    # MISC
+    #
 
     def render(self, context, mode, **kw):
         """Render in mode
