@@ -37,6 +37,7 @@ from AccessControl import ClassSecurityInfo
 from ZODB.PersistentList import PersistentList
 
 from basicstackelements import UserStackElement, GroupStackElement
+from stackregistries import WorkflowStackElementRegistry as ElementRegistry
 
 from interfaces import IWorkflowStack
 from interfaces import ISimpleWorkflowStack
@@ -99,21 +100,24 @@ class Stack(SimpleItem):
 
     def _prepareElement(self, elt_str=None):
         """Prepare the element.
+
+        Usual format : <prefix : id>
+        Call the registry to construct an instance according to the prefix
+        Check WorkflowStackElementRegistry
         """
-        # XXX do not cope with susbstitutes yet
-        # Just deal with User and Group
         elt = None
         if isinstance(elt_str, StringType):
-            if elt_str.startswith('group:'):
-                elt = GroupStackElement(elt_str)
+            if ':' in elt_str:
+                prefix = elt_str.split(':')[0]
             else:
-                elt = UserStackElement(elt_str)
-        else:
-            # XXX : see how to cope with other kind of stack element Either
-            # with the use of the registry either with the devel will ovverride
-            # this method to cope with it's own case
-            elt = elt_str
-        return elt
+                # XXX compatibility
+                prefix = 'user'
+            elt_meta_type = ElementRegistry.getMetaTypeForPrefix(prefix)
+            if elt_meta_type is not None:
+                elt = ElementRegistry.makeWorkflowStackElementTypeInstance(
+                    elt_meta_type, elt_str)
+                return elt
+        return elt_str
 
     def push(self, elt=None):
         """Push an element in the queue
