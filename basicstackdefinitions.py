@@ -82,7 +82,7 @@ class SimpleStackDefinition(StackDefinition):
             elt_id = elt.getIdForRoleSettings()
             for role_id in self.getManagedRoles():
                 if self._getExpressionForRole(role_id, ds, level=None,
-                                              elt=elt()):
+                                              elt=elt):
                     mapping[elt_id] = mapping.get(elt_id, ()) + (role_id,)
 
         return mapping
@@ -249,10 +249,8 @@ class HierarchicalStackDefinition(StackDefinition):
         # XXX AT: access to real StackElement object to update role mappings
         # even if current user is not supposed to view/edit some stack
         # elements.
-        # Plus give access to the whole element call result in expression (and
-        # not just user/group id, even if it does not make any difference
-        # here).
-        # Check if this is the wanted behaviour.
+        # Plus give access to it in expression (and not just user/group id,
+        # even if it does not make any difference here).
         stack_content = {}
         for clevel in ds.getAllLevels():
             stack_content[clevel] = ds.getLevelContent(level=clevel,
@@ -261,7 +259,7 @@ class HierarchicalStackDefinition(StackDefinition):
             for elt in elts:
                 elt_id = elt.getIdForRoleSettings()
                 for role_id in self.getManagedRoles():
-                    if self._getExpressionForRole(role_id, ds, level, elt()):
+                    if self._getExpressionForRole(role_id, ds, level, elt):
                         mapping[elt_id] = mapping.get(elt_id, ()) + (role_id,)
 
         return mapping
