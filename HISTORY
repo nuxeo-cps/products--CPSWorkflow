@@ -1,0 +1,35 @@
+*******************************************
+** CPSWorkflow V0.1.0 [R1 build 2005/01/20-11:48 by ben]
+
+Requires:
+~~~~~~~~~
+-
+New features:
+~~~~~~~~~~~~~
+- Stack, stack def and stack element registries.
+- Stack do have a render() method
+Bug fixes:
+~~~~~~~~~~
+- 'stock' CMF compatible
+New internal features:
+~~~~~~~~~~~~~~~~~~~~~~
+- Renamming files and classes
+- Split CPSWorkflowStacks.py into stack and basicstacks.py
+- Split CPSWorkflowStackDefinitions.py into stackdefinition.py and
+  basicstackdefinitions.py
+- Stack and stackdef registries are registrering stacks and stackdefs from
+  basicstacks and basicstackdefinitions.
+- registries will not register any classes of they are not implementing the
+  base interfaces
+- basic stack element definitions
+- stack stores now stack elements instead of strings
+- skins directory for stack rendering methods
+- wftool.getWorkflowStackElementRegistry()
+- _changeStateOf() overriden that permits to initialize the stacks at
+  creation time
+- renammed : wftool.getDelegateesDataStructures() -> wftool.getStacks()
+             wftool.getDelegateesDataStructureFor() -> wftool.getStackFor()
+- renammed : sci.getDelegateesVarInfoFor() -> sci.getStackFor()
+             sci.delegatees -> sci.stacks
+             sci.getAllDelegateesVarInfo() -> None
+
