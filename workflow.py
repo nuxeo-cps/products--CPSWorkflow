@@ -1132,9 +1132,6 @@ class WorkflowDefinition(DCWorkflowDefinition):
                     ds = stacks.get(wf_var)
                     stacks[wf_var] = stackdef.resetStack(ds, **kwargs)
 
-        #######################################################################
-        #######################################################################
-
         #
         # Update variables.
         #
@@ -1188,8 +1185,6 @@ class WorkflowDefinition(DCWorkflowDefinition):
                 raise moved_exc
             else:
                 raise ObjectDeleted
-        #
-        ###
 
         # Update role to permission assignments.
         kw = {}
@@ -1419,6 +1414,16 @@ class WorkflowDefinition(DCWorkflowDefinition):
     # XML Serialization
     #
 
+    def toXML(self, indent=''):
+        """Serialize the workflow to XML.
+
+        Returns an XML string, without header.
+        """
+        nindent = indent + '  '
+        contents = '\n' + self._transitionsToXML(indent=nindent) + '\n' + indent
+        return _renderXMLTag('workflow', id=self.getId(),
+                             title=self.title, contents=contents)
+
     def _varExprsToXML(self, var_exprs, indent=''):
         nindent = indent + '  '
         if var_exprs is None:
@@ -1447,8 +1452,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
     def _guardToXML(self, guard, indent=''):
         if guard is None:
-            return indent+'<guard></guard>'
-        nindent = indent+'  '
+            return indent + '<guard></guard>'
+        nindent = indent + '  '
         res = ['']
         res.append(self._permissionsToXML(guard.permissions, indent=nindent))
         res.append(self._rolesToXML(guard.roles, indent=nindent))
@@ -1508,16 +1513,6 @@ class WorkflowDefinition(DCWorkflowDefinition):
         res.append(indent)
         contents = '\n'.join(res)
         return indent + _renderXMLTag('transitions', contents=contents)
-
-    def toXML(self, indent=''):
-        """Serialize the workflow to XML.
-
-        Returns an XML string, without header.
-        """
-        nindent = indent + '  '
-        contents = '\n' + self._transitionsToXML(indent=nindent) + '\n' + indent
-        return _renderXMLTag('workflow', id=self.getId(),
-                             title=self.title, contents=contents)
 
     #
     # ZMI
