@@ -377,7 +377,7 @@ class HierarchicalStack(SimpleStack):
     def push(self, elt=None, level=0, **kw):
         """Push elt at given level or in between two levels
 
-        Coderrors are : 
+        Coderrors are :
 
            1  : ok
            0  : queue id full
@@ -390,14 +390,14 @@ class HierarchicalStack(SimpleStack):
         if self.isFull():
             return 0
 
-        low_level = kw.get('low_level', None) 
+        low_level = kw.get('low_level', None)
         high_level = kw.get('high_level', None)
 
         # Compatibility
         if (low_level is not None and
             high_level is not None):
             level = None
-        
+
         # Simply insert a new elt at a given level
         if level is not None:
             content_level = self.getLevelContent(level)
@@ -437,7 +437,7 @@ class HierarchicalStack(SimpleStack):
                     for clevel in clevels:
                         container[clevel-1] = container[clevel]
                     container[low_level] = [self._prepareElement(elt)]
-                elif low_level >= self.getCurrentLevel():
+                else:
                     clevels = [x for x in levels if x > low_level]
                     clevels.reverse()
                     for clevel in clevels:
@@ -503,7 +503,7 @@ class HierarchicalStack(SimpleStack):
         old_elt = self._prepareElement(old)
         for level in self.getAllLevels():
             try:
-                index_level = self.getLevelContent( 
+                index_level = self.getLevelContent(
                     level=level).index(old_elt())
                 self._elements_container[level][index_level] = new_elt
             except ValueError:
