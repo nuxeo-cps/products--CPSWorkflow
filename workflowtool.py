@@ -883,6 +883,12 @@ class WorkflowTool(BaseWorkflowTool):
             if canManage:
                 return 1
             else:
+                # XXX AT: the same stack def is checked another time. If user
+                # can manage the empty stack and the stack definition is in its
+                # manager stacks ids, canManageStack will say yes and we don't
+                # want that.
+                # Anyway I'm not correcting it because manager_stack_ids
+                # mechanism will not stay as it is, right? ;)
                 stackdefs = self.getStackDefinitionsFor(ob)
                 for stackdef_id in stackdefs.keys():
                     ostack_def = stackdefs[stackdef_id]
