@@ -41,11 +41,12 @@ c.f : doc/stackdefinition.txt
 
 """
 
-from types import StringType
+from types import StringType, DictType
 
 from DateTime import DateTime
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
+from Acquisition import aq_parent, aq_inner
 from OFS.SimpleItem import SimpleItem
 from ZODB.PersistentMapping import PersistentMapping
 
@@ -53,6 +54,8 @@ from Products.CMFCore.utils import getToolByName
 from Products.CMFCore.Expression import Expression, getEngine
 from Products.CMFCore.permissions import View, ModifyPortalContent
 from Products.CMFCore.permissions import ManagePortal
+
+from stackdefinitionguard import StackDefinitionGuard as Guard
 
 from interfaces import IWorkflowStackDefinition
 
@@ -67,7 +70,12 @@ class StackDefinition(SimpleItem):
     security = ClassSecurityInfo()
 
     _isLocked = 0
+
     manager_stack_ids = []
+
+    _empty_stack_manage_guard = None
+    _edit_stack_element_guard = None
+    _view_stack_element_guard = None
 
     def __init__(self,
                  stack_type,
@@ -81,20 +89,85 @@ class StackDefinition(SimpleItem):
         self.stack_type = stack_type
         self.wf_var_id = wf_var_id
 
-        # Fetch from the kw the argument we are interested in
-        for k, v in kw.items():
-            if k == 'manager_stack_ids':
-                setattr(self, k, v)
-
-        # Managed Roles
+        # Managed role expressions
         self._managed_role_exprs = PersistentMapping()
 
-        # XXX change this for a guard
-        self._master_role = 'Manager'
+        # Fetch from the kw the argument we are interested in
+        for k, v in kw.items():
+            if k == 'managed_role_exprs':
+                if isinstance(v, DictType):
+                    for role, expr in v.items():
+                        self.addManagedRole(role, expr)
+            if k == 'manager_stack_ids': 
+                setattr(self, k, v)
+            if k == 'empty_stack_manage_guard':
+                self.setEmptyStackManageGuard(**v)
+
+    #
+    # Guards
+    #
+
+    def getEmptyStackManageGuard(self):
+        """ Get the empty stack manage guard
+
+        This Guard defines the manage policy on the stack when nobody
+        is stored within
+        """
+        if self._empty_stack_manage_guard is None:
+            self._empty_stack_manage_guard  = Guard()
+        return self._empty_stack_manage_guard
+
+    def setEmptyStackManageGuard(self, guard_permissions='',
+                                 guard_roles='', guard_groups='',
+                                 guard_expr='', stackdef_id='', REQUEST=None):
+        """ Set the empty stack manage guard 
+
+        This Guard defines the manage policy on the stack when nobody
+        is stored within
+        """
+        self._empty_stack_manage_guard = None
+        _props = {'guard_permissions':guard_permissions,
+                  'guard_roles':guard_roles,
+                  'guard_groups':guard_groups,
+                  'guard_expr':guard_expr,
+                  }
+        self.getEmptyStackManageGuard().changeFromProperties(_props)
+        if REQUEST is not None:
+            url = aq_parent(aq_inner(self)).absolute_url() + \
+                  '/manage_stackdefinition?stackdef_id=%s'%stackdef_id
+            REQUEST.RESPONSE.redirect(url)
+                  
+
+    def getEditStackElementGuard(self):
+        """ """
+        if self._edit_stack_element_guard is None:
+            self._edit_stack_element_guard  = Guard()
+        return self._edit_stack_element_guard
+
+    def setEditStackElementGuard(self, guard_permissions=None,
+                                 guard_roles=None, guard_groups=None,
+                                 guard_expr=None):
+        """ """
+        _props = {'guard_permissions':guard_permissions,
+                  'guard_roles':guard_roles,
+                  'guard_groups':guard_groups,
+                  'guard_expr':guard_expr,
+                  }
+        self.getEmptyStackManageGuard().changeFromProperties(_props)
+
+    def getViewStackElementGuard(self):
+        """ """
+        if self._view_stack_element_guard is None:
+            self._view_stack_element_guard  = Guard()
+        return self._view_stack_element_guard
 
     #
     # Boring accessors
     #
+    def _getWorkflowDefinition(self):
+        statedef = aq_parent(aq_inner(self)) 
+        states = aq_parent(aq_inner(statedef))
+        return aq_parent(aq_inner(states))
 
     security.declareProtected(View, 'getStackDataStructureType')
     def getStackDataStructureType(self):
@@ -109,21 +182,6 @@ class StackDefinition(SimpleItem):
         """
         return self.wf_var_id
 
-    security.declareProtected(View, 'getMasterRole')
-    def getMasterRole(self):
-        """Returns the master role for this stack definition.
-
-        The master role is the role
-        """
-        return self._master_role
-
-    security.declareProtected(ManagePortal, 'setMasterRole')
-    def setMasterRole(self, role_id):
-        """Set the master role for this stack definition.
-        """
-        if isinstance(role_id, StringType):
-            self._master_role = role_id
-            
     security.declarePublic('getManagerStackIds')
     def getManagerStackIds(self):
         """Returns the ids of other stacks for which the people within those
@@ -165,7 +223,7 @@ class StackDefinition(SimpleItem):
         """Reset stack contained within ds.
         """
         ds = self._prepareStack(ds)
-        ds.reset()
+        ds.reset(**kw)
         return ds
 
     #
@@ -185,18 +243,13 @@ class StackDefinition(SimpleItem):
         return self._managed_role_exprs.keys()
 
     security.declareProtected(ManagePortal, 'addManagedRole')
-    def addManagedRole(self, role_id, expression='python:1', master_role=0):
+    def addManagedRole(self, role_id, expression='python:1'):
         """Add a role to to the list of role this stack definition can cope
         with
-
-        master_role is the role that will be considered as a manager role if
-        the stack dosen't contain any elts
 
         Check _createExpressionNS() for the available namespace variables you
         may use within your TALES expression
         """
-        if master_role:
-            self.setMasterRole(role_id)
         self._managed_role_exprs[role_id] = expression
 
     security.declareProtected(ManagePortal, 'delManagedRole')
