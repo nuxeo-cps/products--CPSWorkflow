@@ -115,7 +115,7 @@ class GroupStackElement(UserStackElement):
 
     hidden_meta_type = 'Hidden Group Stack Element'
 
-    def __init__(self, group_id, prefix=''):
+    def __init__(self, group_id, prefix='', **kw):
 	StackElement.__init__(self, group_id)
 	if prefix:
 	    self.prefix = 'group'
