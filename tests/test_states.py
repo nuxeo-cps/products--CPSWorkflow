@@ -130,9 +130,9 @@ class TestCPSWorkflowStates(SecurityRequestTest):
 
         # Test add delegatees var info
         for stackdef_type, ds_type, var_id, lc in (
-            ('Hierarchical Workflow Stack Definition', 'Hierarchical Stack',
+            ('Hierarchical Stack Definition', 'Hierarchical Stack',
              'toto', 'WorkspaceManager'),
-            ('Simple Workflow Stack Definition', 'Simple Stack',
+            ('Simple Stack Definition', 'Simple Stack',
              'tata', 'WorkspaceMember')):
             sdef.addDelegateesWorkflowVariableInfo(stackdef_type,
                                                    ds_type,

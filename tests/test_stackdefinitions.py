@@ -74,7 +74,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                ass_local_role='WorkspaceManager')
 
         # Basics
-        self.assertEqual(base.meta_type, 'Base Workflow Stack Definition')
+        self.assertEqual(base.meta_type, 'Stack Definition')
         self.assertEqual(base.getStackDataStructureType(), 101)
         self.assertEqual(base.getStackWorkflowVariableId(), 'toto')
         self.assertEqual(base.getAssociatedLocalRole(), 'WorkspaceManager')
@@ -95,11 +95,11 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
     def test_SimpleStackDefinition(self):
         simple = SimpleStackDefinition(101,
-                                               'toto',
-                                               ass_local_role='WorkspaceManager')
+                                       'toto',
+                                       ass_local_role='WorkspaceManager')
 
         # Basics
-        self.assertEqual(simple.meta_type, 'Simple Workflow Stack Definition')
+        self.assertEqual(simple.meta_type, 'Simple Stack Definition')
         self.assertEqual(simple.getStackDataStructureType(), 101)
         self.assertEqual(simple.getStackWorkflowVariableId(), 'toto')
         self.assertEqual(simple.getAssociatedLocalRole(), 'WorkspaceManager')
@@ -415,7 +415,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         # Basics
         self.assertEqual(hierarchical.meta_type,
-                         'Hierarchical Workflow Stack Definition')
+                         'Hierarchical Stack Definition')
         self.assertEqual(hierarchical.getStackDataStructureType(), 101)
         self.assertEqual(hierarchical.getStackWorkflowVariableId(), 'toto')
         self.assertEqual(hierarchical.getAssociatedLocalRole(),
@@ -479,7 +479,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # get a copy of the initial stack
         self.assertNotEqual(new_stack, hierarchical.pop(new_stack,
                                                         ids=['0,user1',]))
-        self.assertEqual(new_stack.getLevelContent(), [])
+        self.assertEqual(new_stack.getLevelContentValues(), [])
         self.assertEqual(new_stack.meta_type, 'Hierarchical Stack')
         # Check if the former local roles are recorded
         self.assertEqual(new_stack.getFormerLocalRolesMapping(),
@@ -491,7 +491,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # We get back an empty stack
         new_stack = hierarchical.push(new_stack)
         self.assertNotEqual(new_stack, None)
-        self.assertEqual(new_stack.getLevelContent(), [])
+        self.assertEqual(new_stack.getLevelContentValues(), [])
         self.assertEqual(new_stack.meta_type, 'Hierarchical Stack')
 
         # Local roles (current / former)
@@ -506,7 +506,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                       levels=[0,0])
         self.assertNotEqual(new_stack, None)
         self.assertEqual(new_stack.meta_type, 'Hierarchical Stack')
-        self.assertEqual(new_stack.getLevelContent(), ['user1', 'user2'])
+        self.assertEqual(new_stack.getLevelContentValues(), ['user1', 'user2'])
 
         # Local Roles
         self.assertEqual(new_stack.getFormerLocalRolesMapping(),
@@ -624,7 +624,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         new_stack = hierarchical.push(new_stack,
                                       group_ids=['group2'],
                                       levels=[0])
-        self.assertEqual(new_stack.getLevelContent(),
+        self.assertEqual(new_stack.getLevelContentValues(),
                          ['user3', 'group:group1', 'group:group3', 'group:group2'])
         self.assertEqual(hierarchical.canManageStack(ds=new_stack,
                                                      aclu=aclu,
@@ -647,7 +647,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Remove group1 and group3
         new_stack = hierarchical.pop(new_stack,
                                      ids=['0,group:group1', '0,group:group3',])
-        self.assertEqual(new_stack.getLevelContent(),
+        self.assertEqual(new_stack.getLevelContentValues(),
                          ['user3', 'group:group2'])
         self.assertEqual(hierarchical.canManageStack(ds=new_stack,
                                                      aclu=aclu,
@@ -671,7 +671,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # User 1 stil within the stack by himself
         new_stack = hierarchical.pop(new_stack,
                                      ids=['0,group:group2'])
-        self.assertEqual(new_stack.getLevelContent(),
+        self.assertEqual(new_stack.getLevelContentValues(),
                          ['user3',])
         self.assertEqual(hierarchical.canManageStack(ds=new_stack,
                                                      aclu=aclu,
@@ -694,7 +694,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Remove user1
         new_stack = hierarchical.pop(new_stack,
                                      ids=['0,user3'])
-        self.assertEqual(new_stack.getLevelContent(), [])
+        self.assertEqual(new_stack.getLevelContentValues(), [])
 
         #
         # Here user1 is WorkspaceManager wich is the associated local roles and
@@ -752,7 +752,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         # Basics
         self.assertEqual(hierarchical.meta_type,
-                         'Hierarchical Workflow Stack Definition')
+                         'Hierarchical Stack Definition')
         self.assertEqual(hierarchical.getStackDataStructureType(), 101)
         self.assertEqual(hierarchical.getStackWorkflowVariableId(), 'toto')
         self.assertEqual(hierarchical.getAssociatedLocalRole(),
@@ -1404,7 +1404,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                   levels=[0])
         self.assertEqual(stack.getMetaType(),
                          'Hierarchical Stack')
-        self.assertEqual(stack.getLevelContent(),
+        self.assertEqual(stack.getLevelContentValues(),
                          ['user1'])
         stack = hierarchical.resetStack(stack)
         self.assertEqual(stack.getMetaType(),
