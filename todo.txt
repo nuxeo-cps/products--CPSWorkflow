@@ -6,9 +6,9 @@ $Id$
 
  o views on stack elements
 
- o stack registries
+ x stack registries
 
- o stack def registries
+ x stack def registries
 
  o stack elements (to be able to store any kind of object, not just users)
 
