@@ -927,11 +927,11 @@ class WorkflowTool(BaseWorkflowTool):
         The former local role mapping is defined within the status of the
         object.
         """
-        wf = self[wf_id]
-        status = wf._getStatusOf(ob)
-        sflrm = status.get('sflrm', {})
-        sflrm[stack_id] = mapping
-        ob.workflow_history[wf_id][-1]['sflrm']  = sflrm
+        self._p_changed = 1
+        _status = self[wf_id]._getStatusOf(ob)
+        _sflrm = _status.get('sflrm', {})
+        _sflrm[stack_id] = mapping
+        ob.workflow_history[wf_id][-1]['sflrm']  = _sflrm
 
     security.declareProtected(ManagePortal,
                                'getFormerLocalRoleMappingForStack')
@@ -939,12 +939,10 @@ class WorkflowTool(BaseWorkflowTool):
         """Return the former local role mapping for a given stack on a given
         given content object for a given workflow
         """
-        wf = self[wf_id]
-        status = wf._getStatusOf(ob)
-        sflrm = status.get('sflrm', {})
-        if sflrm:
-            return sflrm.get(stack_id, {})
-        return sflrm
+        _wf_history = ob.workflow_history[wf_id]
+        if len(_wf_history) > 1:
+            return _wf_history[-2].get('sflrm', {}).get(stack_id, {})
+        return {}
 
     #
     # ZMI

@@ -9,6 +9,7 @@ properties
 Bug fixes:
 ~~~~~~~~~~
 - Fix bug on states that was preventing the use of acquisition on
+- Fix on stackdefinitions local roles update after _executeTranstion()
 stackdefs. (Use _getOb())
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
