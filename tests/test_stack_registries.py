@@ -400,7 +400,17 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
             'Fake Stack Element' not in
             WorkflowStackElementRegistry.listWorkflowStackElementTypes())
 
-
+    def test_stack_element_prefix(self):
+        reg = WorkflowStackElementRegistry
+        self.assertEqual(reg.getMetaTypeForPrefix('user'),
+                         'User Stack Element')
+        self.assertEqual(reg.getMetaTypeForPrefix('group'),
+                         'Group Stack Element')
+        self.assertEqual(reg.getMetaTypeForPrefix('user_substitute'),
+                         'User Substitute Stack Element')
+        self.assertEqual(reg.getMetaTypeForPrefix('group_substitute'),
+                         'Group Substitute Stack Element')
+        
 if __name__ == '__main__':
     framework()
 else:
