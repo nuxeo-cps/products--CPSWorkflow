@@ -710,16 +710,20 @@ class WorkflowTool(BaseWorkflowTool):
         Invoked by workflow definitions.
         """
         # Additional info in status: rpath, workflow_id
-        repotool = getToolByName(self, 'portal_repository')
         utool = getToolByName(self, 'portal_url')
         status = status.copy()
         status['rpath'] = utool.getRelativeUrl(ob)
         status['workflow_id'] = wf_id
+
         # Standard CMF storage.
         BaseWorkflowTool.setStatusOf(self, wf_id, ob, status)
+
+        # CPS specifics
         # Store aggregated history in repository.
+        # XXX Check to avoir the dependency in here.
         if not isinstance(ob, ProxyBase):
             return
+        repotool = getToolByName(self, 'portal_repository')
         docid = ob.getDocid()
         wfh = repotool.getHistory(docid) or ()
         wfh += (status,)
@@ -912,6 +916,36 @@ class WorkflowTool(BaseWorkflowTool):
         return WorkflowStackElementRegistry
 
     ####################################################################
+
+    security.declareProtected(ManagePortal,
+                              'updateFormerLocalRoleMappingForStack')
+    def updateFormerLocalRoleMappingForStack(self, ob, wf_id, stack_id,
+                                             mapping):
+
+        """Set the former local role mapping for a given stack on a given given
+        content object for a given workflow
+
+        The former local role mapping is defined within the status of the
+        object.
+        """
+        wf = self[wf_id]
+        status = wf._getStatusOf(ob)
+        sflrm = status.get('sflrm', {})
+        sflrm[stack_id] = mapping
+        ob.workflow_history[wf_id][-1]['sflrm']  = sflrm
+
+    security.declareProtected(ManagePortal,
+                               'getFormerLocalRoleMappingForStack')
+    def getFormerLocalRoleMappingForStack(self, ob, wf_id, stack_id):
+        """Return the former local role mapping for a given stack on a given
+        given content object for a given workflow
+        """
+        wf = self[wf_id]
+        status = wf._getStatusOf(ob)
+        sflrm = status.get('sflrm', {})
+        if sflrm:
+            return sflrm.get(stack_id, {})
+        return sflrm
 
     #
     # ZMI
