@@ -14,12 +14,14 @@ ZopeTestCase.installProduct('MailHost')
 ZopeTestCase.installProduct('CPSWorkflow')
 
 from Products.CMFDefault.Portal import manage_addCMFSite
-
 from Products.CMFCore.utils import getToolByName
 
 from Products.CPSWorkflow.stackregistries import \
-     WorkflowStackRegistryCls, WorkflowStackDefRegistryCls, \
-     WorkflowStackRegistry, WorkflowStackDefRegistry
+     WorkflowStackRegistryCls, WorkflowStackRegistry
+from Products.CPSWorkflow.stackregistries import \
+     WorkflowStackDefRegistryCls, WorkflowStackDefRegistry
+from Products.CPSWorkflow.stackregistries import \
+     WorkflowStackElementRegistry, WorkflowStackElementRegistryCls
 
 from Products.CPSWorkflow.basicstacks import SimpleStack, \
      HierarchicalStack
@@ -27,8 +29,13 @@ from Products.CPSWorkflow.basicstacks import SimpleStack, \
 from Products.CPSWorkflow.basicstackdefinitions import \
      SimpleWorkflowStackDefinition, HierarchicalWorkflowStackDefinition
 
+from Products.CPSWorkflow.basicstackelements import \
+     UserStackElement, GroupStackElement, UserSubstituteStackElement, \
+     GroupSubstituteStackElement
+
 from Products.CPSWorkflow.interfaces import IWorkflowStackRegistry
 from Products.CPSWorkflow.interfaces import IWorkflowStackDefRegistry
+from Products.CPSWorkflow.interfaces import IWorkflowStackElementRegistry
 
 from Interface.Verify import verifyClass
 
@@ -44,10 +51,15 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
     def test_interfaces(self):
         verifyClass(IWorkflowStackRegistry, WorkflowStackRegistryCls)
         verifyClass(IWorkflowStackDefRegistry, WorkflowStackDefRegistryCls)
+        verifyClass(IWorkflowStackElementRegistry,
+                    WorkflowStackElementRegistryCls)
 
     def test_stack_registry_cls_types(self):
         self.assert_(isinstance(WorkflowStackRegistry,
                                 WorkflowStackRegistryCls,
+                                ))
+        self.assert_(isinstance(WorkflowStackDefRegistry,
+                                WorkflowStackDefRegistryCls,
                                 ))
         self.assert_(isinstance(WorkflowStackDefRegistry,
                                 WorkflowStackDefRegistryCls,
@@ -204,6 +216,143 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
 
         # Recover back the value
         WorkflowStackDefRegistry._stack_def_classes = stackdef_reg_save
+
+    def test_stack_element_registry(self):
+
+        #
+        # Test the stack element registry with the stack types defined within
+        # the CPSWorkflowStacks
+        #
+
+        # Reset registries for being able to test behaviors
+        stack_reg_save = WorkflowStackElementRegistry._stack_element_classes
+        WorkflowStackElementRegistry._stack_element_classes = {}
+
+        self.assertEqual(
+            WorkflowStackElementRegistry.listWorkflowStackElementTypes(),[])
+        self.assertEqual(
+            WorkflowStackElementRegistry.register(UserStackElement),
+            1)
+        self.assertEqual(
+            WorkflowStackElementRegistry.listWorkflowStackElementTypes(),
+            ['User Stack Element'])
+
+        # Not possible to duplicate registration
+        self.assertEqual(
+            WorkflowStackElementRegistry.register(UserStackElement),
+            0)
+        self.assertEqual(
+            WorkflowStackElementRegistry.listWorkflowStackElementTypes(),
+            ['User Stack Element'])
+
+        # Test registry API with User Stack Element
+        self.assertEqual(
+            WorkflowStackElementRegistry.getClass('User Stack Element'),
+            UserStackElement)
+        self.assertEqual(
+            WorkflowStackElementRegistry.getClass('Fake Stack Element'),
+            None)
+
+        icls = WorkflowStackElementRegistry.makeWorkflowStackElementTypeInstance('User Stack Element')
+        self.assert_(isinstance(icls, UserStackElement))
+
+        #
+        # Now test with GroupStackElement
+        #
+
+        self.assertEqual(
+            WorkflowStackElementRegistry.listWorkflowStackElementTypes(),
+            ['User Stack Element'])
+
+        self.assertEqual(
+            WorkflowStackElementRegistry.register(GroupStackElement),
+            1)
+        self.assertEqual(
+            WorkflowStackElementRegistry.listWorkflowStackElementTypes(),
+            ['Group Stack Element', 'User Stack Element'])
+
+        # Test duplication again
+        self.assertEqual(
+            WorkflowStackElementRegistry.register(GroupStackElement),
+            0)
+        self.assertEqual(
+            WorkflowStackElementRegistry.listWorkflowStackElementTypes(),
+            ['Group Stack Element', 'User Stack Element'])
+
+        # Test registry API with Group Stack Element
+        self.assertEqual(
+            WorkflowStackElementRegistry.getClass('Group Stack Element'),
+            GroupStackElement)
+
+        icls = WorkflowStackElementRegistry.makeWorkflowStackElementTypeInstance(
+            'Group Stack Element')
+        self.assert_(isinstance(icls, GroupStackElement))
+
+        #
+        # Now test with UserSubstituteStackElement
+        #
+
+        self.assertEqual(
+            WorkflowStackElementRegistry.listWorkflowStackElementTypes(),
+            ['Group Stack Element', 'User Stack Element'])
+
+        self.assertEqual(
+            WorkflowStackElementRegistry.register(UserSubstituteStackElement),
+            1)
+        self.assertEqual(
+            WorkflowStackElementRegistry.listWorkflowStackElementTypes(),
+            ['Group Stack Element', 'User Stack Element',
+             'User Substitute Stack Element',])
+
+        # Test registry API with Group Stack Element
+        self.assertEqual(
+            WorkflowStackElementRegistry.getClass(
+            'User Substitute Stack Element'),
+            UserSubstituteStackElement)
+
+        icls = WorkflowStackElementRegistry.makeWorkflowStackElementTypeInstance(
+            'User Substitute Stack Element')
+        self.assert_(isinstance(icls, UserSubstituteStackElement))
+
+        #
+        # Now test with GroupSubstituteStackElement
+        #
+
+        self.assertEqual(
+            WorkflowStackElementRegistry.listWorkflowStackElementTypes(),
+            ['Group Stack Element', 'User Stack Element',
+             'User Substitute Stack Element',])
+
+        self.assertEqual(
+            WorkflowStackElementRegistry.register(GroupSubstituteStackElement),
+            1)
+        self.assertEqual(
+            WorkflowStackElementRegistry.listWorkflowStackElementTypes(),
+            ['Group Stack Element',
+             'Group Substitute Stack Element',
+             'User Stack Element',
+             'User Substitute Stack Element',])
+
+        # Test registry API with Group Stack Element
+        self.assertEqual(
+            WorkflowStackElementRegistry.getClass(
+            'Group Substitute Stack Element'),
+            GroupSubstituteStackElement)
+
+        icls = WorkflowStackElementRegistry.makeWorkflowStackElementTypeInstance(
+            'Group Substitute Stack Element')
+        self.assert_(isinstance(icls, GroupSubstituteStackElement))
+
+        # test instance creation with a not registered type
+        icls = WorkflowStackElementRegistry.makeWorkflowStackElementTypeInstance(
+            'Fake Stack Element')
+        self.assert_(icls is None)
+
+        icls = WorkflowStackElementRegistry.makeWorkflowStackElementTypeInstance('')
+        self.assert_(icls is None)
+
+        # Recover old value
+        WorkflowStackElementRegistry._stack_element_classes = stack_reg_save
 
     def test_stack_registry_interface_check(self):
 
