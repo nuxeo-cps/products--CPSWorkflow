@@ -29,10 +29,12 @@ from Interface.Verify import verifyClass, DoesNotImplement
 
 from Products.CMFCore.CMFCorePermissions import ManagePortal
 
+from interfaces import IStackElement
 from interfaces import IWorkflowStack
 from interfaces import IWorkflowStackDefinition
 from interfaces import IWorkflowStackRegistry
 from interfaces import IWorkflowStackDefRegistry
+from interfaces import IWorkflowStackElementRegistry
 
 class WorkflowStackRegistryCls:
     """Registry of the available stack types
@@ -137,5 +139,56 @@ InitializeClass(WorkflowStackDefRegistryCls)
 ###############################################################
 ###############################################################
 
+class WorkflowStackElementRegistryCls:
+    """Registry of the available stack element types
+    """
+
+    __implements__ = (IWorkflowStackElementRegistry,)
+
+    def __init__(self):
+        self._stack_element_classes = {}
+
+    def register(self, cls=None):
+        """Register a class for a stack element type
+        """
+        if cls is not None:
+            try:
+                verifyClass(IStackElement, cls)
+            except DoesNotImplement:
+                LOG("WorkflowStackElementRegistry error : ", INFO,
+                    "Cannot import class %s" %str(cls))
+            else:
+                meta_type = cls.meta_type
+                if meta_type not in self.listWorkflowStackElementTypes():
+                    self._stack_element_classes[meta_type] = cls
+                    return 1
+        return 0
+
+    def listWorkflowStackElementTypes(self):
+        """Return the list of workflow stack elt types
+        """
+        _types = self._stack_element_classes.keys()
+        _types.sort()
+        return _types
+
+    def makeWorkflowStackElementTypeInstance(self, stack_elt_type, **kw):
+        """Factory to make a workflow stack element type instance of the given
+        workflow stack type with id = <id>
+        """
+        if stack_elt_type in self.listWorkflowStackElementTypes():
+            return self._stack_element_classes[stack_elt_type](**kw)
+        return None
+
+    def getClass(self, stack_elt_type):
+        """Get the instance class for a workflow stack elt of the given type
+        """
+        return self._stack_element_classes.get(stack_elt_type)
+
+InitializeClass(WorkflowStackElementRegistryCls)
+
+###############################################################
+###############################################################
+
 WorkflowStackRegistry = WorkflowStackRegistryCls()
 WorkflowStackDefRegistry = WorkflowStackDefRegistryCls()
+WorkflowStackElementRegistry = WorkflowStackElementRegistryCls()
