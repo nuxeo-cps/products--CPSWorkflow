@@ -28,7 +28,7 @@ from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
 from OFS.SimpleItem import SimpleItem
 
-from Products.DCWorkflow.Guard import Guard
+from stackdefinitionguard import StackDefinitionGuard as Guard
 
 from interfaces import IStackElement
 
