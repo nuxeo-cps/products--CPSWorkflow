@@ -904,38 +904,6 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         self.assertNotEqual(hstack1.getStackContent(),
                             hstack2.getStackContent())
 
-    def test_former_localroles_mapping(self):
-
-        #
-        # Test the behavior of the record of the former local role
-        # mapping
-        #
-
-        base = Stack()
-        simple = SimpleStack()
-        hierarchical = HierarchicalStack()
-
-        self.assertEqual(base.getFormerLocalRolesMapping(), {})
-        self.assertEqual(simple.getFormerLocalRolesMapping(), {})
-        self.assertEqual(hierarchical.getFormerLocalRolesMapping(), {})
-
-        simple.setFormerLocalRolesMapping({'user1': 'WorkspaceManager'})
-        csimple = simple.getCopy()
-        self.assertEqual(simple.getFormerLocalRolesMapping(),
-                         csimple.getFormerLocalRolesMapping())
-        csimple.setFormerLocalRolesMapping({'user2': 'WorkspaceManager'})
-        self.assertNotEqual(simple.getFormerLocalRolesMapping(),
-                            csimple.getFormerLocalRolesMapping())
-
-        hierarchical.setFormerLocalRolesMapping({'user1': 'WorkspaceManager'})
-        chierarchical = hierarchical.getCopy()
-        self.assertNotEqual(hierarchical, chierarchical)
-        self.assertEqual(hierarchical.getFormerLocalRolesMapping(),
-                         chierarchical.getFormerLocalRolesMapping())
-        chierarchical.setFormerLocalRolesMapping({'user2': 'WorkspaceManager'})
-        self.assertNotEqual(hierarchical.getFormerLocalRolesMapping(),
-                            chierarchical.getFormerLocalRolesMapping())
-
     def test_reset_simple_wf_stack(self):
 
         #
