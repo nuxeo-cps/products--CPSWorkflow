@@ -78,13 +78,16 @@ class UserStackElement(StackElement):
     def __str__(self):
         return self.user_id
 
+    def getIdForRoleSettings(self):
+        return self.user_id
+
 InitializeClass(UserStackElement)
 
 class GroupStackElement(UserStackElement):
     """Group Stack Element
 
     Stack element you may use to store a group. It understand only the group
-    id. The group id is stored with CPS group style conventiopn (i.e : group_id
+    id. The group id is stored with CPS group style convention (i.e : group_id
     = 'group:nuxeo')
 
     You may use it like this :
@@ -125,6 +128,9 @@ class GroupStackElement(UserStackElement):
         """Return the group id without the 'group:' prefix
         """
         return self()[len(self._getGroupPrefix()):]
+
+    def getIdForRoleSettings(self):
+        return self.group_id
 
 InitializeClass(GroupStackElement)
 
