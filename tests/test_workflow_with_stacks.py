@@ -2112,6 +2112,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # It's been updated for next time
         self.assertEqual(hsflrm, {'manager': ('WorkspaceManager',),
                                   'toto': ('WorkspaceMember',)})
+
         # Check local roles on the content
         mtool = getToolByName(self.portal, 'portal_membership')
         lc = mtool.getMergedLocalRoles(content)
@@ -2128,12 +2129,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         self.assert_('user:manager' in lc.keys())
         self.assert_('WorkspaceMember' in lc['user:manager'])
         self.assert_('WorkspaceManager' in lc['user:manager'])
-
-        # XXX AT: currently breaks tests
         self.assert_('user:toto' in lc.keys())
         self.assert_('WorkspaceMember' in lc['user:toto'])
-
-
 
 def test_suite():
     suite = unittest.TestSuite()

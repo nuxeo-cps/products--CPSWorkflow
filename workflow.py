@@ -201,8 +201,29 @@ class WorkflowDefinition(DCWorkflowDefinition):
                         if old_role not in mapping[id]:
                             roles_to_remove.append(old_role)
 
-                # Do the actual job to remove absolote roles
+
+                # Check that no other stack distributes currently this role
+                # to the current member
+                roles_to_keep = ()
                 for old_local_role in roles_to_remove:
+                    stacks = wftool.getStacks(ob)
+                    for stack_id, stack in stacks.items():
+                        if stack_id != current_wf_var_id:
+                            # The current transition is already
+                            # executed on ob thus we can take the
+                            # former mapping for this other given
+                            if (old_local_role in
+                                wftool.getFormerLocalRoleMappingForStack(
+                                ob, self.id, stack_id).get(id, ())):
+                                roles_to_keep += (old_local_role,)
+
+                # Do the actual job to remove absolete roles
+                for old_local_role in roles_to_remove:
+
+                    # Don't remove those already managed by another stack
+                    if old_local_role in roles_to_keep:
+                        continue
+
                     if not id.startswith('group:'):
                         current_roles = list(
                             ob.get_local_roles_for_userid(userid=id))
