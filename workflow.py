@@ -339,10 +339,9 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
         DC workflow + stack def checks
         """
-        guard = t.guard
-        return (guard is None or
-                guard.check(getSecurityManager(), self, ob) and
-                self._checkStackGuards(t, ob))
+        dcworkflow_check = DCWorkflowDefinition._checkTransitionGuard(self, t, ob)
+        stack_check = self._checkStackGuards(t, ob)
+        return dcworkflow_check and stack_check
 
     def _changeStateOf(self, ob, tdef=None, kwargs=None):
         """
