@@ -215,7 +215,12 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
                 default_expr="python:state_change.getStackFor(var_id='%s')" %var_id,
                 for_status=1,
                 update_always=0,
-                props={'guard_permissions': 'View',},
+                # XXX AT: not currently possible to set View permission on the
+                # stack, because in canManageStack, for instance, we check the
+                # stack content to tell if user can edit the stack. When view
+                # permission is set, user sees the stacks as anepty stack, the
+                # empty stack guard is evaluated.
+                #props={'guard_permissions': 'View',},
                 )
 
         stackdef = None
