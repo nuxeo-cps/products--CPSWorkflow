@@ -848,7 +848,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user1'}
+                                                     member_id='user1',
                                                      ),
                          1)
 
@@ -856,7 +856,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user2'}
+                                                     member_id='user2',
                                                      ),
                          1)
 
@@ -864,7 +864,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user3'}
+                                                     member_id='user3',
                                                      ),
                          0)
 
@@ -872,7 +872,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user4'}
+                                                     member_id='user4',
                                                      ),
                          0)
 
@@ -880,7 +880,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user5'}
+                                                     member_id='user5',
                                                      ),
                          0)
 
@@ -888,7 +888,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user6'}
+                                                     member_id='user6',
                                                      ),
                          0)
 
@@ -916,7 +916,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user1'}
+                                                     member_id='user1',
                                                      ),
                          0)
 
@@ -924,7 +924,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user2'}
+                                                     member_id='user2',
                                                      ),
                          0)
 
@@ -932,7 +932,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user3'}
+                                                     member_id='user3',
                                                      ),
                          0)
 
@@ -940,7 +940,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user4'}
+                                                     member_id='user4',
                                                      ),
                          1)
 
@@ -948,7 +948,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user5'}
+                                                     member_id='user5',
                                                      ),
                          0)
 
@@ -956,7 +956,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user6'}
+                                                     member_id='user6',
                                                      ),
                          0)
 
@@ -983,7 +983,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user1'}
+                                                     member_id='user1',
                                                      ),
                          0)
 
@@ -991,7 +991,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user2'}
+                                                     member_id='user2',
                                                      ),
                          0)
 
@@ -999,7 +999,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user3'}
+                                                     member_id='user3',
                                                      ),
                          0)
 
@@ -1007,7 +1007,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user4'}
+                                                     member_id='user4',
                                                      ),
                          0)
 
@@ -1015,7 +1015,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user5'}
+                                                     member_id='user5',
                                                      ),
                          0)
 
@@ -1023,7 +1023,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user6'}
+                                                     member_id='user6',
                                                      ),
                          1)
 
@@ -1050,7 +1050,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user1'}
+                                                     member_id='user1',
                                                      ),
                          0)
 
@@ -1058,7 +1058,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user2'}
+                                                     member_id='user2',
                                                      ),
                          0)
 
@@ -1066,7 +1066,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user3'}
+                                                     member_id='user3',
                                                      ),
                          0)
 
@@ -1074,7 +1074,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user4'}
+                                                     member_id='user4',
                                                      ),
                          1)
 
@@ -1082,7 +1082,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user5'}
+                                                     member_id='user5',
                                                      ),
                          0)
 
@@ -1090,7 +1090,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user6'}
+                                                     member_id='user6',
                                                      ),
                          0)
 
@@ -1117,7 +1117,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user1'}
+                                                     member_id='user1',
                                                      ),
                          1)
 
@@ -1125,7 +1125,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user2'}
+                                                     member_id='user2',
                                                      ),
                          1)
 
@@ -1133,7 +1133,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user3'}
+                                                     member_id='user3',
                                                      ),
                          0)
 
@@ -1141,7 +1141,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user4'}
+                                                     member_id='user4',
                                                      ),
                          0)
 
@@ -1149,7 +1149,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user5'}
+                                                     member_id='user5',
                                                      ),
                          0)
 
@@ -1157,7 +1157,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user6'}
+                                                     member_id='user6',
                                                      ),
                          0)
 
@@ -1184,7 +1184,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user1'}
+                                                     member_id='user1',
                                                      ),
                          0)
 
@@ -1192,7 +1192,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user2'}
+                                                     member_id='user2',
                                                      ),
                          0)
 
@@ -1200,7 +1200,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user3'}
+                                                     member_id='user3',
                                                      ),
                          1)
 
@@ -1208,7 +1208,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user4'}
+                                                     member_id='user4',
                                                      ),
                          0)
 
@@ -1216,7 +1216,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user5'}
+                                                     member_id='user5',
                                                      ),
                          0)
 
@@ -1224,7 +1224,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user6'}
+                                                     member_id='user6',
                                                      ),
                          0)
 
@@ -1250,7 +1250,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user1'}
+                                                     member_id='user1',
                                                      ),
                          0)
 
@@ -1258,7 +1258,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user2'}
+                                                     member_id='user2',
                                                      ),
                          0)
 
@@ -1266,7 +1266,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user3'}
+                                                     member_id='user3',
                                                      ),
                          0)
 
@@ -1274,7 +1274,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user4'}
+                                                     member_id='user4',
                                                      ),
                          0)
 
@@ -1282,7 +1282,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user5'}
+                                                     member_id='user5',
                                                      ),
                          1)
 
@@ -1290,7 +1290,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      aclu,
                                                      mtool,
                                                      self,
-                                                     **{'member_id': 'user6'}
+                                                     member_id='user6',
                                                      ),
                          0)
 
@@ -1546,12 +1546,12 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         sstackdef._addExpressionForRole('WorkspaceManager',
                                         'python:len(stack.getStackContent())%2==1')
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack), {})
-        sstack = sstackdef._push(sstack, **{'push_ids': ('user:elt1',)})
+        sstack = sstackdef._push(sstack, push_ids=('user:elt1',))
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
                          {'elt1': ('WorkspaceManager',)})
-        sstack = sstackdef._push(sstack, **{'push_ids': ('user:elt2',)})
+        sstack = sstackdef._push(sstack, push_ids=('user:elt2',))
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack), {})
-        sstack = sstackdef._push(sstack, **{'push_ids': ('user:elt3',)})
+        sstack = sstackdef._push(sstack, push_ids=('user:elt3',))
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
                          {'elt1': ('WorkspaceManager',),
                           'elt2': ('WorkspaceManager',),
@@ -1563,10 +1563,10 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         sstackdef._addExpressionForRole('WorkspaceManager',
                                         "python:elt.getIdWithoutPrefix().startswith('hello')")
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack), {})
-        sstack = sstackdef._push(sstack, **{'push_ids': ('user:hello_elt1',)})
+        sstack = sstackdef._push(sstack, push_ids=('user:hello_elt1',))
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
                          {'hello_elt1': ('WorkspaceManager',)})
-        sstack = sstackdef._push(sstack, **{'push_ids': ('user:elt2',)})
+        sstack = sstackdef._push(sstack, push_ids=('user:elt2',))
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
                          {'hello_elt1': ('WorkspaceManager',)})
 
