@@ -164,10 +164,20 @@ class SimpleStackDefinition(StackDefinition):
         # same element in the stack at a given time
         #
 
-        for elt in ds.getStackContent():
+        # XXX AT: access to real StackElement object to update role mappings
+        # even if current user is not supposed to view/edit some stack
+        # elements.
+        # Plus give access to the whole element call result in expression (and
+        # not just user/group id, even if it does not make any difference
+        # here).
+        # Check if this is the wanted behaviour.
+        stack_content = ds._getElementsContainer()
+        for elt in stack_content:
+            elt_id = elt.getIdForRoleSettings()
             for role_id in self.getManagedRoles():
-                if self._getExpressionForRole(role_id, ds):
-                    mapping[elt] = mapping.get(elt, ()) + (role_id,)
+                if self._getExpressionForRole(role_id, ds, level=None, elt=elt()):
+                    mapping[elt_id] = mapping.get(elt_id, ()) + (role_id,)
+
         return mapping
 
     def _canManageStack(self, ds, aclu, mtool, context, **kw):
@@ -203,7 +213,7 @@ class SimpleStackDefinition(StackDefinition):
         # the stack content
         #
 
-        for each in ds.getStackContent():
+        for each in ds.getStackContentForRoleSettings():
             if not each.startswith('group:'):
                 if each == member_id:
                     return 1
@@ -285,6 +295,7 @@ class HierarchicalStackDefinition(StackDefinition):
         # It might be None of not yet initialized
         #
 
+
         ds = self._prepareStack(ds)
 
         #
@@ -322,7 +333,7 @@ class HierarchicalStackDefinition(StackDefinition):
         """pop delegatees
         """
 
-        LOG("::SimpleStackDefinition.pop()::",
+        LOG("::HierarchicalStackDefinition.pop()::",
             DEBUG,
             str(kw))
 
@@ -394,7 +405,7 @@ class HierarchicalStackDefinition(StackDefinition):
         # the stack content
         #
 
-        for each in ds.getLevelContentValues():
+        for each in ds.getLevelContentValuesForRoleSettings():
             if not each.startswith('group:'):
                 if each == member_id:
                     return 1
@@ -414,7 +425,7 @@ class HierarchicalStackDefinition(StackDefinition):
         # intialized.
         #
 
-        if ds.getLevelContentValues() == []:
+        if ds.getLevelContent() == []:
             wf_def = self._getWorkflowDefinition()
             return self.getEmptyStackManageGuard().check(
                 getSecurityManager(), wf_def, context)
@@ -440,11 +451,23 @@ class HierarchicalStackDefinition(StackDefinition):
         # same element in the stack at a given time
         #
 
-        for k, v in ds.getStackContent().items():
-            for elt in v:
+        # XXX AT: access to real StackElement object to update role mappings
+        # even if current user is not supposed to view/edit some stack
+        # elements.
+        # Plus give access to the whole element call result in expression (and
+        # not just user/group id, even if it does not make any difference
+        # here).
+        # Check if this is the wanted behaviour.
+        stack_content = {}
+        for clevel in ds.getAllLevels():
+            stack_content[clevel] = ds.getLevelContent(level=clevel)
+        for level, elts in stack_content.items():
+            for elt in elts:
+                elt_id = elt.getIdForRoleSettings()
                 for role_id in self.getManagedRoles():
-                    if self._getExpressionForRole(role_id, ds, k):
-                        mapping[elt] = mapping.get(elt, ()) + (role_id,)
+                    if self._getExpressionForRole(role_id, ds, level, elt()):
+                        mapping[elt_id] = mapping.get(elt_id, ()) + (role_id,)
+
         return mapping
 
     security.declareProtected(ModifyPortalContent, 'doIncLevel')
