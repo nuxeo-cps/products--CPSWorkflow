@@ -30,6 +30,7 @@ import states
 import stack
 import stackdefinition
 import stackelement
+import stackdefinitionguard
 
 import basicstacks
 import basicstackdefinitions
