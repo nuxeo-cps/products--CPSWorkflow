@@ -1,17 +1,14 @@
 # -*- coding: iso-8859-15 -*-
 import unittest
 from Testing.ZopeTestCase import ZopeTestCase
+from Interface.Verify import verifyClass
 
 from Products.CPSWorkflow.basicstacks import BaseStack, SimpleStack, \
      HierarchicalStack
 
-from Interface.Verify import verifyClass
-
-from Products.CPSWorkflow.interfaces.IWorkflowStack import IWorkflowStack
-from Products.CPSWorkflow.interfaces.ISimpleWorkflowStack import \
-     ISimpleWorkflowStack
-from Products.CPSWorkflow.interfaces.IHierarchicalWorkflowStack import \
-     IHierarchicalWorkflowStack
+from Products.CPSWorkflow.interfaces import IWorkflowStack
+from Products.CPSWorkflow.interfaces import ISimpleWorkflowStack
+from Products.CPSWorkflow.interfaces import IHierarchicalWorkflowStack
 
 class TestCPSWorkflowStacks(ZopeTestCase):
 

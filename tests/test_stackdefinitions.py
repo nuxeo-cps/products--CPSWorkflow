@@ -2,18 +2,18 @@
 import Zope
 import unittest
 from OFS.Folder import Folder
+from Interface.Verify import verifyClass
 
 from Testing import ZopeTestCase
 from Products.CMFCore.tests.base.testcase import SecurityRequestTest
+
 from Products.CPSWorkflow.basicstacks import SimpleStack, HierarchicalStack
 from Products.CPSWorkflow.basicstackdefinitions import  \
      BaseWorkflowStackDefinition, \
      SimpleWorkflowStackDefinition, \
      HierarchicalWorkflowStackDefinition
 
-from Interface.Verify import verifyClass
-from Products.CPSWorkflow.interfaces.IWorkflowStackDefinition import \
-     IWorkflowStackDefinition
+from Products.CPSWorkflow.interfaces import IWorkflowStackDefinition
 
 #######################################################################
 # Fake a User Folder with groups
