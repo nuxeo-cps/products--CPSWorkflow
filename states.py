@@ -270,7 +270,7 @@ class StateDefinition(DCWFStateDefinition):
             var = workflow.variables.get(var_id)
             var.setProperties(
                 description="Delegatees variable",
-                default_expr="python:state_change.getDelegateesVarInfoFor(var_id='%s')" %var_id,
+                default_expr="python:state_change.getStackFor(var_id='%s')" %var_id,
                 for_status=1,
                 update_always=0)
         else:
