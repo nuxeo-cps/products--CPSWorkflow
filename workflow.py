@@ -637,7 +637,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
                         wf_var,
                         ))
 
-                stackdef = new_sdef.getDelegateesVarInfoFor(wf_var)
+                stackdef = new_sdef.getStackDefinitionFor(wf_var)
                 if stackdef is not None:
                     ds = stacks.get(wf_var)
                     stacks[wf_var] = stackdef.push(ds, **kwargs)
@@ -708,7 +708,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
                         wf_var,
                         ))
 
-                stackdef = new_sdef.getDelegateesVarInfoFor(wf_var)
+                stackdef = new_sdef.getStackDefinitionFor(wf_var)
                 if stackdef is not None:
                     ds = stacks.get(wf_var)
                     stacks[wf_var] = stackdef.pop(ds, **kwargs)
@@ -778,7 +778,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
                         wf_var,
                         ))
 
-                stackdef = new_sdef.getDelegateesVarInfoFor(wf_var)
+                stackdef = new_sdef.getStackDefinitionFor(wf_var)
                 if stackdef is not None:
                     ds = stacks.get(wf_var)
                     stacks[wf_var] = stackdef.returnedUpDirection(ds, **kwargs)
@@ -848,7 +848,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
                         wf_var,
                         ))
 
-                stackdef = new_sdef.getDelegateesVarInfoFor(wf_var)
+                stackdef = new_sdef.getStackDefinitionFor(wf_var)
                 if stackdef is not None:
                     ds = stacks.get(wf_var)
                     stacks[wf_var] = stackdef.doIncLevel(ds)
@@ -918,7 +918,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
                         wf_var,
                         ))
 
-                stackdef = new_sdef.getDelegateesVarInfoFor(wf_var)
+                stackdef = new_sdef.getStackDefinitionFor(wf_var)
                 if stackdef is not None:
                     ds = stacks.get(wf_var)
                     stacks[wf_var] = stackdef.doDecLevel(ds)
@@ -988,7 +988,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
                         wf_var,
                         ))
 
-                stackdef = new_sdef.getDelegateesVarInfoFor(wf_var)
+                stackdef = new_sdef.getStackDefinitionFor(wf_var)
                 if stackdef is not None:
                     stackdef.doLockStack()
 
@@ -1057,7 +1057,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
                         wf_var,
                         ))
 
-                stackdef = new_sdef.getDelegateesVarInfoFor(wf_var)
+                stackdef = new_sdef.getStackDefinitionFor(wf_var)
                 if stackdef is not None:
                     stackdef.doUnLockStack()
 
@@ -1126,7 +1126,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
                         wf_var,
                         ))
 
-                stackdef = new_sdef.getDelegateesVarInfoFor(wf_var)
+                stackdef = new_sdef.getStackDefinitionFor(wf_var)
                 if stackdef is not None:
                     ds = stacks.get(wf_var)
                     stacks[wf_var] = stackdef.resetStack(ds, **kwargs)

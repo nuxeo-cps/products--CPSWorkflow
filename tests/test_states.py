@@ -50,8 +50,6 @@ class TestCPSWorkflowStates(SecurityRequestTest):
 
         self.assertEqual(sdef.getAvailableStateBehaviors(),
                          state_behavior_export_dict)
-        self.assertEqual(sdef.getAvailableDataStructureTypes(),
-                         data_struct_types_export_dict)
 
         # Test initial properties
         self.assertEqual(sdef.state_behaviors, ())
@@ -103,8 +101,6 @@ class TestCPSWorkflowStates(SecurityRequestTest):
 
         self.assertEqual(sdef.getAvailableStateBehaviors(),
                          state_behavior_export_dict)
-        self.assertEqual(sdef.getAvailableDataStructureTypes(),
-                         data_struct_types_export_dict)
 
         # Test initial properties
         self.assertEqual(sdef.state_behaviors, ())
@@ -134,69 +130,69 @@ class TestCPSWorkflowStates(SecurityRequestTest):
              'toto', 'WorkspaceManager'),
             ('Simple Stack Definition', 'Simple Stack',
              'tata', 'WorkspaceMember')):
-            sdef.addDelegateesWorkflowVariableInfo(stackdef_type,
-                                                   ds_type,
-                                                   var_id,
-                                                   ass_local_role=lc)
+            sdef.addStackDefinition(stackdef_type,
+                                    ds_type,
+                                    var_id,
+                                    ass_local_role=lc)
         # Test property again
         self.assertEqual(sdef.state_behaviors,
                          tuple(state_behavior_export_dict.keys()))
         self.assertEqual(sdef.transitions, ())
 
-        dinfo = sdef.getDelegateesVarInfoFor('toto')
+        dinfo = sdef.getStackDefinitionFor('toto')
         self.assertNotEqual(dinfo, None)
         self.assertEqual(dinfo.getStackDataStructureType(),
                          'Hierarchical Stack')
         self.assertEqual(dinfo.getStackWorkflowVariableId(), 'toto')
         self.assertEqual(dinfo.getAssociatedLocalRole(), 'WorkspaceManager')
 
-        dinfo = sdef.getDelegateesVarInfoFor('tata')
+        dinfo = sdef.getStackDefinitionFor('tata')
         self.assertNotEqual(dinfo, None)
         self.assertEqual(dinfo.getStackDataStructureType(), 'Simple Stack')
         self.assertEqual(dinfo.getStackWorkflowVariableId(), 'tata')
         self.assertEqual(dinfo.getAssociatedLocalRole(), 'WorkspaceMember')
 
         # Let's remove the delegatees var info
-        sdef.delDelegateesWorkflowVariablesInfo(['toto'])
+        sdef.delStackDefinitionsById(['toto'])
 
         # Test property again
         self.assertEqual(sdef.state_behaviors,
                          tuple(state_behavior_export_dict.keys()))
         self.assertEqual(sdef.transitions, ())
 
-        dinfo = sdef.getDelegateesVarInfoFor('toto')
+        dinfo = sdef.getStackDefinitionFor('toto')
         self.assertEqual(dinfo, None)
 
-        dinfo = sdef.getDelegateesVarInfoFor('tata')
+        dinfo = sdef.getStackDefinitionFor('tata')
         self.assertNotEqual(dinfo, None)
         self.assertEqual(dinfo.getStackDataStructureType(), 'Simple Stack')
         self.assertEqual(dinfo.getStackWorkflowVariableId(), 'tata')
         self.assertEqual(dinfo.getAssociatedLocalRole(), 'WorkspaceMember')
 
         # Let's remove the delegatees var info
-        sdef.delDelegateesWorkflowVariablesInfo(['toto'])
+        sdef.delStackDefinitionsById(['toto'])
 
         # Test property again
         self.assertEqual(sdef.state_behaviors,
                          tuple(state_behavior_export_dict.keys()))
         self.assertEqual(sdef.transitions, ())
 
-        dinfo = sdef.getDelegateesVarInfoFor('tata')
+        dinfo = sdef.getStackDefinitionFor('tata')
         self.assertNotEqual(dinfo, None)
         self.assertEqual(dinfo.getStackDataStructureType(), 'Simple Stack')
         self.assertEqual(dinfo.getStackWorkflowVariableId(), 'tata')
         self.assertEqual(dinfo.getAssociatedLocalRole(), 'WorkspaceMember')
 
         # Let's remove the delegatees var info
-        sdef.delDelegateesWorkflowVariablesInfo(['tata'])
+        sdef.delStackDefinitionsById(['tata'])
 
         # Test property again
         self.assertEqual(sdef.state_behaviors,
                          tuple(state_behavior_export_dict.keys()))
         self.assertEqual(sdef.transitions, ())
         #self.assertEqual(sdef.state_delegatees_vars_info, {})
-        self.assertEqual(sdef.getDelegateesVarInfoFor('toto'), None)
-        self.assertEqual(sdef.getDelegateesVarInfoFor('tata'), None)
+        self.assertEqual(sdef.getStackDefinitionFor('toto'), None)
+        self.assertEqual(sdef.getStackDefinitionFor('tata'), None)
         #self.assertEqual(sdef.getDelegateesVarsInfo(), {})
 
 def test_suite():

@@ -61,6 +61,9 @@ from Products.CPSWorkflow.states import *
 from Products.CPSWorkflow.transitions import \
      transition_behavior_export_dict as tbdict
 
+from Products.CPSWorkflow.basicstackdefinitions import SimpleStackDefinition, \
+     HierarchicalStackDefinition
+
 from dummy import DummyContent
 
 portal_name = 'portal'
@@ -136,31 +139,31 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
     def _setStackDefinitionsFor(self, s):
 
         # Add Pilots stack
-        s.addDelegateesWorkflowVariableInfo(
+        s.addStackDefinition(
             'Hierarchical Stack Definition',
             'Hierarchical Stack',
             'Pilots',
-            'WorkspaceManager',
-            'WorkspaceReader',
-            'WorkspaceMember',
-            ['Associates', 'Observers'],
+            ass_local_role='WorkspaceManager',
+            up_ass_local_role='WorkspaceReader',
+            down_ass_local_role='WorkspaceMember',
+            manager_stack_ids=['Associates', 'Observers'],
             )
 
         # Add Associates stack
-        s.addDelegateesWorkflowVariableInfo(
+        s.addStackDefinition(
             'Simple Stack Definition',
             'Simple Stack',
             'Associates',
-            'WorkspaceMember',
-            ['Observers']
+            ass_local_role='WorkspaceMember',
+            manager_stack_ids=['Observers']
             )
 
         # Add Observers stack
-        s.addDelegateesWorkflowVariableInfo(
+        s.addStackDefinition(
             'Simple Stack Definition',
             'Simple Stack',
             'Observers',
-            'WorkspaceMember',
+            ass_local_role='WorkspaceMember',
             )
 
     def _makeWorkflows(self):
@@ -475,15 +478,18 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         keys.sort()
         self.assert_(len(keys) == 3)
         self.assertEqual(keys, ['Associates', 'Observers', 'Pilots'])
+
+        self.assertNotEqual(stackdefs['Associates'], None)
+        self.assertNotEqual(stackdefs['Observers'], None)
+        self.assertNotEqual(stackdefs['Pilots'], None)
+
+        self.assert_(isinstance(stackdefs['Pilots'],
+                                HierarchicalStackDefinition))
         self.assert_(isinstance(stackdefs['Associates'],
                                 SimpleStackDefinition))
         self.assert_(isinstance(stackdefs['Observers'],
                                 SimpleStackDefinition))
-        self.assert_(isinstance(stackdefs['Pilots'],
-                                HierarchicalStackDefinition))
-        self.assertNotEqual(stackdefs['Associates'], None)
-        self.assertNotEqual(stackdefs['Observers'], None)
-        self.assertNotEqual(stackdefs['Pilots'], None)
+
 
         #
         # getStackDefinitionFor(self, ob, wf_var_id='')
@@ -570,7 +576,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         self.assertEqual(current_state.getId(), 'delegating')
 
         # Check stackdefs
-        stackdefs = current_state.getDelegateesVarsInfo()
+        stackdefs = current_state.getStackDefinitions()
         keys = stackdefs.keys()
         keys.sort()
         self.assert_(isinstance(stackdefs, DictType))
@@ -583,11 +589,11 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                                 HierarchicalStackDefinition))
 
         # Check consistency
-        self.assertEqual(current_state.getDelegateesVarInfoFor('Associates'),
+        self.assertEqual(current_state.getStackDefinitionFor('Associates'),
                          stackdefs['Associates'])
-        self.assertEqual(current_state.getDelegateesVarInfoFor('Observers'),
+        self.assertEqual(current_state.getStackDefinitionFor('Observers'),
                          stackdefs['Observers'])
-        self.assertEqual(current_state.getDelegateesVarInfoFor('Pilots'),
+        self.assertEqual(current_state.getStackDefinitionFor('Pilots'),
                          stackdefs['Pilots'])
 
         # Check behaviors given this workflow definition

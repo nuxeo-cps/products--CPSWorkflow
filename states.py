@@ -23,8 +23,11 @@
 Extends DCWorkflow States and DCWorkflow State Definitions.
 
 It adds :
-  - Advanced properties management for delegatees.
+
+  - CPS States can store stack definitions
   - State bahaviors
+
+Check the documentation within the doc sub-folder
 """
 
 from zLOG import LOG, ERROR, DEBUG
@@ -33,12 +36,6 @@ from Globals import DTMLFile
 
 from Products.DCWorkflow.States import StateDefinition as DCWFStateDefinition
 from Products.DCWorkflow.States import States as DCWFStates
-
-from basicstackdefinitions import SimpleStackDefinition, \
-     HierarchicalStackDefinition
-
-from stack import DATA_STRUCT_STACK_TYPE_LIFO, \
-     DATA_STRUCT_STACK_TYPE_HIERARCHICAL, data_struct_types_export_dict
 
 from stackregistries import WorkflowStackDefRegistry
 
@@ -89,7 +86,7 @@ class StateDefinition(DCWFStateDefinition):
         globals())
 
     state_behaviors = ()
-    state_delegatees_vars_info = {}
+    stackdefs = {}
 
     # State Behaviors depend on a workflow variables
     push_on_workflow_variable = []
@@ -103,9 +100,10 @@ class StateDefinition(DCWFStateDefinition):
 
     def setProperties(self,
                       title='',
+                      description='',
                       transitions=(),
                       state_behaviors=(),
-                      state_delegatees_vars_info={},
+                      stackdefs={},
                       push_on_workflow_variable = None,
                       pop_on_workflow_variable = None,
                       returned_up_hierarchy_on_workflow_variable = None,
@@ -115,7 +113,8 @@ class StateDefinition(DCWFStateDefinition):
                       workflow_unlock_on_workflow_variable = None,
                       workflow_reset_on_workflow_variable = None,
                       REQUEST=None,
-                      description=''):
+                      **kw
+                      ):
         """Set state properties
 
         DCWorkflow properties / CPS extensions
@@ -126,14 +125,10 @@ class StateDefinition(DCWFStateDefinition):
         self.transitions = tuple(map(str, transitions))
         self.state_behaviors = tuple(state_behaviors)
 
-        #
-        # Simple edit properties form with no delegatees specified
-        # Avoid removing the configuration for delegatees if not
-        # specified
-        #
-
-        if state_delegatees_vars_info:
-            self.state_delegatees_vars_info = dict(state_delegatees_vars_info)
+        # Simple edit properties form with no stackdef specified Avoid removing
+        # the configuration for stacks if not specified
+        if stackdefs:
+            self.stackdefs = dict(stackdefs)
 
         # Stack workflow state behavior flags
         if push_on_workflow_variable is not None:
@@ -170,84 +165,31 @@ class StateDefinition(DCWFStateDefinition):
             management_view='Advanced Properties',
             manage_tabs_message=manage_tabs_message,)
 
-    def setDelegateesVarsInfo(self, key, variable_information):
-        """Update the variable holding delegate workflow variables information
+    #
+    # API
+    #
 
-        key is the workflow variable id which is gonna be used as identifier in
-        here.  variable_information is a tuple containing information about
-        this variable state side (i.e : Data strucuture / associated local
-        roles)
+    def getStackDefinitions(self):
+        """Returns all stack definitions defined on this state
+        """
+        return self.stackdefs
 
-        We will create an instance of CPSWorkflowStackDefinition corresponding
-        to the stack workflow type. It will be cleaner since the CPSWorkflow
-        after will be able to call the CPSWorkflowStackDefinition from the
-        _executeTransition()
+    def getStackDefinitionFor(self, var_id):
+        """Return the stack definition given its id
+        """
+        return self.getStackDefinitions().get(var_id)
+
+    def addStackDefinition(self, stackdef_type, stack_type, var_id,
+                           REQUEST=None, **kw):
+        """Add a new stack definition on this state
+
+        stackdef_type : is the stack definition type
+
+        stack_type : stack type (cf. above for the differrent available types
+
+        var_id : workflow variable id used to store this new variable
         """
         self._p_changed = 1
-
-        stackdef = None
-
-        #
-        # Let's check the data structure type and the create a workflow stack
-        # definition mapping this ds type
-        #
-
-        kw = {}
-        kw['ass_local_role'] = variable_information[2]
-        kw['up_ass_local_role'] = variable_information[3]
-        kw['down_ass_local_role'] = variable_information[4]
-        kw['manager_stack_ids'] = variable_information[5]
-
-        #
-        # Call the stack def registries to get an instance associated to a
-        # given stack type
-        #
-
-        stackdef = WorkflowStackDefRegistry.makeWorkflowStackDefTypeInstance(
-            variable_information[0],
-            variable_information[1],
-            key,
-            **kw)
-
-        #
-        # state_delegatees_var_info is a dictionnary with the workflow variable
-        # id as key and an instance of stack definition as value
-        #
-
-        if stackdef is not None:
-            info_dict = self.getDelegateesVarsInfo()
-            info_dict[key] = stackdef
-            self.state_delegatees_vars_info = info_dict
-        else:
-            raise NotImplementedError
-
-    def addDelegateesWorkflowVariableInfo(self,
-                                          stack_def_type,
-                                          data_struct_type,
-                                          var_id='',
-                                          ass_local_role='',
-                                          up_ass_local_role='',
-                                          down_ass_local_role='',
-                                          manager_stack_ids=[],
-                                          REQUEST=None):
-        """Add a new workflow variables hodling the stack where the delegatees
-        will be stored
-
-        data_struct_type : stack type (cf. above for the differrent
-                               available types
-        var_id : workflow variable id used to store this new
-                              variable
-
-        ass_local_role : local role given to the people in this stack.
-
-        up_ass_local_role : local role given to the people above the current
-        level
-        down_ass_local_role : local role givne to the people below the
-        current level
-        """
-
-        self._p_changed = 1
-
         workflow = self.getWorkflow()
 
         # www checks
@@ -257,7 +199,7 @@ class StateDefinition(DCWFStateDefinition):
                     REQUEST,
                     'You need to specify a variable id')
             return -1
-        if not 'ass_local_role':
+        if not kw.get('ass_local_role'):
             if REQUEST is not None:
                 return self.manage_advanced_properties(
                     REQUEST,
@@ -269,7 +211,7 @@ class StateDefinition(DCWFStateDefinition):
             var = workflow.variables.addVariable(var_id)
             var = workflow.variables.get(var_id)
             var.setProperties(
-                description="Delegatees variable",
+                description="Variable holding a stack",
                 default_expr="python:state_change.getStackFor(var_id='%s')" %var_id,
                 for_status=1,
                 update_always=0)
@@ -280,65 +222,54 @@ class StateDefinition(DCWFStateDefinition):
                     'The id you choose is already taken !')
             return -1
 
-        self.setDelegateesVarsInfo(var_id,
-                                   (stack_def_type,
-                                    data_struct_type,
-                                    ass_local_role,
-                                    up_ass_local_role,
-                                    down_ass_local_role,
-                                    manager_stack_ids))
+
+        stackdef = None
+
+        # Call the stack def registries to get an instance associated to a
+        # given stack type
+        stackdef = WorkflowStackDefRegistry.makeWorkflowStackDefTypeInstance(
+            stackdef_type,
+            stack_type,
+            var_id,
+            **kw)
+
+        if stackdef is not None:
+            stackdefs = self.getStackDefinitions()
+            stackdefs[var_id] = stackdef
+            self.stackdefs = stackdefs
 
         if REQUEST is not None:
             return self.manage_advanced_properties(
                 REQUEST,
                 'New workflow variable defined')
 
-    def delDelegateesWorkflowVariablesInfo(self, ids=[], REQUEST=None):
-        """Remove delegatees variables given the id of the variable wich is
-        unique
+    def delStackDefinitionsById(self, ids=[], REQUEST=None):
+        """Remove stack definitions given their ids
+
+        It removes as well the corresponding workflow variable
         """
-
         self._p_changed = 1
-
         for id in ids:
-            if self.getDelegateesVarsInfo().has_key(id):
-                # Remove variable from the workflow variable
+            if self.getStackDefinitions().has_key(id):
                 workflow = self.getWorkflow()
                 try:
                     workflow.variables.deleteVariables([id])
                 except KeyError:
-                    # The variable has been already removed directly
                     pass
-                # Remove the information defined on this state
-                del self.state_delegatees_vars_info[id]
-
+                del self.stackdefs[id]
         if REQUEST is not None:
             return self.manage_advanced_properties(
                 REQUEST,
                 'Delegate workflow variables removed !')
 
+    #
+    # Misc
+    #
+
     def getAvailableStateBehaviors(self):
         """Get the possible bahavior for the state
         """
         return state_behavior_export_dict
-
-    def getAvailableDataStructureTypes(self):
-        """Get the different stack workflow implementations
-        """
-        return data_struct_types_export_dict
-
-    def getDelegateesVarsInfo(self):
-        """Returns the variable information related to delegatees
-        """
-        return self.state_delegatees_vars_info
-
-    ##############################################################
-    ##############################################################
-
-    def getDelegateesVarInfoFor(self, var_id):
-        """Return the var info given the var_id
-        """
-        return self.getDelegateesVarsInfo().get(var_id)
 
 class States(DCWFStates):
     meta_type = 'CPS Workflow States'

@@ -820,7 +820,7 @@ class WorkflowTool(BaseWorkflowTool):
         for wf in self.getWorkflowsFor(ob):
             state_def = wf._getWorkflowStateOf(ob)
             if state_def is not None:
-                info.update(state_def.getDelegateesVarsInfo())
+                info.update(state_def.getStackDefinitions())
         return info
 
     security.declarePublic('getStackDefinitionFor')

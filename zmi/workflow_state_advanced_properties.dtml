@@ -17,7 +17,7 @@
   <th align="left" valign="top">Add workflow variables holding delegatees</th>
   <td align="right">
     <small>Stack Definition Type&nbsp; :&nbsp; </small>
-    <select name="stack_def_type">
+    <select name="stackdef_type">
       <dtml-in expr="portal_workflow.getWorkflowStackDefRegistry().listWorkflowStackDefTypes()">
           <option value="&dtml-sequence-item;">
             <dtml-var expr="_['sequence-item']">
@@ -27,7 +27,7 @@
     <br /><br />
 
     <small>Associate Stack Type&nbsp; :&nbsp; </small>
-    <select name="data_struct_type">
+    <select name="stack_type">
       <dtml-in expr="portal_workflow.getWorkflowStackRegistry().listWorkflowStackTypes()">
           <option value="&dtml-sequence-item;">
             <dtml-var expr="_['sequence-item']">
@@ -75,7 +75,7 @@
     <br />
     <br />
 
-    <input type="submit" name="addDelegateesWorkflowVariableInfo:method" value="Add" />
+    <input type="submit" name="addStackDefinition:method" value="Add" />
   <td>
 </tr>
 
@@ -88,13 +88,13 @@
 <tr>
   <th align="left" valign="top">Currently defined variables which hold delegatees</th>
   <td>
-    <dtml-in expr="getDelegateesVarsInfo().keys()">
+    <dtml-in expr="getStackDefinitions().keys()">
       <dtml-let current_variable_id="_['sequence-item']">
         <input type="checkbox" name="ids:list" value="<dtml-var current_variable_id>" />
 
         <b><dtml-var current_variable_id></b><br /><br />
         <dtml-let
-        stackdef="getDelegateesVarInfoFor(current_variable_id)">
+        stackdef="getStackDefinitionFor(current_variable_id)">
         <b>Type : </b>
           <dtml-var expr="stackdef.getStackDataStructureType()">
         <br />
@@ -113,7 +113,7 @@
         </dtml-let>
       </dtml-let>
     </dtml-in>
-    <input type="submit" name="delDelegateesWorkflowVariablesInfo:method"
+    <input type="submit" name="delStackDefinitionsById:method"
         value="Remove selected" />
   </td>
 </tr>
