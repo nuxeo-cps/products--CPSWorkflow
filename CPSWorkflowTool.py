@@ -45,6 +45,7 @@ from Products.CMFCore.WorkflowTool import WorkflowTool
 try:
     from Products.CPSCore.EventServiceTool import getEventService
     from Products.CPSCore.ProxyBase import ProxyBase, ProxyFolderishDocument
+    from Products.CPSCore.ProxyBase import ProxyBTreeFolderishDocument
 except ImportError, e:
     if str(e) != 'No module named CPSCore':
         raise
@@ -67,6 +68,9 @@ except ImportError, e:
         pass
 
     class ProxyFolderishDocument:
+        pass
+
+    class ProxyBTreeFolderishDocument:
         pass
 
 from Products.CPSWorkflow.CPSWorkflowTransitions import TRANSITION_ALLOWSUB_CREATE
@@ -468,7 +472,8 @@ class CPSWorkflowTool(WorkflowTool):
         # The recursion is only applied if it's a proxy folderish document.
         # If the considered object is a folder, its content should not be
         # subject to workflow modifications.
-        isproxyfolderishdoc = isinstance(ob, ProxyFolderishDocument)
+        isproxyfolderishdoc = isinstance(ob, ProxyFolderishDocument) or \
+                              isinstance(ob, ProxyBTreeFolderishDocument)
         if isproxyfolderishdoc:
             for subob in ob.objectValues():
                 self._insertWorkflowRecursive(subob, initial_transition,
@@ -518,7 +523,8 @@ class CPSWorkflowTool(WorkflowTool):
             pxtool.checkinRevisions(ob, dest_ob)
 
         # For folderish documents, copy subobjects into new container.
-        if isinstance(dest_ob, ProxyFolderishDocument):
+        if isinstance(dest_ob, ProxyFolderishDocument) or \
+               isinstance(dest_ob, ProxyBTreeFolderishDocument):
             # Erase old
             ids = [id for id in dest_ob.objectIds() if not id.startswith('.')]
             dest_ob.manage_delObjects(ids)
@@ -617,7 +623,8 @@ class CPSWorkflowTool(WorkflowTool):
         The workflow object must perform its own security checks.
         """
         # Don't recurse for initial transitions! # XXX urgh
-        isproxyfolderishdoc = isinstance(ob, ProxyFolderishDocument)
+        isproxyfolderishdoc = isinstance(ob, ProxyFolderishDocument) or \
+                              isinstance(ob, ProxyBTreeFolderishDocument)
         if isproxyfolderishdoc and not kw.has_key('dest_container'):
             return self._doActionForRecursive(ob, action, wf_id=wf_id,
                                               *args, **kw)
