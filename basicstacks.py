@@ -313,13 +313,12 @@ class HierarchicalStack(SimpleStack):
 
         If not specified let's return the current level content
         """
-        if level is not None:
-            try:
-                value = self._getElementsContainer()[level]
-            except KeyError:
-                value = []
-        else:
-            value = self.getLevelContent(level=self.getCurrentLevel())
+        if level is None:
+            level=self.getCurrentLevel()
+        try:
+            value = self._getElementsContainer()[level]
+        except KeyError:
+            value = []
 
         return value
 
@@ -430,7 +429,7 @@ class HierarchicalStack(SimpleStack):
                 self._elements_container[level][index_level] = new_elt
             except ValueError:
                 pass
-            
+
     ################################################################
 
     def getCopy(self):
