@@ -69,8 +69,12 @@ from Products.CPSWorkflow.states import *
 from Products.CPSWorkflow.transitions import \
      transition_behavior_export_dict as tbdict
 
-from Products.CPSWorkflow.basicstackdefinitions import SimpleStackDefinition, \
+from Products.CPSWorkflow.basicstackdefinitions import SimpleStackDefinition
+from Products.CPSWorkflow.basicstackdefinitions import \
      HierarchicalStackDefinition
+
+from Products.CPSWorkflow.basicstacks import SimpleStack
+from Products.CPSWorkflow.basicstacks import HierarchicalStack
 
 from dummy import DummyContent
 
@@ -168,8 +172,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                                  'WorkspaceMember' : "python:level < stack.getCurrentLevel() and 1 or nothing",
                                  'WorkspaceReader' : "python:level > stack.getCurrentLevel() and 1 or nothing",
                                  },
-            master_role= 'WorkspaceManager',
             manager_stack_ids=['Associates', 'Observers'],
+            empty_stack_manage_guard={'guard_roles':'Owner; WorkspaceManager'},
             )
 
         # Add Associates stack
@@ -179,7 +183,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
             'Associates',
             managed_role_exprs={'WorkspaceMember': 'python:1',
                                 },
-            master_role='WorkspaceMember',
+            empty_stack_manage_guard={'guard_roles':'Owner; WorkspaceMember'},
             manager_stack_ids=['Observers']
             )
 
@@ -190,7 +194,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
             'Observers',
             managed_role_exprs={'WorkspaceReader': 'python:1',
                                 },
-            master_role='WorkspaceReader'
+            empty_stack_manage_guard={'guard_roles':'Owner; WorkspaceReader'},
             )
 
     def _makeWorkflows(self):
@@ -248,21 +252,21 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                                                          'WorkspaceMember' : "python:level < stack.getCurrentLevel() and 1 or nothing",
                                                          'WorkspaceReader' : "python:level > stack.getCurrentLevel() and 1 or nothing",
                                                          },
-                                  'master_role': 'WorkspaceManager',
+                                  'empty_stack_manage_guard':{'guard_roles':'Owner; WorkspaceManager'},    
                                   'manager_stack_ids':['Associates', 'Observers'],
                                   },
                        'Associates': {'stackdef_type' : 'Simple Stack Definition',
                                       'stack_type': 'Simple Stack',
                                       'var_id':'Associates',
                                       'managed_role_exprs':{'WorkspaceMember': 'python:1',},
-                                      'master_role':'WorkspaceMember',
+                                      'empty_stack_manage_guard':{'guard_roles':'Owner; WorkspaceMember'},    
                                       'manager_stack_ids':['Observers'],
                                       },
                        'Observers': {'stackdef_type' : 'Simple Stack Definition',
                                      'stack_type': 'Simple Stack',
                                      'var_id':'Observers',
                                      'managed_role_exprs':{'WorkspaceReader': 'python:1',},
-                                     'master_role':'WorkspaceReader',
+                                     'empty_stack_manage_guard':{'guard_roles':'Owner; WorkspaceReader'},    
                                      'manager_stack_ids':[],
                                      },
                        },
@@ -298,21 +302,21 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                                                          'WorkspaceMember' : "python:level < stack.getCurrentLevel() and 1 or nothing",
                                                          'WorkspaceReader' : "python:level > stack.getCurrentLevel() and 1 or nothing",
                                                          },
-                                  'master_role': 'WorkspaceManager',
+                                  'empty_stack_manage_guard':{'guard_roles':'Owner; WorkspaceManager'},    
                                   'manager_stack_ids':['Associates', 'Observers'],
                                   },
                        'Associates': {'stackdef_type' : 'Simple Stack Definition',
                                       'stack_type': 'Simple Stack',
                                       'var_id':'Associates',
                                       'managed_role_exprs':{'WorkspaceMember': 'python:1',},
-                                      'master_role':'WorkspaceMember',
+                                      'empty_stack_manage_guard':{'guard_roles':'Owner; WorkspaceMember'},    
                                       'manager_stack_ids':['Observers'],
                                       },
                        'Observers': {'stackdef_type' : 'Simple Stack Definition',
                                      'stack_type': 'Simple Stack',
                                      'var_id':'Observers',
                                      'managed_role_exprs':{'WorkspaceReader': 'python:1',},
-                                     'master_role':'WorkspaceReader',
+                                     'empty_stack_manage_guard':{'guard_roles':'Owner; WorkspaceReader'},    
                                      'manager_stack_ids':[],
                                      },
                        },
@@ -393,7 +397,20 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                         transition_behavior=(
             TRANSITION_BEHAVIOR_PUSH_DELEGATEES,
             ),
-                        push_on_workflow_variable=['Pilots'],
+                        push_on_workflow_variable=['Pilots', 'Associates'],
+                        )
+
+        # Reset
+        wf.transitions.addTransition('reset')
+        t = wf.transitions.get('reset')
+        t.setProperties('title',
+                        '',
+                        trigger_type=TRIGGER_USER_ACTION,
+                        transition_behavior=(
+            TRANSITION_BEHAVIOR_WORKFLOW_RESET,
+            ),
+                        workflow_reset_on_workflow_variable=['Pilots',
+                                                             'Associates'],
                         )
 
         # remove_delegate
@@ -457,11 +474,19 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                                               'create',
                                               'delegate',
                                               'remove_delegate',
+                                              'reset',
                                               'to_validate',
                                               'to_writing',
                                               'validate',
                                               ))
 
+        # silent
+        wf.transitions.addTransition('silent')
+        t = wf.transitions.get('silent')
+        t.setProperties('title',
+                        '',
+                        trigger_type=TRIGGER_USER_ACTION,
+                        )
         #
         # Variables
         #
@@ -519,7 +544,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         #
 
         s = wf.states.get('delegating')
-        s.transitions += ('delegate', 'remove_delegate')
+        s.transitions += ('delegate', 'remove_delegate', 'silent', 'reset')
 
         #
         # Workflow for the container
@@ -551,6 +576,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                         trigger_type=TRIGGER_USER_ACTION,
                         transition_behavior=(tbdict[TRANSITION_ALLOWSUB_CREATE],
                                              ))
+        
     ###################################################################
     # TESTS STARTS HERE
     ###################################################################
@@ -731,7 +757,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         allowed_transitions = current_state.getTransitions()
         # Not yet initialized
-        self.assertEqual(allowed_transitions, ('delegate', 'remove_delegate'))
+        self.assertEqual(allowed_transitions, ('delegate', 'remove_delegate',
+                                               'silent', 'reset'))
 
     def test_stack_hierarchical_behavior_with_users_no_levels_one_level(self):
 
@@ -865,6 +892,47 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                 self.assert_('WorkspaceManager' in v)
 
             # Manager can't manage the stack
+        self.assert_(not wftool.canManageStack(content, 'Pilots'))
+
+        ################################################
+        # EXECUTE BORING TRANSITION
+        # check if nothing moved
+        ################################################
+
+        wftool.doActionFor(content, 'silent')
+
+        pstacks = wftool.getStackFor(content, 'Pilots')
+
+        # Check stack status
+        self.assert_(pstacks is not None)
+        self.assert_(pstacks.getStackContent())
+        self.assertEqual({0:['toto', 'tata']}, pstacks.getStackContent())
+
+        # Check local roles mapping
+        pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
+        self.assert_(pstackdef._getLocalRolesMapping(pstacks))
+        self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
+                         {'tata': ('WorkspaceManager',),
+                          'toto': ('WorkspaceManager',)})
+
+        # Check the former local role mapping
+        flrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Pilots')
+        # It's been updated for next time
+        self.assertEqual(flrm,
+                         {'tata': ('WorkspaceManager',),
+                          'toto': ('WorkspaceManager',)},
+                         )
+        
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        for k, v in lc.items():
+            if k in ('user:toto', 'user:tata',):
+                self.assert_('WorkspaceManager' in v)
+
+        # Manager can't manage the stack
         self.assert_(not wftool.canManageStack(content, 'Pilots'))
 
         #################################################
@@ -1047,7 +1115,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                          {'manager': ('WorkspaceManager',),
                           }
                          )
-
+        
         # Check local roles on the content
         mtool = getToolByName(self.portal, 'portal_membership')
         lc = mtool.getMergedLocalRoles(content)
@@ -1059,10 +1127,572 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Manager
         self.assert_( not wftool.canManageStack(content, 'Pilots'))
 
-    def test_hierarchical_as_member(self):
-        self.login('toto')
+    def test_resetOnSImpleStack(self):
+
+        self.login('manager')
         wftool = self.wftool
+
         content = getattr(self.portal.f, 'dummy')
+        self.assertEqual(wftool.getInfoFor(content, 'review_state'),
+                         'delegating')
+
+        #########################################
+        # Check current state fixtures
+        #########################################
+
+        wf = wftool['wf']
+        current_state = wf._getWorkflowStateOf(content)
+        self.assertEqual(current_state.getId(), 'delegating')
+
+        #########################################
+        # Check stack intialization
+        # It should not be empty
+        #########################################
+
+        pstacks = wftool.getStackFor(content, 'Associates')
+        self.assert_(pstacks is not None)
+
+        ############################
+        # PUSH me within
+        ############################
+
+        kw = {'member_ids': ('manager',),
+              'current_wf_var_id' : 'Associates'}
+        wftool.doActionFor(content,'delegate',
+                           **kw)
+        
+        pstacks = wftool.getStackFor(content, 'Associates')
+
+        # Check stack status
+        self.assert_(pstacks is not None)
+        self.assertEqual(['manager'],
+                         pstacks.getStackContent())
+
+        # Check local roles mapping
+        pstackdef = wftool.getStackDefinitionFor(content, 'Associates')
+        self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
+                         {'manager' : ('WorkspaceMember',)})
+
+        # Check the former local role mapping
+        flrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Associates')
+
+        # It's been updated for next time
+        self.assertEqual(flrm, {})
+        
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        self.assert_('user:manager' in lc.keys())
+
+        # Manager
+        self.assert_( wftool.canManageStack(content, 'Associates'))
+
+        ############################
+        # reset with new_users
+        ############################
+        
+        kw = {'new_users': ('toto',),
+              'current_wf_var_id':'Associates'}
+        wftool.doActionFor(content,'reset',
+                           **kw)
+        
+        pstacks = wftool.getStackFor(content, 'Associates')
+
+        # Check stack status
+        self.assert_(pstacks is not None)
+        self.assertEqual(['toto'],
+                         pstacks.getStackContent())
+
+        # Check local roles mapping
+        pstackdef = wftool.getStackDefinitionFor(content, 'Associates')
+        self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
+                         {'toto' : ('WorkspaceMember',)})
+
+        # Check the former local role mapping
+        flrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Associates')
+
+        # It's been updated for next time
+        self.assertEqual(flrm, {'manager':('WorkspaceMember',)})
+        
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        self.assert_('user:toto' in lc.keys())
+
+        # Manager
+        self.assert_( not wftool.canManageStack(content, 'Associates'))
+
+        ############################
+        # reset with new_groups
+        ############################
+        
+        kw = {'new_groups': ('group:nuxeo',),
+              'current_wf_var_id':'Associates'}
+        wftool.doActionFor(content,'reset',
+                           **kw)
+        
+        pstacks = wftool.getStackFor(content, 'Associates')
+
+        # Check stack status
+        self.assert_(pstacks is not None)
+        self.assertEqual(['group:nuxeo'],
+                         pstacks.getStackContent())
+
+        # Check local roles mapping
+        pstackdef = wftool.getStackDefinitionFor(content, 'Associates')
+        self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
+                         {'group:nuxeo' : ('WorkspaceMember',)})
+
+        # Check the former local role mapping
+        flrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Associates')
+
+        # It's been updated for next time
+        self.assertEqual(flrm, {'toto':('WorkspaceMember',)})
+        
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        self.assert_('group:nuxeo' in lc.keys())
+
+        # Manager
+        self.assert_( not wftool.canManageStack(content, 'Associates'))
+
+        ############################
+        # reset with new_stack
+        ############################
+
+        new_stack = SimpleStack()
+        
+        kw = {'new_stack': new_stack,
+              'new_users': ('manager',),
+              'current_wf_var_id':'Associates'}
+        wftool.doActionFor(content,'reset',
+                           **kw)
+        
+        pstacks = wftool.getStackFor(content, 'Associates')
+
+        # Check stack status
+        self.assert_(pstacks is not None)
+        self.assertEqual(['manager',],
+                         pstacks.getStackContent())
+
+        # Check local roles mapping
+        pstackdef = wftool.getStackDefinitionFor(content, 'Associates')
+        self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
+                         {'manager':('WorkspaceMember',)})
+
+        # Check the former local role mapping
+        flrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Associates')
+
+        # It's been updated for next time
+        self.assertEqual(flrm, {'group:nuxeo':('WorkspaceMember',)})
+        
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        self.assert_(not 'group:nuxeo' in lc.keys())
+        self.assert_('user:manager' in lc.keys())
+
+        # Manager
+        self.assert_( wftool.canManageStack(content, 'Associates'))
+
+    def test_resetOnHierarchicalStack(self):
+
+        self.login('manager')
+        wftool = self.wftool
+
+        content = getattr(self.portal.f, 'dummy')
+        self.assertEqual(wftool.getInfoFor(content, 'review_state'),
+                         'delegating')
+
+        #########################################
+        # Check current state fixtures
+        #########################################
+
+        wf = wftool['wf']
+        current_state = wf._getWorkflowStateOf(content)
+        self.assertEqual(current_state.getId(), 'delegating')
+
+        #########################################
+        # Check stack intialization
+        # It should not be empty
+        #########################################
+
+        pstacks = wftool.getStackFor(content, 'Pilots')
+        self.assert_(pstacks is not None)
+
+        ############################
+        # PUSH me within
+        ############################
+
+        kw = {'member_ids': ('manager',),
+              'levels':(0,),
+              'current_wf_var_id' : 'Pilots'}
+        wftool.doActionFor(content,'delegate',
+                           **kw)
+        
+        pstacks = wftool.getStackFor(content, 'Pilots')
+
+        # Check stack status
+        self.assert_(pstacks is not None)
+        self.assertEqual(['manager'],
+                         pstacks.getStackContent()[0])
+
+        # Check local roles mapping
+        pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
+        self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
+                         {'manager' : ('WorkspaceManager',)})
+
+        # Check the former local role mapping
+        flrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Pilots')
+
+        # It's been updated for next time
+        self.assertEqual(flrm, {})
+        
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        self.assert_('user:manager' in lc.keys())
+
+        # Manager
+        self.assert_( wftool.canManageStack(content, 'Pilots'))
+
+        ############################
+        # reset with new_users
+        ############################
+        
+        kw = {'new_users': ('toto',),
+              'current_wf_var_id':'Pilots'}
+        wftool.doActionFor(content,'reset',
+                           **kw)
+        
+        pstacks = wftool.getStackFor(content, 'Pilots')
+
+        # Check stack status
+        self.assert_(pstacks is not None)
+        self.assertEqual(['toto'],
+                         pstacks.getStackContent()[0])
+
+        # Check local roles mapping
+        pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
+        self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
+                         {'toto' : ('WorkspaceManager',)})
+
+        # Check the former local role mapping
+        flrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Pilots')
+
+        # It's been updated for next time
+        self.assertEqual(flrm, {'manager':('WorkspaceManager',)})
+        
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        self.assert_('user:toto' in lc.keys())
+
+        # Manager
+        self.assert_( not wftool.canManageStack(content, 'Pilots'))
+
+        ############################
+        # reset with new_groups
+        ############################
+        
+        kw = {'new_groups': ('group:nuxeo',),
+              'current_wf_var_id':'Pilots'}
+        wftool.doActionFor(content,'reset',
+                           **kw)
+        
+        pstacks = wftool.getStackFor(content, 'Pilots')
+
+        # Check stack status
+        self.assert_(pstacks is not None)
+        self.assertEqual(['group:nuxeo'],
+                         pstacks.getStackContent()[0])
+
+        # Check local roles mapping
+        pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
+        self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
+                         {'group:nuxeo' : ('WorkspaceManager',)})
+
+        # Check the former local role mapping
+        flrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Pilots')
+
+        # It's been updated for next time
+        self.assertEqual(flrm, {'toto':('WorkspaceManager',)})
+        
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        self.assert_('group:nuxeo' in lc.keys())
+
+        # Manager
+        self.assert_( not wftool.canManageStack(content, 'Pilots'))
+
+        ############################
+        # reset with new_stack
+        ############################
+
+        new_stack = HierarchicalStack()
+        
+        kw = {'new_stack': new_stack,
+              'new_users': ('manager',),
+              'current_wf_var_id':'Pilots'}
+        wftool.doActionFor(content,'reset',
+                           **kw)
+        
+        pstacks = wftool.getStackFor(content, 'Pilots')
+
+        # Check stack status
+        self.assert_(pstacks is not None)
+        self.assertEqual(['manager',],
+                         pstacks.getStackContent()[0])
+
+        # Check local roles mapping
+        pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
+        self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
+                         {'manager':('WorkspaceManager',)})
+
+        # Check the former local role mapping
+        flrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Pilots')
+
+        # It's been updated for next time
+        self.assertEqual(flrm, {'group:nuxeo':('WorkspaceManager',)})
+        
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        self.assert_(not 'group:nuxeo' in lc.keys())
+        self.assert_('user:manager' in lc.keys())
+
+        # Manager
+        self.assert_( wftool.canManageStack(content, 'Pilots'))
+
+    def test_replaceOnHierarchicalStack(self):
+
+        self.login('manager')
+        wftool = self.wftool
+
+        content = getattr(self.portal.f, 'dummy')
+        self.assertEqual(wftool.getInfoFor(content, 'review_state'),
+                         'delegating')
+
+        #########################################
+        # Check current state fixtures
+        #########################################
+
+        wf = wftool['wf']
+        current_state = wf._getWorkflowStateOf(content)
+        self.assertEqual(current_state.getId(), 'delegating')
+
+        #########################################
+        # Check stack intialization
+        # It should not be empty
+        #########################################
+
+        pstacks = wftool.getStackFor(content, 'Pilots')
+        self.assert_(pstacks is not None)
+
+        ############################
+        # PUSH me within
+        ############################
+
+        kw = {'member_ids': ('manager',),
+              'levels':(0,),
+              'current_wf_var_id' : 'Pilots'}
+        wftool.doActionFor(content,'delegate',
+                           **kw)
+        
+        pstacks = wftool.getStackFor(content, 'Pilots')
+
+        # Check stack status
+        self.assert_(pstacks is not None)
+        self.assertEqual(['manager'],
+                         pstacks.getStackContent()[0])
+
+        # Check local roles mapping
+        pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
+        self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
+                         {'manager' : ('WorkspaceManager',)})
+
+        # Check the former local role mapping
+        flrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Pilots')
+
+        # It's been updated for next time
+        self.assertEqual(flrm, {})
+        
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        self.assert_('user:manager' in lc.keys())
+
+        # Manager
+        self.assert_( wftool.canManageStack(content, 'Pilots'))
+
+        ##############################################################
+        # Replace the element within the stack and follow the reset
+        # transition
+        ##############################################################
+
+        stack = wftool.getStackFor(content, 'Pilots')
+        new_stack = stack.getCopy()
+        self.assertNotEqual(stack, new_stack)
+        new_stack.replace('manager', 'toto')
+
+        wftool.doActionFor(content, 'reset',
+                           new_stack=new_stack,
+                           current_wf_var_id='Pilots')
+        pstacks = wftool.getStackFor(content, 'Pilots')
+
+        # Check stack status
+        self.assert_(pstacks is not None)
+        self.assertEqual(['toto'],
+                         pstacks.getStackContent()[0])
+
+        # Check local roles mapping
+        pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
+        self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
+                         {'toto' : ('WorkspaceManager',)})
+
+        # Check the former local role mapping
+        flrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Pilots')
+
+        # It's been updated for next time
+        self.assertEqual(flrm, {'manager':('WorkspaceManager',)})
+        
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        self.assert_('user:manager' not in lc.keys())
+        self.assert_('user:toto' in lc.keys())
+
+        # Manager
+        self.assert_(not wftool.canManageStack(content, 'Pilots'))
+
+
+    def test_replaceOnSimpleStack(self):
+
+        self.login('manager')
+        wftool = self.wftool
+
+        content = getattr(self.portal.f, 'dummy')
+        self.assertEqual(wftool.getInfoFor(content, 'review_state'),
+                         'delegating')
+
+        #########################################
+        # Check current state fixtures
+        #########################################
+
+        wf = wftool['wf']
+        current_state = wf._getWorkflowStateOf(content)
+        self.assertEqual(current_state.getId(), 'delegating')
+
+        #########################################
+        # Check stack intialization
+        # It should not be empty
+        #########################################
+
+        pstacks = wftool.getStackFor(content, 'Associates')
+        self.assert_(pstacks is not None)
+
+        ############################
+        # PUSH me within
+        ############################
+
+        kw = {'member_ids': ('manager',),
+              'levels':(0,),
+              'current_wf_var_id' : 'Associates'}
+        wftool.doActionFor(content,'delegate',
+                           **kw)
+        
+        pstacks = wftool.getStackFor(content, 'Associates')
+
+        # Check stack status
+        self.assert_(pstacks is not None)
+        self.assertEqual(['manager'],
+                         pstacks.getStackContent())
+
+        # Check local roles mapping
+        pstackdef = wftool.getStackDefinitionFor(content, 'Associates')
+        self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
+                         {'manager' : ('WorkspaceMember',)})
+
+        # Check the former local role mapping
+        flrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Associates')
+
+        # It's been updated for next time
+        self.assertEqual(flrm, {})
+        
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        self.assert_('user:manager' in lc.keys())
+
+        # Manager
+        self.assert_( wftool.canManageStack(content, 'Associates'))
+
+        ##############################################################
+        # Replace the element within the stack and follow the reset
+        # transition
+        ##############################################################
+
+        stack = wftool.getStackFor(content, 'Associates')
+        new_stack = stack.getCopy()
+        self.assertNotEqual(stack, new_stack)
+        new_stack.replace('manager', 'toto')
+
+        wftool.doActionFor(content, 'reset',
+                           new_stack=new_stack,
+                           current_wf_var_id='Associates')
+        pstacks = wftool.getStackFor(content, 'Associates')
+
+        # Check stack status
+        self.assert_(pstacks is not None)
+        self.assertEqual(['toto'],
+                         pstacks.getStackContent())
+
+        # Check local roles mapping
+        pstackdef = wftool.getStackDefinitionFor(content, 'Associates')
+        self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
+                         {'toto' : ('WorkspaceMember',)})
+
+        # Check the former local role mapping
+        flrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Associates')
+
+        # It's been updated for next time
+        self.assertEqual(flrm, {'manager':('WorkspaceMember',)})
+        
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        self.assert_('user:manager' not in lc.keys())
+        self.assert_('user:toto' in lc.keys())
+
+        # Manager
+        self.assert_(not wftool.canManageStack(content, 'Associates'))
+        
 
 def test_suite():
     suite = unittest.TestSuite()

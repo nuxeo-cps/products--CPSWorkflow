@@ -1,16 +1,44 @@
+#!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
+
+# (C) Copyright 2004-2005 Nuxeo SARL <http://nuxeo.com>
+# Author: Julien Anguenot <ja@nuxeo.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as published
+# by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+# 02111-1307, USA.
+#
+# $Id$
+
 import Zope
 import unittest
 from OFS.Folder import Folder
 from Interface.Verify import verifyClass
 
+from AccessControl.SecurityManagement import newSecurityManager
+
 from Testing import ZopeTestCase
 from Products.CMFCore.tests.base.testcase import SecurityRequestTest
 
-from Products.CPSWorkflow.basicstacks import SimpleStack, HierarchicalStack
-from Products.CPSWorkflow.basicstackdefinitions import  \
-     StackDefinition, \
-     SimpleStackDefinition, \
+from Products.CPSCore.CPSMembershipTool import CPSUnrestrictedUser
+
+from Products.CPSWorkflow.stack import Stack
+from Products.CPSWorkflow.basicstacks import SimpleStack
+from Products.CPSWorkflow.basicstacks import HierarchicalStack
+
+from Products.CPSWorkflow.basicstackdefinitions import StackDefinition
+from Products.CPSWorkflow.basicstackdefinitions import SimpleStackDefinition
+from Products.CPSWorkflow.basicstackdefinitions import \
      HierarchicalStackDefinition
 
 from Products.CPSWorkflow.interfaces import IWorkflowStackDefinition
@@ -28,10 +56,15 @@ class FakeGroup:
 class FakeUserFolderWithGroups:
     _groups = {'group1': FakeGroup(['user1']),
                'group2': FakeGroup(['user1', 'user2'])}
+    _users = {}
     def getGroupById(self, id):
         # KeyError if not found as PUF
         # so that we'll be able to test
         return self._groups[id]
+    def setUser(self, member_id, member_instance):
+        self._users[member_id] = member_instance
+    def getUser(self, member_id):
+        return self._users.get(member_id)
 
 ########################################################################
 # Fake a portal_membership tool
@@ -63,6 +96,12 @@ class FakeMembershipTool:
 
 class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
+    def login(self, member_id, roles=()):
+        aclu = FakeUserFolderWithGroups()
+        self.acl_users = aclu
+        self.acl_users.setUser(member_id, FakeMember(member_id, roles))
+        newSecurityManager(None, self.acl_users.getUser(member_id))
+
     def test_interface(self):
         verifyClass(IWorkflowStackDefinition, StackDefinition)
         verifyClass(IWorkflowStackDefinition, SimpleStackDefinition)
@@ -70,8 +109,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
     def test_StackDefinition(self):
         base = StackDefinition('Simple Stack',
-                               'toto',
-                               ass_local_role='WorkspaceManager')
+                               'toto')
 
         # Basics
         self.assertEqual(base.meta_type, 'Stack Definition')
@@ -81,7 +119,8 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Not implemented methods
         self.assertRaises(NotImplementedError, base._push, None)
         self.assertRaises(NotImplementedError, base._pop, None)
-        self.assertRaises(NotImplementedError, base._getLocalRolesMapping, None)
+        self.assertRaises(NotImplementedError, base._getLocalRolesMapping,
+                          None)
         self.assertRaises(NotImplementedError, base._canManageStack,
                           None, None, None, None)
 
@@ -93,11 +132,13 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertEqual(base.isLocked(), 0)
 
     def test_SimpleStackDefinition(self):
+        self.login('user1', ('Owner',))
         simple = SimpleStackDefinition('Simple Stack',
                                        'toto')
+        simple.setEmptyStackManageGuard(guard_roles='Owner; WorkspaceManager')
 
         # Add expressions
-        simple.addManagedRole('WorkspaceManager', 'python:1', master_role=1)
+        simple.addManagedRole('WorkspaceManager', 'python:1')
 
         # Basics
         self.assertEqual(simple.meta_type, 'Simple Stack Definition')
@@ -181,7 +222,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                           'user2':('WorkspaceManager',)})
 
         # Add a fake acl_users to the instance
-        aclu = FakeUserFolderWithGroups()
+        aclu = self.acl_users
         # Add a fake membership tool
         mtool = FakeMembershipTool()
         self.assertEqual(simple._canManageStack(ds=new_stack,
@@ -364,8 +405,10 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                member_id='user1',
                                                context=self),
                          1)
+
+        self.login('user2', ('Member',))
         self.assertEqual(simple._canManageStack(ds=new_stack,
-                                               aclu=aclu,
+                                               aclu=self.acl_users,
                                                mtool=mtool,
                                                member_id='user2',
                                                context=self),
@@ -381,6 +424,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         auth_roles = auth_member.getRolesInContext(self)
         self.assertEqual('Owner' in auth_roles, 1)
 
+        self.login('user3', ('Owner',))
         self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
@@ -391,20 +435,19 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         hierarchical = HierarchicalStackDefinition(
             'Hierarchical Stack',
             'toto')
+        hierarchical.setEmptyStackManageGuard(
+            guard_roles='Owner;WorkspaceManager')
 
         # Add expressions
         hierarchical.addManagedRole(
             'WorkspaceManager',
-            "python:level == stack.getCurrentLevel() and 1 or nothing",
-            master_role=1)
+            "python:level == stack.getCurrentLevel() and 1 or nothing")
         hierarchical.addManagedRole(
             'WorkspaceMember',
-            "python:level < stack.getCurrentLevel() and 1 or nothing",
-            master_role=0)
+            "python:level < stack.getCurrentLevel() and 1 or nothing")
         hierarchical.addManagedRole(
             'WorkspaceReader',
-            "python:level > stack.getCurrentLevel() and 1 or nothing",
-            master_role=0)
+            "python:level > stack.getCurrentLevel() and 1 or nothing")
 
         # Basics
         self.assertEqual(hierarchical.meta_type,
@@ -686,6 +729,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         user1_roles = member_user1.getRolesInContext(self)
         self.assertEqual('WorkspaceManager' in user1_roles, 1)
 
+        self.login('user', ('Owner', 'WorkspaceManager',))
         self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
@@ -693,6 +737,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      context=self),
                          1)
 
+        self.login('user2', ('Member',))
         self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
@@ -710,6 +755,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         auth_roles = auth_member.getRolesInContext(self)
         self.assertEqual('Owner' in auth_roles, 1)
 
+        self.login('user1', ('Owner',))
         self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
@@ -730,17 +776,18 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Add expressions
         hierarchical.addManagedRole(
             'WorkspaceManager',
-            "python:level == stack.getCurrentLevel() and 1 or nothing",
-            master_role=1)
+            "python:level == stack.getCurrentLevel() and 1 or nothing")
         hierarchical.addManagedRole(
             'WorkspaceMember',
-            "python:level < stack.getCurrentLevel() and 1 or nothing",
-            master_role=0)
+            "python:level < stack.getCurrentLevel() and 1 or nothing")
         hierarchical.addManagedRole(
             'WorkspaceReader',
-            "python:level > stack.getCurrentLevel() and 1 or nothing",
-            master_role=0)
+            "python:level > stack.getCurrentLevel() and 1 or nothing")
 
+        # XX
+        hierarchical.setEmptyStackManageGuard(
+            guard_roles='Owner; WorkspaceManager')
+            
         # Basics
         self.assertEqual(hierarchical.meta_type,
                          'Hierarchical Stack Definition')
@@ -1493,6 +1540,112 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         sstackdef._addExpressionForRole('WorkspaceManager', 'python:portal')
         self.assert_(sstackdef._getExpressionForRole('WorkspaceManager',
                                                      sstack) is not None)
+
+    def test_ResetOnSimpleStackDefinition(self):
+
+        #
+        # Test the reset behavior on the Simple Stack Definition class type
+        #
+
+        stack = SimpleStack()
+        stackdef = SimpleStackDefinition('Simple Stack',
+                                         'Fake')
+
+        kw = {}
+        kw['member_ids'] = ('elt1',)
+        stack = stackdef._push(stack, **kw)
+        self.assertEqual([x for x in stack._getElementsContainer()],
+                         ['elt1'])
+
+        # Reset with one (1) new user
+        stack = stackdef.resetStack(stack, new_users=('elt2',))
+        self.assertEqual([x() for x in stack._getElementsContainer()],
+                         ['elt2'])
+
+        # Reset with two (2) new users
+        stack = stackdef.resetStack(stack, new_users=('elt3', 'elt4'))
+        self.assertEqual([x() for x in stack._getElementsContainer()],
+                         ['elt3', 'elt4'])
+
+        # Reset with one (1) new group
+        stack = stackdef.resetStack(stack, new_users=('group:elt2',))
+        self.assertEqual([x() for x in stack._getElementsContainer()],
+                         ['group:elt2'])
+        
+        # Reset with two (2) new users
+        stack = stackdef.resetStack(stack,
+                                    new_users=('group:elt3', 'group:elt4'))
+        self.assertEqual([x() for x in stack._getElementsContainer()],
+                         ['group:elt3', 'group:elt4'])
+
+        # Reset with one new stack
+        new_stack = SimpleStack()
+        new_stack.push('new_elt')
+        stack = stackdef.resetStack(stack, new_stack=new_stack)
+        self.assertEqual(stack._getElementsContainer(),
+                         new_stack._getElementsContainer())
+
+        # Reset with a new stack, new users and new groups
+        new_stack = SimpleStack()
+        stack = stackdef.resetStack(stack, new_stack=new_stack,
+                                    new_users=('elt1', 'elt2'),
+                                    new_groups=('group:elt3', 'group:elt4'))
+        self.assertEqual([x() for x in stack._getElementsContainer()],
+                         ['elt1', 'elt2', 'group:elt3', 'group:elt4'])
+
+    def test_ResetOnHierarchicalStackDefinition(self):
+
+        #
+        # Test the reset behavior on the Hierachical Stack Definition
+        # class type
+        #
+
+        stack = HierarchicalStack()
+        stackdef = HierarchicalStackDefinition('Hierarchical Stack',
+                                               'Fake')
+
+        kw = {}
+        kw['member_ids'] = ('elt1',)
+        kw['levels'] = (0,)
+        stack = stackdef._push(stack, **kw)
+        self.assertEqual([x for x in stack._getElementsContainer()[0]],
+                         ['elt1'])
+
+        # Reset with one (1) new user
+        stack = stackdef.resetStack(stack, new_users=('elt2',))
+        self.assertEqual([x() for x in stack._getElementsContainer()[0]],
+                         ['elt2'])
+
+        # Reset with two (2) new users
+        stack = stackdef.resetStack(stack, new_users=('elt3', 'elt4'))
+        self.assertEqual([x() for x in stack._getElementsContainer()[0]],
+                         ['elt3', 'elt4'])
+
+        # Reset with one (1) new group
+        stack = stackdef.resetStack(stack, new_users=('group:elt2',))
+        self.assertEqual([x() for x in stack._getElementsContainer()[0]],
+                         ['group:elt2'])
+        
+        # Reset with two (2) new users
+        stack = stackdef.resetStack(stack,
+                                    new_users=('group:elt3', 'group:elt4'))
+        self.assertEqual([x() for x in stack._getElementsContainer()[0]],
+                         ['group:elt3', 'group:elt4'])
+
+        # Reset with one new stack
+        new_stack = HierarchicalStack()
+        new_stack.push('new_elt')
+        stack = stackdef.resetStack(stack, new_stack=new_stack)
+        self.assertEqual(stack._getElementsContainer(),
+                         new_stack._getElementsContainer())
+
+        # Reset with a new stack, new users and new groups
+        new_stack = HierarchicalStack()
+        stack = stackdef.resetStack(stack, new_stack=new_stack,
+                                    new_users=('elt1', 'elt2'),
+                                    new_groups=('group:elt3', 'group:elt4'))
+        self.assertEqual([x() for x in stack._getElementsContainer()[0]],
+                         ['elt1', 'elt2', 'group:elt3', 'group:elt4'])
 
 def test_suite():
     loader = unittest.TestLoader()

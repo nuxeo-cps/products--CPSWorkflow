@@ -1,14 +1,35 @@
+#!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
+
+# (C) Copyright 2004-2005 Nuxeo SARL <http://nuxeo.com>
+# Author: Julien Anguenot <ja@nuxeo.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as published
+# by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+# 02111-1307, USA.
+#
+# $Id$
 
 import unittest
 from Testing.ZopeTestCase import ZopeTestCase
 from Interface.Verify import verifyClass
 
-from Products.CPSWorkflow.basicstacks import Stack, SimpleStack, \
-     HierarchicalStack
+from Products.CPSWorkflow.stack import Stack
+from Products.CPSWorkflow.basicstacks import SimpleStack
+from Products.CPSWorkflow.basicstacks import HierarchicalStack
 
-from Products.CPSWorkflow.basicstackelements import UserStackElement, \
-     GroupStackElement
+from Products.CPSWorkflow.basicstackelements import UserStackElement
+from Products.CPSWorkflow.basicstackelements import GroupStackElement
 
 from Products.CPSWorkflow.interfaces import IWorkflowStack
 from Products.CPSWorkflow.interfaces import ISimpleWorkflowStack
@@ -871,7 +892,8 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         self.assertEqual(sstack1.getStackContent(), ['elt1'])
         self.assertEqual(sstack2.getStackContent(), ['elt2'])
 
-        self.assertNotEqual(sstack1.getStackContent(), sstack2.getStackContent())
+        self.assertNotEqual(sstack1.getStackContent(),
+                            sstack2.getStackContent())
 
     def test_HierarchicalStackCopy(self):
 
@@ -963,19 +985,19 @@ class TestCPSWorkflowStacks(ZopeTestCase):
 
         # Add a user
         bstack.push('elt1')
-        elt = bstack.container[0]
+        elt = bstack._getElementsContainer()[0]
         self.assert_(isinstance(elt, UserStackElement))
         self.assert_(elt == 'elt1')
 
         # Add a group
         bstack.push('group:elt2')
-        elt2 = bstack.container[1]
+        elt2 = bstack._getElementsContainer()[1]
         self.assert_(isinstance(elt2, GroupStackElement))
         self.assert_(elt2 == 'group:elt2')
 
         # Remove the group
         bstack.pop()
-        elt = bstack.container[0]
+        elt = bstack._getElementsContainer()[0]
         self.assert_(isinstance(elt, UserStackElement))
         self.assert_(elt == 'elt1')
 
@@ -986,13 +1008,13 @@ class TestCPSWorkflowStacks(ZopeTestCase):
 
         # Add a user
         sstack.push('elt1')
-        elt = sstack.container[0]
+        elt = sstack._getElementsContainer()[0]
         self.assert_(isinstance(elt, UserStackElement))
         self.assert_(elt == 'elt1')
 
         # Add a group
         sstack.push('group:elt2')
-        elt2 = sstack.container[1]
+        elt2 = sstack._getElementsContainer()[1]
         self.assert_(isinstance(elt2, GroupStackElement))
         self.assert_(elt2 == 'group:elt2')
 
@@ -1001,13 +1023,13 @@ class TestCPSWorkflowStacks(ZopeTestCase):
 
         # Add a user
         hstack.push('elt1')
-        elt = hstack.container[0][0]
+        elt = hstack._getElementsContainer()[0][0]
         self.assert_(isinstance(elt, UserStackElement))
         self.assert_(elt == 'elt1')
 
         # Add a group
         hstack.push('group:elt2')
-        elt2 = hstack.container[0][1]
+        elt2 = hstack._getElementsContainer()[0][1]
         self.assert_(isinstance(elt2, GroupStackElement))
         self.assert_(elt2 == 'group:elt2')
 
@@ -1065,6 +1087,214 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         self.assert_(not hstack.hasUpperLevel())
         self.assert_(not hstack.hasLowerLevel())
 
+    def test_ResetOnStack(self):
+
+        #
+        # Test the reset behavior on the Stack class type
+        #
+
+        stack = Stack()
+        stack.push('elt1')
+        self.assertEqual([x() for x in stack._getElementsContainer()],
+                         ['elt1'])
+
+        # Reset with one (1) new user
+        stack.reset(new_users=('elt2',))
+        self.assertEqual([x() for x in stack._getElementsContainer()],
+                         ['elt2'])
+
+        # Reset with two (2) new users
+        stack.reset(new_users=('elt3', 'elt4'))
+        self.assertEqual([x() for x in stack._getElementsContainer()],
+                         ['elt3', 'elt4'])
+
+        # Reset with one (1) new group
+        stack.reset(new_users=('group:elt2',))
+        self.assertEqual([x() for x in stack._getElementsContainer()],
+                         ['group:elt2'])
+
+        # Reset with two (2) new users
+        stack.reset(new_users=('group:elt3', 'group:elt4'))
+        self.assertEqual([x() for x in stack._getElementsContainer()],
+                         ['group:elt3', 'group:elt4'])
+
+        # Reset with one new stack
+        new_stack = Stack()
+        new_stack.push('new_elt')
+        stack.reset(new_stack=new_stack)
+        self.assertEqual(stack._getElementsContainer(),
+                         new_stack._getElementsContainer())
+
+        # Reset with a new stack, new users and new groups
+        new_stack = Stack()
+        stack.reset(new_stack=new_stack,
+                   new_users=('elt1', 'elt2'),
+                   new_groups=('group:elt3', 'group:elt4'))
+        self.assertEqual([x() for x in stack._getElementsContainer()],
+                         ['elt1', 'elt2', 'group:elt3', 'group:elt4'])
+
+    def test_ResetOnSimpleStack(self):
+
+        #
+        # Test the reset behavior on the Stack class type
+        #
+
+        stack = SimpleStack()
+        stack.push('elt1')
+        self.assertEqual([x() for x in stack._getElementsContainer()],
+                         ['elt1'])
+
+        # Reset with one (1) new user
+        stack.reset(new_users=('elt2',))
+        self.assertEqual([x() for x in stack._getElementsContainer()],
+                         ['elt2'])
+
+        # Reset with two (2) new users
+        stack.reset(new_users=('elt3', 'elt4'))
+        self.assertEqual([x() for x in stack._getElementsContainer()],
+                         ['elt3', 'elt4'])
+
+        # Reset with one (1) new group
+        stack.reset(new_users=('group:elt2',))
+        self.assertEqual([x() for x in stack._getElementsContainer()],
+                         ['group:elt2'])
+
+        # Reset with two (2) new users
+        stack.reset(new_users=('group:elt3', 'group:elt4'))
+        self.assertEqual([x() for x in stack._getElementsContainer()],
+                         ['group:elt3', 'group:elt4'])
+
+        # Reset with one new stack
+        new_stack = SimpleStack()
+        new_stack.push('new_elt')
+        stack.reset(new_stack=new_stack)
+        self.assertEqual(stack._getElementsContainer(),
+                         new_stack._getElementsContainer())
+
+        # Reset with a new stack, new users and new groups
+        new_stack = SimpleStack()
+        stack.reset(new_stack=new_stack,
+                   new_users=('elt1', 'elt2'),
+                   new_groups=('group:elt3', 'group:elt4'))
+        self.assertEqual([x() for x in stack._getElementsContainer()],
+                         ['elt1', 'elt2', 'group:elt3', 'group:elt4'])
+        
+    def test_ResetOnHierarchicalStack(self):
+
+        #
+        # Test the reset behavior on the Stack class type
+        #
+
+        stack = HierarchicalStack()
+        stack.push('elt1')
+        self.assertEqual([x() for x in stack._getElementsContainer()[0]],
+                         ['elt1'])
+
+        # Reset with one (1) new user
+        stack.reset(new_users=('elt2',))
+        self.assertEqual([x() for x in stack._getElementsContainer()[0]],
+                         ['elt2'])
+
+        # Reset with two (2) new users
+        stack.reset(new_users=('elt3', 'elt4'))
+        self.assertEqual([x() for x in stack._getElementsContainer()[0]],
+                         ['elt3', 'elt4'])
+
+        # Reset with one (1) new group
+        stack.reset(new_users=('group:elt2',))
+        self.assertEqual([x() for x in stack._getElementsContainer()[0]],
+                         ['group:elt2'])
+
+        # Reset with two (2) new users
+        stack.reset(new_users=('group:elt3', 'group:elt4'))
+        self.assertEqual([x() for x in stack._getElementsContainer()[0]],
+                         ['group:elt3', 'group:elt4'])
+
+        # Reset with one new stack
+        new_stack = HierarchicalStack()
+        new_stack.push('new_elt')
+        stack.reset(new_stack=new_stack)
+        self.assertEqual(stack._getElementsContainer(),
+                         new_stack._getElementsContainer())
+
+        # Reset with a new stack, new users and new groups
+        new_stack = HierarchicalStack()
+        stack.reset(new_stack=new_stack,
+                   new_users=('elt1', 'elt2'),
+                   new_groups=('group:elt3', 'group:elt4'))
+        self.assertEqual([x() for x in stack._getElementsContainer()[0]],
+                         ['elt1', 'elt2', 'group:elt3', 'group:elt4'])
+
+    def test_replaceOnSimpleStack(self):
+
+        #
+        # Test with strings
+        #
+
+        stack = SimpleStack()
+        stack.push('elt1')
+        stack.push('elt2')
+        self.assertEqual(stack.getStackContent(), ['elt1', 'elt2'])
+        stack.replace('elt2', 'elt4')
+        self.assertEqual(stack.getStackContent(), ['elt1', 'elt4'])
+
+        #
+        # Test with elements objects
+        #
+        
+        oelt = UserStackElement('string_elt')
+        stack.replace('elt4', oelt)
+        self.assertEqual(stack.getStackContent(), ['elt1', 'string_elt'])
+
+    def test_replaceOnSHierarchicalStack(self):
+
+        #
+        # Test with strings
+        #
+
+        stack = HierarchicalStack()
+        stack.push('elt1')
+        stack.push('elt2')
+        self.assertEqual(stack.getLevelContent(), ['elt1', 'elt2'])
+        stack.replace('elt2', 'elt4')
+        self.assertEqual(stack.getLevelContent(), ['elt1', 'elt4'])
+
+        #
+        # Test with elements objects
+        #
+        
+        oelt = UserStackElement('string_elt')
+        stack.replace('elt4', oelt)
+        self.assertEqual(stack.getLevelContent(), ['elt1', 'string_elt'])
+
+        #
+        # Test with different levels
+        #
+
+        stack.push('string_elt', level=1)
+        stack.push('string_elt', level=-1)
+        self.assertEqual(stack.getLevelContent(), ['elt1', 'string_elt'])
+        self.assertEqual(stack.getLevelContent(level=1), ['string_elt'])
+        self.assertEqual(stack.getLevelContent(level=-1), ['string_elt'])
+
+        stack.push('elt1', level=1)
+        self.assertEqual(stack.getLevelContent(), ['elt1', 'string_elt'])
+        self.assertEqual(stack.getLevelContent(level=1), ['string_elt',
+                                                          'elt1'])
+        self.assertEqual(stack.getLevelContent(level=-1), ['string_elt'])
+
+        stack.replace('string_elt', 'string_elt2')
+        self.assertEqual(stack.getLevelContent(), ['elt1', 'string_elt2'])
+        self.assertEqual(stack.getLevelContent(level=1), ['string_elt2',
+                                                          'elt1'])
+        self.assertEqual(stack.getLevelContent(level=-1), ['string_elt2'])
+
+        stack.replace('elt1', 'elt2')
+        self.assertEqual(stack.getLevelContent(), ['elt2', 'string_elt2'])
+        self.assertEqual(stack.getLevelContent(level=1), ['string_elt2',
+                                                          'elt2'])
+        self.assertEqual(stack.getLevelContent(level=-1), ['string_elt2'])
+        
 def test_suite():
     loader = unittest.TestLoader()
     return loader.loadTestsFromTestCase(TestCPSWorkflowStacks)
