@@ -128,7 +128,7 @@ class SimpleStack(Stack):
         if self.isFull():
             return 0
         if elt not in self.getStackContent():
-            elt = self._prepareElement(elt)
+            elt = self._prepareElement(elt, **kw)
             if elt is None:
                 return -1
             self._getElementsContainer().append(elt)
@@ -368,14 +368,19 @@ class HierarchicalStack(SimpleStack):
             high_level is not None):
             level = None
 
+        # Prepare the element
+        prepared_elt = self._prepareElement(elt, **kw)
+
         # Simply insert a new elt at a given level
         if level is not None:
-            content_level = self.getLevelContent(level, type='object')
-            elt = self._prepareElement(elt)
-            if elt.getId() not in self.getLevelContent(level):
-                content_level.append(elt)
+            index = self._getStackElementIndex(elt, level)
+            if index == -1:
+                # element not found in level
+                content_level = self.getLevelContent(level, type='object')
+                content_level.append(prepared_elt)
                 self._getElementsContainer()[level] = content_level
             else:
+                # element already here
                 return -2
 
         #
@@ -405,13 +410,13 @@ class HierarchicalStack(SimpleStack):
                     clevels = [x for x in levels if x <= low_level]
                     for clevel in clevels:
                         container[clevel-1] = container[clevel]
-                    container[low_level] = [self._prepareElement(elt)]
+                    container[low_level] = [prepared_elt]
                 else:
                     clevels = [x for x in levels if x > low_level]
                     clevels.reverse()
                     for clevel in clevels:
                         container[clevel+1] = container[clevel]
-                    container[low_level+1] = [self._prepareElement(elt)]
+                    container[low_level+1] = [prepared_elt]
         return 1
 
     def _pop(self, elt=None, level=None, **kw):
@@ -597,7 +602,7 @@ class HierarchicalStack(SimpleStack):
         i = 0
         for push_id in push_ids:
             try:
-                self._push(push_id, int(levels[i]))
+                self._push(push_id, int(levels[i]), **kw)
                 i += 1
             except IndexError:
                 # wrong user input
