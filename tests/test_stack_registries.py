@@ -37,7 +37,7 @@ from Products.CPSWorkflow.interfaces import IWorkflowStackRegistry
 from Products.CPSWorkflow.interfaces import IWorkflowStackDefRegistry
 from Products.CPSWorkflow.interfaces import IWorkflowStackElementRegistry
 
-from Interface.Verify import verifyClass
+from Interface.Verify import verifyClass, DoesNotImplement
 
 class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
     """Workflow Stack Registry test case
@@ -364,7 +364,8 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
         class FakeStack:
             meta_type = 'Fake Stack'
 
-        self.assertEqual(WorkflowStackRegistry.register(FakeStack), 0)
+        self.assertRaises(DoesNotImplement,
+                          WorkflowStackRegistry.register, FakeStack)
         self.assert_(
             'Fake Stack' not in WorkflowStackRegistry.listWorkflowStackTypes())
 
@@ -378,7 +379,9 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
         class FakeStackDef:
             meta_type = 'Fake Stack Def'
 
-        self.assertEqual(WorkflowStackDefRegistry.register(FakeStackDef), 0)
+        self.assertRaises(DoesNotImplement,
+                          WorkflowStackDefRegistry.register,
+                          FakeStackDef)
         self.assert_(
             'Fake Stack Def' not in WorkflowStackRegistry.listWorkflowStackTypes())
 
