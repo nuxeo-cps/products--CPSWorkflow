@@ -135,7 +135,7 @@ class SimpleStack(Stack):
             return 1
         return -2
 
-    def _pop(self, element=None):
+    def _pop(self, element=None, **kw):
         """Remove a given element
 
         O : failed
@@ -195,11 +195,11 @@ class SimpleStack(Stack):
 
         # XXX case where a single element is passed (compatibility)
         if not pop_ids:
-            return self._pop(elt)
+            return self._pop(elt, **kw)
 
         # pop_ids have to be prefixed
         for pop_id in pop_ids:
-            self._pop(pop_id)
+            self._pop(pop_id, **kw)
 
     def getStackContent(self, type='str', level=None,
                         context=None, **kw):
@@ -246,12 +246,12 @@ class SimpleStack(Stack):
         """Reset the stack
 
         new_stack  : stack that might be a substitute of self
-        new_ids    : new elements to add at current level
+        reset_ids  : new elements to add to the stack
         """
         new_stack = kw.get('new_stack')
 
         # Translate for push()
-        kw['push_ids'] = kw.get('new_ids', ())
+        kw['push_ids'] = kw.get('reset_ids', ())
 
         # Replace the stack container
         if new_stack is not None:
@@ -408,7 +408,7 @@ class HierarchicalStack(SimpleStack):
                     container[low_level+1] = [self._prepareElement(elt)]
         return 1
 
-    def _pop(self, elt=None, level=None):
+    def _pop(self, elt=None, level=None, **kw):
         """Remove elt at given level
 
         -1 : not found
@@ -607,7 +607,7 @@ class HierarchicalStack(SimpleStack):
         # Check arguments in here.
         pop_ids = kw.get('pop_ids', ())
         if not pop_ids:
-            return self._pop(elt, level)
+            return self._pop(elt, level, **kw)
 
         # Pop member / group given ids
         for pop_id in pop_ids:
@@ -616,7 +616,7 @@ class HierarchicalStack(SimpleStack):
             split = pop_id.split(',')
             level = int(split[0])
             the_id = split[1]
-            self._pop(elt=the_id, level=level)
+            self._pop(elt=the_id, level=level, **kw)
 
 
     def replace(self, old, new):
@@ -638,7 +638,7 @@ class HierarchicalStack(SimpleStack):
         """Reset the stack
 
         new_stack  : stack that might be a substitute of self
-        new_ids    : new elements to add at current level
+        reset_ids  : new elements to add at current level
         """
         # Replace the stack container
 
@@ -649,7 +649,7 @@ class HierarchicalStack(SimpleStack):
             self.__init__()
 
         # Translate for push
-        new_elts  = kw['push_ids'] = kw.get('new_ids', ())
+        new_elts  = kw['push_ids'] = kw.get('reset_ids', ())
 
         if kw.get('levels') is None:
             # init with level 0
