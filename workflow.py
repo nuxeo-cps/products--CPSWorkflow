@@ -342,44 +342,13 @@ class WorkflowDefinition(DCWorkflowDefinition):
         while 1:
             try:
                 sdef = self._executeTransition(ob, tdef, kwargs)
-                # Check if it's creation time
-                # If on a CMF site tdef is None
-                # If on a CPS site tdef is not None but has a
-                # TRANSITION_INITIAL_CREATE
-
-                ## ADDED FROM HERE
-                if (tdef is None or
-                    TRANSITION_INITIAL_CREATE in tdef.transition_behavior):
-                    stacks = {}
-                    tool = aq_parent(aq_inner(self))
-                    # Call the registry and construct stack instances if the
-                    # value of the stacks is None
-                    stackdefs = tool.getStackDefinitionsFor(ob)
-                    for k in stackdefs.keys():
-                        old_stack = tool.getStackFor(ob, k)
-                        if old_stack is None:
-                            stype = stackdefs[k].getStackDataStructureType()
-                            new_stack = StackReg.makeWorkflowStackTypeInstance(
-                                stype)
-                            stacks[k] = new_stack
-                        else:
-                            stacks[k] = old_stack
-                    if stacks:
-                        # Update status
-                        status = self._getStatusOf(ob)
-                        for k, v in stacks.items():
-                            status[k] = v
-                        # We can't use the setStatus of otherweise it will add
-                        # a new status within the workflow_history var and thus
-                        # we will see two creation action.
-                        ob.workflow_history[self.id] = [status]
-                ## ADDED STOP HERE
             except ObjectMoved, moved_exc:
                 ob = moved_exc.getNewObject()
                 sdef = self._getWorkflowStateOf(ob)
                 # Re-raise after all transitions.
             if sdef is None:
                 break
+            # look for automatic transitions
             tdef = self._findAutomaticTransition(ob, sdef)
             if tdef is None:
                 # No more automatic transitions.
@@ -736,7 +705,6 @@ class WorkflowDefinition(DCWorkflowDefinition):
                 # Filter on the working workflow variable It's necessarly since
                 # the transition can be allowed on several wf variable id
                 #
-
                 current_wf_var_id = kwargs.get('current_wf_var_id', '')
                 if current_wf_var_id != wf_var:
                     continue
@@ -1009,6 +977,22 @@ class WorkflowDefinition(DCWorkflowDefinition):
                 value = expr(econtext)
 
             status[id] = value
+
+        # update stack variables, initializing stacks defined in given state
+        stacks = {}
+        stackdefs = new_sdef.getStackDefinitions()
+        LOG("_executeTransition", DEBUG, "sdef=%s, stackdefs=%s"%(new_sdef, stackdefs))
+        for k in stackdefs.keys():
+            # stack is a variable, it has just been updated in the status
+            if status[k] is None:
+                # Call the registry and construct stack instance
+                stype = stackdefs[k].getStackDataStructureType()
+                new_stack = StackReg.makeWorkflowStackTypeInstance(
+                    stype)
+                status[k] = new_stack
+                LOG("_executeTransition", DEBUG, "new stack %s for %s"%(stype, k))
+            else:
+                LOG("_executeTransition", DEBUG, "stack %s existed"%(k,))
 
         # Update state.
         status[self.state_var] = new_state

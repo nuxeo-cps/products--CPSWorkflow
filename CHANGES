@@ -6,7 +6,7 @@ New features:
 -
 Bug fixes:
 ~~~~~~~~~~
--
+- #490: Stack is not initialized when stackdef is not on the creation state
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
 -
