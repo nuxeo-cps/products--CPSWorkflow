@@ -39,6 +39,7 @@ from Products.CMFCore.WorkflowTool import WorkflowTool as BaseWorkflowTool
 
 from stackregistries import WorkflowStackRegistry
 from stackregistries import WorkflowStackDefRegistry
+from stackregistries import WorkflowStackElementRegistry
 
 from transitions import TRANSITION_ALLOWSUB_CREATE
 from transitions import TRANSITION_ALLOWSUB_DELETE
@@ -829,8 +830,8 @@ class WorkflowTool(BaseWorkflowTool):
                 return stackdefs.get(wf_var_id)
         return None
 
-    security.declarePrivate('getDelegateesDataStructures')
-    def getDelegateesDataStructures(self, ob):
+    security.declarePublic('getStacks')
+    def getStacks(self, ob):
         """Return defined delegatees data structures for this ob
 
         returned value is a dictionnary containing as keys the name of the
@@ -849,11 +850,11 @@ class WorkflowTool(BaseWorkflowTool):
                     data_structs[var_id] = ds_instance
         return data_structs
 
-    security.declarePrivate('getDelegateesDataStructureFor')
-    def getDelegateesDataStructureFor(self, ob, stack_id):
+    security.declarePublic('getStackFor')
+    def getStackFor(self, ob, stack_id):
         """Return the delegatees data struct corresponding to the stack_id
         """
-        return self.getDelegateesDataStructures(ob).get(stack_id)
+        return self.getStacks(ob).get(stack_id)
 
     security.declarePublic('canManageStack')
     def canManageStack(self, ob, stack_id):
@@ -876,7 +877,8 @@ class WorkflowTool(BaseWorkflowTool):
                 stackdefs = self.getStackDefinitionsFor(ob)
                 for stackdef_id in stackdefs.keys():
                     ostack_def = stackdefs[stackdef_id]
-                    canManage = ostack_def.canManageStack(None, aclu, mtool, ob)
+                    canManage = ostack_def.canManageStack(None, aclu, mtool,
+                                                          ob)
                     manager_stack_ids = ostack_def.getManagerStackIds()
                     if (canManage and
                         stack_id in manager_stack_ids):
@@ -895,11 +897,19 @@ class WorkflowTool(BaseWorkflowTool):
 
     security.declarePublic('getWorkflowStackDefRegistry')
     def getWorkflowStackDefRegistry(self):
-        """Returns the Workflow Stack Regitry
+        """Returns the Workflow Stack Definition Regitry
 
         So that it can be access from within restricted code
         """
         return WorkflowStackDefRegistry
+
+    security.declarePublic('getWorkflowStackElementRegistry')
+    def getWorkflowStackElementRegistry(self):
+        """Returns the Workflow Stack Element Regitry
+
+        So that it can be access from within restricted code
+        """
+        return WorkflowStackElementRegistry
 
     ####################################################################
 
