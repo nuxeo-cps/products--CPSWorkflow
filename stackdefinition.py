@@ -26,7 +26,7 @@ To be able to register your own class within the WorkflowStackDefRegistry you
 need to sub-class this bare definition and implement the
 IWorkflowStackDefinition interface. (Check basicstackdefinitions.py)
 
-A stack definition is instancied wthin a State object. It holds the basic
+A stack definition is instantiated within a State object. It holds the basic
 configuration for a stack.
 
 A stack definition is defined by :
