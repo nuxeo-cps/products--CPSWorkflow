@@ -152,6 +152,7 @@ class StackDefinition(SimpleItem):
                   'guard_groups':guard_groups,
                   'guard_expr':guard_expr,
                   }
+        self._edit_stack_element_guard = None
         self.getEditStackElementGuard().changeFromProperties(_props)
 
     def getViewStackElementGuard(self):
