@@ -33,8 +33,6 @@ from OFS.SimpleItem import SimpleItem
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
 
-from ZODB.PersistentList import PersistentList
-
 from stackregistries import WorkflowStackElementRegistry as ElementRegistry
 
 from interfaces import IWorkflowStack
@@ -48,15 +46,21 @@ class Stack(SimpleItem):
     security = ClassSecurityInfo()
     security.declareObjectPublic()
 
-    __implements__ = IWorkflowStack
+    __implements__ = (IWorkflowStack,)
 
+    _elements_container = None
     render_method = ''
+    
+    #
+    # Boring accessors
+    #
 
-    def __init__(self, maxsize=None):
-        """ Possiblity to specify a maximum size
+    def getMetaType(self):
+        """Returns the meta_type of the class
+
+        Needs to be public for non restricted code
         """
-        self.max_size = maxsize
-        self._elements_container = PersistentList()
+        return self.meta_type
 
     #
     # Private API
@@ -90,98 +94,41 @@ class Stack(SimpleItem):
                 return elt
         return elt_str
 
-    #
-    # Accessors
-    #
-
-    def getMetaType(self):
-        """Returns the meta_type of the class
-
-        Needs to be public for non restricted code
-        """
-        return self.meta_type
-    
-    def getSize(self):
-        """ Return the current size of the Stack
-        """
-        return len(self._getElementsContainer())
-
-    def isFull(self):
-        """Is the queue Full ?
-
-        Used in the case of max size is specified
-        """
-        if self.max_size is not None:
-            return self.getSize() >= self.max_size
-        return 0
-
-    def isEmpty(self):
-        """Is the Stack empty ?
-        """
-        return self.getSize() == 0
 
     #
-    # API
+    # API TO BE IMPLEMENTED WITHIN THE CHILD CLASSES
     #
 
     def push(self, elt=None):
-        """Push an element in the queue
-
-        1  : ok
-        0  : queue id full
-        -1 : elt is None
+        """Push elt in the queue
         """
-
-        # Construct a stack element instance
-        elt = self._prepareElement(elt)
-
-        if elt is None:
-            return -1
-        if self.isFull():
-            return 0
-
-        # ok we push
-        self._getElementsContainer().append(elt)
-        return 1
-
-    def pop(self):
-        """Get the first element of the queue
-
-        0 : empty
-        1 : ok
+        raise NotImplementedError      
+    
+    def pop(self, elt=None):
+        """Remove elt from within the queue
+        
+        If elt is None then remove the last one
         """
+        raise NotImplementedError
 
-        if self.isEmpty():
-            return 0
-
-        last_elt_index = self.getSize() - 1
-        res = self._getElementsContainer()[last_elt_index]
-        del self._getElementsContainer()[last_elt_index]
-        return res
-
-    # XXX give **kw to push
     def reset(self, **kw):
         """Reset the stack
-
-        new_stack  : stack that might be a substitute of self
-        new_users  : users to add at current level
-        new_groups : groups to add ar current level
         """
-        new_stack = kw.get('new_stack')
-        new_users = kw.get('new_users', ())
-        new_groups = kw.get('new_groups', ())
+        raise NotImplementedError
 
-        if new_stack is not None:
-            self._elements_container = new_stack._getElementsContainer()
-        else:
-            self.__init__()
+    def getCopy(self):
+        """Duplicate self
 
-        for new_user in new_users:
-            self.push(new_user)
-        for new_group in new_groups:
-            self.push(new_group)
+        Return a new object instance of the same type
+        """
+        raise NotImplementedError
 
-        return self
+    def __deepcopy__(self, ob):
+        """Deep copy. Just to call a clean API while calling getCopy()
+        
+        Cope with mutable attrs to break reference
+        """
+        raise NotImplementedError
 
     #
     # MISC
