@@ -3,7 +3,7 @@ Requires:
 -
 New features:
 ~~~~~~~~~~~~~
-- Stack and stack def registries.
+- Stack, stack def and stack element registries.
 Bug fixes:
 ~~~~~~~~~~
 - 'stock' CMF compatible
@@ -17,3 +17,4 @@ New internal features:
   basicstacks and basicstackdefinitions.
 - registries will not register any classes of they are not implementing the
   base interfaces
+- basic stack element definitions
