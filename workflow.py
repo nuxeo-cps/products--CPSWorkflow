@@ -225,6 +225,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
                                     ob,
                                     ids=[group_id],
                                     role=old_local_role)
+
         return changed
 
     def updateRoleMappingsFor(self, ob, **kw):
@@ -313,7 +314,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
                                 stype)
                             stacks[k] = new_stack
                         else:
-                            stacks[k] = old_stackxs
+                            stacks[k] = old_stack
                     if stacks:
                         # Update status
                         status = self._getStatusOf(ob)
