@@ -32,3 +32,7 @@ New internal features:
 - Security on getStackContent(). Filter depending the the stack def
   edit stack element guard or the guard on the element itself
 - Use getId() instead of __str__ for stack elements.
+- pop and _pop refactoring: drop the support for the elt kw. The use of pop_ids
+  is now mandatory. pop_ids=[] does nothing. pop now always returns codes : 0 =
+  at least one id in pop_ids was not found ; 1 = all element in pop_ids were
+  sucessfully removed
