@@ -1546,27 +1546,27 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         sstackdef._addExpressionForRole('WorkspaceManager',
                                         'python:len(stack.getStackContent())%2==1')
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack), {})
-        sstack = sstackdef._push(sstack, **{'push_ids': ('elt1',)})
+        sstack = sstackdef._push(sstack, **{'push_ids': ('user:elt1',)})
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
                          {'elt1': ('WorkspaceManager',)})
-        sstack = sstackdef._push(sstack, **{'push_ids': ('elt2',)})
+        sstack = sstackdef._push(sstack, **{'push_ids': ('user:elt2',)})
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack), {})
-        sstack = sstackdef._push(sstack, **{'push_ids': ('elt3',)})
+        sstack = sstackdef._push(sstack, **{'push_ids': ('user:elt3',)})
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
                          {'elt1': ('WorkspaceManager',),
                           'elt2': ('WorkspaceManager',),
                           'elt3': ('WorkspaceManager',),
                           })
 
-        # test that local role is given only if elt starts with 'hello'
+        # test that local role is given only if elt id starts with 'hello'
         sstack = SimpleStack()
         sstackdef._addExpressionForRole('WorkspaceManager',
-                                        "python:elt.startswith('hello')")
+                                        "python:elt.getIdWithoutPrefix().startswith('hello')")
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack), {})
-        sstack = sstackdef._push(sstack, **{'push_ids': ('hello_elt1',)})
+        sstack = sstackdef._push(sstack, **{'push_ids': ('user:hello_elt1',)})
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
                          {'hello_elt1': ('WorkspaceManager',)})
-        sstack = sstackdef._push(sstack, **{'push_ids': ('elt2',)})
+        sstack = sstackdef._push(sstack, **{'push_ids': ('user:elt2',)})
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
                          {'hello_elt1': ('WorkspaceManager',)})
 
@@ -1592,7 +1592,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                         'python:len(stack.getLevelContent(level))%2==1')
         self.assertEqual(hstackdef._getLocalRolesMapping(hstack), {})
         kw = {
-            'push_ids': ('elt1',),
+            'push_ids': ('user:elt1',),
             'levels': (0,)
             }
         hstack = hstackdef._push(hstack, **kw)
@@ -1601,33 +1601,33 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertEqual(hstackdef._getLocalRolesMapping(hstack),
                          {'elt1': ('WorkspaceManager',)})
         kw = {
-            'push_ids': ('elt2',),
+            'push_ids': ('user:elt2',),
             'levels': (0,)
             }
         hstack = hstackdef._push(hstack, **kw)
         self.assertEqual(hstackdef._getLocalRolesMapping(hstack), {})
         kw = {
-            'push_ids': ('elt3',),
+            'push_ids': ('user:elt3',),
             'levels': (1,)
             }
         hstack = hstackdef._push(hstack, **kw)
         self.assertEqual(hstackdef._getLocalRolesMapping(hstack),
                          {'elt3': ('WorkspaceManager',),})
 
-        # test that local role is given only if elt starts with 'hello'
+        # test that local role is given only if elt id starts with 'hello'
         hstack = HierarchicalStack()
         hstackdef._addExpressionForRole('WorkspaceManager',
-                                        "python:elt.startswith('hello')")
+                                        "python:elt.getIdWithoutPrefix().startswith('hello')")
         self.assertEqual(hstackdef._getLocalRolesMapping(hstack), {})
         kw = {
-            'push_ids': ('hello_elt1',),
+            'push_ids': ('user:hello_elt1',),
             'levels': (0,)
             }
         hstack = hstackdef._push(hstack, **kw)
         self.assertEqual(hstackdef._getLocalRolesMapping(hstack),
                          {'hello_elt1': ('WorkspaceManager',)})
         kw = {
-            'push_ids': ('elt2',),
+            'push_ids': ('user:elt2',),
             'levels': (0,)
             }
         hstack = hstackdef._push(hstack, **kw)
