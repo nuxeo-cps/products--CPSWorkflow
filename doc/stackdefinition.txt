@@ -21,7 +21,7 @@ A stack definition :
 
 It may be used as well without any roles policy if the purpose of the stack
 is not to distribute local roles. (for instace : addind a stack of tasks
-hooked on a givne state)
+hooked on a given state)
 
 ---------------------------
 Stack Definition Registry
