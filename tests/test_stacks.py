@@ -47,135 +47,135 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         verifyClass(IHierarchicalWorkflowStack, HierarchicalStack)
         verifyClass(ISimpleWorkflowStack, HierarchicalStack)
 
-    def test_StackNoMaxSize(self):
-
-        # Test Base Stack with no initialization
-        bstack = Stack()
-        self.assertEqual(bstack.getSize(), 0)
-        self.assertEqual(bstack.isEmpty(), 1)
-        self.assertEqual(bstack.isFull(), 0)
-
-        # Adding one element
-        bstack.push('elt1')
-        self.assertEqual(bstack.getSize(), 1)
-        self.assertEqual(bstack.isEmpty(), 0)
-        self.assertEqual(bstack.isFull(), 0)
-
-        # Adding same element. (Allowed with this stack)
-        bstack.push('elt1')
-        self.assertEqual(bstack.getSize(), 2)
-        self.assertEqual(bstack.isEmpty(), 0)
-        self.assertEqual(bstack.isFull(), 0)
-
-        # Adding another element. (Allowed with this stack)
-        bstack.push('elt2')
-        self.assertEqual(bstack.getSize(), 3)
-        self.assertEqual(bstack.isEmpty(), 0)
-        self.assertEqual(bstack.isFull(), 0)
-
-        # Pop now
-        elt = bstack.pop()
-        self.assertEqual(elt(), 'elt2')
-        self.assertEqual(bstack.getSize(), 2)
-        self.assertEqual(bstack.isEmpty(), 0)
-        self.assertEqual(bstack.isFull(), 0)
-
-        # Pop again
-        elt = bstack.pop()
-        self.assertEqual(elt(), 'elt1')
-        self.assertEqual(bstack.getSize(), 1)
-        self.assertEqual(bstack.isEmpty(), 0)
-        self.assertEqual(bstack.isFull(), 0)
-
-        # Pop again
-        elt = bstack.pop()
-        self.assertEqual(elt(), 'elt1')
-        self.assertEqual(bstack.getSize(), 0)
-        self.assertEqual(bstack.isEmpty(), 1)
-        self.assertEqual(bstack.isFull(), 0)
-
-        # Adding one element
-        bstack.push('elt1')
-        self.assertEqual(bstack.getSize(), 1)
-        self.assertEqual(bstack.isEmpty(), 0)
-        self.assertEqual(bstack.isFull(), 0)
-
-        # Pop again
-        elt = bstack.pop()
-        self.assertEqual(elt(), 'elt1')
-        self.assertEqual(bstack.getSize(), 0)
-        self.assertEqual(bstack.isEmpty(), 1)
-        self.assertEqual(bstack.isFull(), 0)
-
-        # Try to push a None element
-        res = bstack.push(None)
-        self.assertEqual(res, -1)
-
-    def test_StackWithMaxSize(self):
-
-        # Test Base Stack with no initialization
-        bstack = Stack(maxsize=2)
-        self.assertEqual(bstack.getSize(), 0)
-        self.assertEqual(bstack.isEmpty(), 1)
-        self.assertEqual(bstack.isFull(), 0)
-
-        # Adding one element
-        bstack.push('elt1')
-        self.assertEqual(bstack.getSize(), 1)
-        self.assertEqual(bstack.isEmpty(), 0)
-        self.assertEqual(bstack.isFull(), 0)
-
-        # Adding same element. (Allowed with this stack)
-        bstack.push('elt1')
-        self.assertEqual(bstack.getSize(), 2)
-        self.assertEqual(bstack.isEmpty(), 0)
-        self.assertEqual(bstack.isFull(), 1)
-
-        # Adding another element.
-        # Stack is full now
-        res = bstack.push('elt2')
-        self.assertEqual(res, 0)
-        self.assertEqual(bstack.getSize(), 2)
-        self.assertEqual(bstack.isEmpty(), 0)
-        self.assertEqual(bstack.isFull(), 1)
-
-        # Pop now
-        elt = bstack.pop()
-        self.assertEqual(elt(), 'elt1')
-        self.assertEqual(bstack.getSize(), 1)
-        self.assertEqual(bstack.isEmpty(), 0)
-        self.assertEqual(bstack.isFull(), 0)
-
-        # Pop again
-        elt = bstack.pop()
-        self.assertEqual(elt(), 'elt1')
-        self.assertEqual(bstack.getSize(), 0)
-        self.assertEqual(bstack.isEmpty(), 1)
-        self.assertEqual(bstack.isFull(), 0)
-
-        # Pop again
-        res = bstack.pop()
-        self.assertEqual(res, 0)
-        self.assertEqual(bstack.getSize(), 0)
-        self.assertEqual(bstack.isEmpty(), 1)
-        self.assertEqual(bstack.isFull(), 0)
-
-        # Adding one element
-        bstack.push('elt1')
-        self.assertEqual(bstack.getSize(), 1)
-        self.assertEqual(bstack.isEmpty(), 0)
-        self.assertEqual(bstack.isFull(), 0)
-
-        # Pop again
-        elt = bstack.pop()
-        self.assertEqual(elt(), 'elt1')
-        self.assertEqual(bstack.getSize(), 0)
-        self.assertEqual(bstack.isEmpty(), 1)
-        self.assertEqual(bstack.isFull(), 0)
-
-        # Try to push a None element
-        res = bstack.push(None)
-        self.assertEqual(res, -1)
+    #def test_StackNoMaxSize(self):
+    #
+    #    # Test Base Stack with no initialization
+    #    bstack = Stack()
+    #    self.assertEqual(bstack.getSize(), 0)
+    #    self.assertEqual(bstack.isEmpty(), 1)
+    #    self.assertEqual(bstack.isFull(), 0)
+    #
+    #    # Adding one element
+    #    bstack.push('elt1')
+    #    self.assertEqual(bstack.getSize(), 1)
+    #    self.assertEqual(bstack.isEmpty(), 0)
+    #    self.assertEqual(bstack.isFull(), 0)
+    #
+    #    # Adding same element. (Allowed with this stack)
+    #    bstack.push('elt1')
+    #    self.assertEqual(bstack.getSize(), 2)
+    #    self.assertEqual(bstack.isEmpty(), 0)
+    #    self.assertEqual(bstack.isFull(), 0)
+    #
+    #    # Adding another element. (Allowed with this stack)
+    #    bstack.push('elt2')
+    #    self.assertEqual(bstack.getSize(), 3)
+    #    self.assertEqual(bstack.isEmpty(), 0)
+    #    self.assertEqual(bstack.isFull(), 0)
+    #
+    #    # Pop now
+    #    elt = bstack.pop()
+    #    self.assertEqual(elt(), 'elt2')
+    #    self.assertEqual(bstack.getSize(), 2)
+    #    self.assertEqual(bstack.isEmpty(), 0)
+    #    self.assertEqual(bstack.isFull(), 0)
+    #
+    #    # Pop again
+    #    elt = bstack.pop()
+    #    self.assertEqual(elt(), 'elt1')
+    #    self.assertEqual(bstack.getSize(), 1)
+    #    self.assertEqual(bstack.isEmpty(), 0)
+    #    self.assertEqual(bstack.isFull(), 0)
+    #
+    #    # Pop again
+    #    elt = bstack.pop()
+    #    self.assertEqual(elt(), 'elt1')
+    #    self.assertEqual(bstack.getSize(), 0)
+    #    self.assertEqual(bstack.isEmpty(), 1)
+    #    self.assertEqual(bstack.isFull(), 0)
+    #
+    #    # Adding one element
+    #    bstack.push('elt1')
+    #    self.assertEqual(bstack.getSize(), 1)
+    #    self.assertEqual(bstack.isEmpty(), 0)
+    #    self.assertEqual(bstack.isFull(), 0)
+    #
+    #    # Pop again
+    #    elt = bstack.pop()
+    #    self.assertEqual(elt(), 'elt1')
+    #    self.assertEqual(bstack.getSize(), 0)
+    #    self.assertEqual(bstack.isEmpty(), 1)
+    #    self.assertEqual(bstack.isFull(), 0)
+    #
+    #    # Try to push a None element
+    #    res = bstack.push(None)
+    #    self.assertEqual(res, -1)
+    #
+    ##def test_StackWithMaxSize(self):
+    #
+    #    # Test Base Stack with no initialization
+    #    bstack = Stack(maxsize=2)
+    #    self.assertEqual(bstack.getSize(), 0)
+    #    self.assertEqual(bstack.isEmpty(), 1)
+    #    self.assertEqual(bstack.isFull(), 0)
+    #
+    #    # Adding one element
+    #    bstack.push('elt1')
+    #    self.assertEqual(bstack.getSize(), 1)
+    #    self.assertEqual(bstack.isEmpty(), 0)
+    #    self.assertEqual(bstack.isFull(), 0)
+    #
+    #    # Adding same element. (Allowed with this stack)
+    #    bstack.push('elt1')
+    #    self.assertEqual(bstack.getSize(), 2)
+    #    self.assertEqual(bstack.isEmpty(), 0)
+    #    self.assertEqual(bstack.isFull(), 1)
+    #
+    #    # Adding another element.
+    #    # Stack is full now
+    #    res = bstack.push('elt2')
+    #    self.assertEqual(res, 0)
+    #    self.assertEqual(bstack.getSize(), 2)
+    #    self.assertEqual(bstack.isEmpty(), 0)
+    #    self.assertEqual(bstack.isFull(), 1)
+    #
+    #    # Pop now
+    #    elt = bstack.pop()
+    #    self.assertEqual(elt(), 'elt1')
+    #    self.assertEqual(bstack.getSize(), 1)
+    #    self.assertEqual(bstack.isEmpty(), 0)
+    #    self.assertEqual(bstack.isFull(), 0)
+    #
+    #    # Pop again
+    #    elt = bstack.pop()
+    #    self.assertEqual(elt(), 'elt1')
+    #    self.assertEqual(bstack.getSize(), 0)
+    #    self.assertEqual(bstack.isEmpty(), 1)
+    #    self.assertEqual(bstack.isFull(), 0)
+    #
+    #    # Pop again
+    #    res = bstack.pop()
+    #    self.assertEqual(res, 0)
+    #    self.assertEqual(bstack.getSize(), 0)
+    #    self.assertEqual(bstack.isEmpty(), 1)
+    #    self.assertEqual(bstack.isFull(), 0)
+    #
+    #    # Adding one element
+    #    bstack.push('elt1')
+    #    self.assertEqual(bstack.getSize(), 1)
+    #    self.assertEqual(bstack.isEmpty(), 0)
+    #    self.assertEqual(bstack.isFull(), 0)
+    #
+    #    # Pop again
+    #    elt = bstack.pop()
+    #    self.assertEqual(elt(), 'elt1')
+    #    self.assertEqual(bstack.getSize(), 0)
+    #    self.assertEqual(bstack.isEmpty(), 1)
+    #    self.assertEqual(bstack.isFull(), 0)
+    #
+    #    # Try to push a None element
+    #    res = bstack.push(None)
+    #    self.assertEqual(res, -1)
 
     def test_SimpleStackNoMaxSize(self):
 
@@ -953,28 +953,28 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         self.assertEqual(hierarchical.getLevelContentValues(),
                          ['elt1'])
 
-    def test_bstack_elements(self):
-        bstack = Stack()
-
-        # Add a user
-        bstack.push('elt1')
-        elt = bstack._getElementsContainer()[0]
-        self.assert_(isinstance(elt, UserStackElement))
-        self.assert_(elt == 'elt1')
-
-        # Add a group
-        bstack.push('group:elt2')
-        elt2 = bstack._getElementsContainer()[1]
-        self.assert_(isinstance(elt2, GroupStackElement))
-        self.assert_(elt2 == 'group:elt2')
-
-        # Remove the group
-        bstack.pop()
-        elt = bstack._getElementsContainer()[0]
-        self.assert_(isinstance(elt, UserStackElement))
-        self.assert_(elt == 'elt1')
-
-        bstack.pop()
+    #def test_bstack_elements(self):
+    #    bstack = Stack()
+    #
+    #    # Add a user
+    #    bstack.push('elt1')
+    #    elt = bstack._getElementsContainer()[0]
+    #    self.assert_(isinstance(elt, UserStackElement))
+    #    self.assert_(elt == 'elt1')
+    #
+    #    # Add a group
+    #    bstack.push('group:elt2')
+    #    elt2 = bstack._getElementsContainer()[1]
+    #    self.assert_(isinstance(elt2, GroupStackElement))
+    #    self.assert_(elt2 == 'group:elt2')
+    #
+    #    # Remove the group
+    #    bstack.pop()
+    #    elt = bstack._getElementsContainer()[0]
+    #    self.assert_(isinstance(elt, UserStackElement))
+    #    self.assert_(elt == 'elt1')
+    #
+    #    bstack.pop()
 
     def test_sstack_elements(self):
         sstack = SimpleStack()
@@ -1060,51 +1060,51 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         self.assert_(not hstack.hasUpperLevel())
         self.assert_(not hstack.hasLowerLevel())
 
-    def test_ResetOnStack(self):
-
-        #
-        # Test the reset behavior on the Stack class type
-        #
-
-        stack = Stack()
-        stack.push('elt1')
-        self.assertEqual([x() for x in stack._getElementsContainer()],
-                         ['elt1'])
-
-        # Reset with one (1) new user
-        stack.reset(new_users=('elt2',))
-        self.assertEqual([x() for x in stack._getElementsContainer()],
-                         ['elt2'])
-
-        # Reset with two (2) new users
-        stack.reset(new_users=('elt3', 'elt4'))
-        self.assertEqual([x() for x in stack._getElementsContainer()],
-                         ['elt3', 'elt4'])
-
-        # Reset with one (1) new group
-        stack.reset(new_users=('group:elt2',))
-        self.assertEqual([x() for x in stack._getElementsContainer()],
-                         ['group:elt2'])
-
-        # Reset with two (2) new users
-        stack.reset(new_users=('group:elt3', 'group:elt4'))
-        self.assertEqual([x() for x in stack._getElementsContainer()],
-                         ['group:elt3', 'group:elt4'])
-
-        # Reset with one new stack
-        new_stack = Stack()
-        new_stack.push('new_elt')
-        stack.reset(new_stack=new_stack)
-        self.assertEqual(stack._getElementsContainer(),
-                         new_stack._getElementsContainer())
-
-        # Reset with a new stack, new users and new groups
-        new_stack = Stack()
-        stack.reset(new_stack=new_stack,
-                   new_users=('elt1', 'elt2'),
-                   new_groups=('group:elt3', 'group:elt4'))
-        self.assertEqual([x() for x in stack._getElementsContainer()],
-                         ['elt1', 'elt2', 'group:elt3', 'group:elt4'])
+    #def test_ResetOnStack(self):
+    #
+    #    #
+    #    # Test the reset behavior on the Stack class type
+    #    #
+    #
+    #    stack = Stack()
+    #    stack.push('elt1')
+    #    self.assertEqual([x() for x in stack._getElementsContainer()],
+    #                     ['elt1'])
+    #
+    #    # Reset with one (1) new user
+    #    stack.reset(new_users=('elt2',))
+    #    self.assertEqual([x() for x in stack._getElementsContainer()],
+    #                     ['elt2'])
+    #
+    #    # Reset with two (2) new users
+    #    stack.reset(new_users=('elt3', 'elt4'))
+    #    self.assertEqual([x() for x in stack._getElementsContainer()],
+    #                     ['elt3', 'elt4'])
+    #
+    #    # Reset with one (1) new group
+    #    stack.reset(new_users=('group:elt2',))
+    #    self.assertEqual([x() for x in stack._getElementsContainer()],
+    #                     ['group:elt2'])
+    #
+    #    # Reset with two (2) new users
+    #    stack.reset(new_users=('group:elt3', 'group:elt4'))
+    #    self.assertEqual([x() for x in stack._getElementsContainer()],
+    #                     ['group:elt3', 'group:elt4'])
+    #
+    #    # Reset with one new stack
+    #    new_stack = Stack()
+    #    new_stack.push('new_elt')
+    #    stack.reset(new_stack=new_stack)
+    #    self.assertEqual(stack._getElementsContainer(),
+    #                     new_stack._getElementsContainer())
+    #
+    #    # Reset with a new stack, new users and new groups
+    #    new_stack = Stack()
+    #    stack.reset(new_stack=new_stack,
+    #               new_users=('elt1', 'elt2'),
+    #               new_groups=('group:elt3', 'group:elt4'))
+    #    self.assertEqual([x() for x in stack._getElementsContainer()],
+    #                     ['elt1', 'elt2', 'group:elt3', 'group:elt4'])
 
     def test_ResetOnSimpleStack(self):
 

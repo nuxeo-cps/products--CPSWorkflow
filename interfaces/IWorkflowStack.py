@@ -29,36 +29,60 @@ class IWorkflowStack(Interface.Base):
     """API for the Workflow Stack
     """
 
-    def isFull():
-        """Is the queue Full ?
+    #
+    # PRIVATE
+    #
 
-        Used in the case of max size is specified
+    def _getElementsContainer():
+        """Returns the stack elements container
+        
+        This is PersistentList type
         """
-    def isEmpty():
-        """Is the Stack empty ?
+
+    def _prepareElement(elt_str=None, **kw):
+        """Prepare the element.
+        
+        Usual format : <prefix : id>
+        Call the registry to construct an instance according to the prefix
+        Check WorkflowStackElementRegistry
         """
 
-    #def push(elt=None):
-    #    """Push an element in the queue
     #
-    #    1  : ok
-    #    0  : queue id full
-    #    -1 : elt is None
-    #    """
+    # PUBLIC
     #
-    #def pop():
-    #    """Get the first element of the queue
-    #
-    #    0 : empty
-    #    1 : ok
-    #    """
 
-    def reset():
+    def getMetaType():
+        """Returns the meta_type of the class
+
+        Needs to be public for non restricted code
+        """
+
+    def push(elt=None):
+        """Push elt in the queue
+        """
+    
+    def pop(elt=None):
+        """Remove elt from within the queue
+        
+        If elt is None then remove the last one
+        """
+
+    def reset(**kw):
         """Reset the stack
-
-        Simply Call the constructor to reinitialize
         """
 
+    def getCopy():
+        """Duplicate self
+
+        Return a new object instance of the same type
+        """
+
+    def __deepcopy__(ob):
+        """Deep copy. Just to call a clean API while calling getCopy()
+        
+        Cope with mutable attrs to break reference
+        """
+    
     def render(context, mode, **kw):
         """Render in mode
         """
