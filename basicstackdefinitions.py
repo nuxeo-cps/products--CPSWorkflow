@@ -28,7 +28,7 @@ c.f : doc/stackdefinitions.txt
 from zLOG import LOG, DEBUG
 
 from Globals import InitializeClass
-from AccessControl import ClassSecurityInfo
+from AccessControl import ClassSecurityInfo, getSecurityManager
 
 from Products.CMFCore.permissions import View, ModifyPortalContent
 
@@ -219,20 +219,13 @@ class SimpleStackDefinition(StackDefinition):
 
         #
         # Now let's cope with the first case when the stack is not et
-        # intialized. We will grant the 'Owner' of the document and the people
-        # having the same local role as the associated local roles of the stack
+        # intialized. Call the specific guard for this
         #
 
-        # XXX Owner is hardcoded
-        # change this for a guard
-        _granted_local_roles = ('Owner', self._master_role)
-
         if ds.getStackContent() == []:
-            if context is not None:
-                member_roles = member.getRolesInContext(context)
-                for lc in _granted_local_roles:
-                    if lc in member_roles:
-                        return 1
+            wf_def = self._getWorkflowDefinition()
+            return self.getEmptyStackManageGuard().check(
+                getSecurityManager(), wf_def, context)
 
         return 0
 
@@ -416,19 +409,13 @@ class HierarchicalStackDefinition(StackDefinition):
 
         #
         # Now let's cope with the first case when the stack is not et
-        # intialized. We will grant the 'Owner' of the document and the people
-        # having the same local role as the associated local roles of the stack
+        # intialized.
         #
 
-
-        _granted_local_roles = ('Owner', self._master_role)
-
         if ds.getLevelContentValues() == []:
-            if context is not None:
-                member_roles = member.getRolesInContext(context)
-                for lc in _granted_local_roles:
-                    if lc in member_roles:
-                        return 1
+            wf_def = self._getWorkflowDefinition()
+            return self.getEmptyStackManageGuard().check(
+                getSecurityManager(), wf_def, context)
 
         return 0
 
