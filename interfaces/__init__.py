@@ -35,6 +35,7 @@ from IHierarchicalWorkflowStack import IHierarchicalWorkflowStack
 # Stack registry interfaces
 from IWorkflowStackRegistry import IWorkflowStackRegistry
 from IWorkflowStackDefRegistry import IWorkflowStackDefRegistry
+from IWorkflowStackElementRegistry import IWorkflowStackElementRegistry
 
 # Stack element interfaces
 from IStackElement import IStackElement
