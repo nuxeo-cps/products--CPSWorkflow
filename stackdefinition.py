@@ -31,12 +31,13 @@ configuration for a stack.
 
 A stack definition is defined by :
 
- - the stack def type
  - the stack type the stack def will be able to manage
  - the id of the workflow variable where the stack instance will be stored
  - the managed roles. They are roles that the stack def can cope with.  roles
  have an associated tales expression evaluated within the stackdef context that
  defined the policy for the given role.
+
+c.f : doc/stackdefinition.txt
 
 """
 
@@ -46,14 +47,12 @@ from DateTime import DateTime
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
 from OFS.SimpleItem import SimpleItem
-from Acquisition import aq_parent, aq_inner
 from ZODB.PersistentMapping import PersistentMapping
 
+from Products.CMFCore.utils import getToolByName
+from Products.CMFCore.Expression import Expression, getEngine
 from Products.CMFCore.permissions import View, ModifyPortalContent
 from Products.CMFCore.permissions import ManagePortal
-from Products.CMFCore.utils import getToolByName
-from Products.CMFCore.Expression import Expression
-from Products.CMFCore.Expression import getEngine
 
 from interfaces import IWorkflowStackDefinition
 
@@ -73,8 +72,7 @@ class StackDefinition(SimpleItem):
     def __init__(self,
                  stack_type,
                  wf_var_id,
-                 **kw
-                 ):
+                 **kw):
         """Constructor
 
         stack_type   : Data Structure type holding the deleggatees
