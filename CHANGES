@@ -9,6 +9,7 @@ New features:
 - #507 : Delegatees managment
 - #509 : Inserting people in hierarchical stacks
 - #529 : New: api misc
+- #521 : bug in role settings algorythm
 Bug fixes:
 ~~~~~~~~~~
 - Keep former local roles mapping during non stack flaged transition
