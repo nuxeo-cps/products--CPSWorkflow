@@ -134,7 +134,7 @@ class SimpleStack(Stack):
             return 1
         return -2
 
-    def _pop(self, element=None):
+    def _pop(self, elt=None, **kw):
         """Remove a given element
 
         O : failed
@@ -142,8 +142,8 @@ class SimpleStack(Stack):
         """
         if self.isEmpty():
             return 0
-        if element is not None:
-            index = self._getStackElementIndex(element)
+        if elt is not None:
+            index = self._getStackElementIndex(elt)
             if index >= 0:
                 try:
                     del self._getElementsContainer()[index]
@@ -195,11 +195,11 @@ class SimpleStack(Stack):
 
         # XXX case where a single element is passed (compatibility)
         if not pop_ids:
-            return self._pop(elt)
+            return self._pop(elt, **kw)
 
         # pop_ids have to be prefixed
         for pop_id in pop_ids:
-            self._pop(pop_id)
+            self._pop(pop_id, **kw)
 
 
     def getStackContent(self, type='str', level=None, **kw):
@@ -408,7 +408,7 @@ class HierarchicalStack(SimpleStack):
                     container[low_level+1] = [self._prepareElement(elt)]
         return 1
 
-    def _pop(self, elt=None, level=None):
+    def _pop(self, elt=None, level=None, **kw):
         """Remove elt at given level
 
         -1 : not found
@@ -607,7 +607,7 @@ class HierarchicalStack(SimpleStack):
         # Check arguments in here.
         pop_ids = kw.get('pop_ids', ())
         if not pop_ids:
-            return self._pop(elt, level)
+            return self._pop(elt, level, **kw)
 
         # Pop member / group given ids
         for pop_id in pop_ids:
@@ -616,7 +616,7 @@ class HierarchicalStack(SimpleStack):
             split = pop_id.split(',')
             level = int(split[0])
             the_id = split[1]
-            self._pop(elt=the_id, level=level)
+            self._pop(elt=the_id, level=level, **kw)
 
 
     def replace(self, old, new):
