@@ -10,13 +10,13 @@ $Id$
 
  x stack def registries
 
- o stack elements (to be able to store any kind of object, not just users)
+ x stack elements (to be able to store any kind of object, not just users)
 
- o WorkflowStackDelegate
+ x WorkflowStackDelegate
    + class representing a member within a stack
    + think about the substitutes
 
- o WorkflowStackGroupDelegate
+ x WorkflowStackGroupDelegate
    + think about the substitutes
 
  o Former local roles for a given stack stored within the status of the object

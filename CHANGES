@@ -18,3 +18,4 @@ New internal features:
 - registries will not register any classes of they are not implementing the
   base interfaces
 - basic stack element definitions
+- stack stores now stack elements instead of strings
