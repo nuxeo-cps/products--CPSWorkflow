@@ -138,12 +138,34 @@ class WorkflowDefinition(DCWorkflowDefinition):
     def updateStackDefinitionsRoleMappingsFor(self, ob, **kw):
         """Update local roles for delegatees that are within workflow stacks
         """
+        current_wf_var_id = kw.get('current_wf_var_id', '')
+
+        wftool = getToolByName(self, 'portal_workflow')
+        mtool = getToolByName(self, 'portal_membership')
+        stackdefs = wftool.getStackDefinitionsFor(ob)
+        
         changed = 0
 
-        current_wf_var_id = kw.get('current_wf_var_id', '')
-        wftool = aq_parent(aq_inner(self))
-        stackdefs = wftool.getStackDefinitionsFor(ob)
-        mtool = getToolByName(self, 'portal_membership')
+        #
+        # First save the former local roles maping They will be
+        # overriden if defined on the state just after.  For the other
+        # ones, we need to keep the flrm's since the stackdef might be
+        # defined on another state further within the process
+        # definition or called by a stack flaged transition. 
+        #
+        
+        tdef = kw.get('tdef')
+        history = wftool.getHistoryOf(self.id, ob)
+        try:
+            former_status = history[-2]
+        except IndexError:
+            # Virgin instance ;)
+            pass
+        else:
+            sflrm = former_status.get('sflrm', {})
+            for k, v in sflrm.items():
+                wftool.updateFormerLocalRoleMappingForStack(ob, self.id,
+                                                                k, v)
 
         #
         # Let's ask the stack definition for the list of local roles
@@ -1212,6 +1234,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
         # Update role to permission assignments.
         kw = {}
         kw['current_wf_var_id'] = kwargs.get('current_wf_var_id', '')
+        kw['tdef'] = tdef
         self.updateRoleMappingsFor(ob, **kw)
 
         # Execute the "after" script.
