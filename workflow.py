@@ -304,6 +304,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
                 # If on a CMF site tdef is None
                 # If on a CPS site tdef is not None but has a
                 # TRANSITION_INITIAL_CREATE
+
+                ## ADDED FROM HERE
                 if (tdef is None or
                     TRANSITION_INITIAL_CREATE in tdef.transition_behavior):
                     stacks = {}
@@ -329,6 +331,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
                         # a new status within the workflow_history var and thus
                         # we will see two creation action.
                         ob.workflow_history[self.id] = [status]
+                ## ADDED STOP HERE
             except ObjectMoved, moved_exc:
                 ob = moved_exc.getNewObject()
                 sdef = self._getWorkflowStateOf(ob)
@@ -1215,17 +1218,18 @@ class WorkflowDefinition(DCWorkflowDefinition):
         else:
             return new_sdef
 
-
     #
     # API
     #
 
     security.declarePrivate('getInfoFor')
     def getInfoFor(self, ob, name, default):
-        '''
-        Allows the user to request information provided by the
-        workflow.  This method must perform its own security checks.
-        '''
+        """Allows the user to request information provided by the workflow.
+        This method must perform its own security checks.
+
+        The method is overrided because we need to use the StateChangeInfo
+        defined within the CPSWorkflow.expression
+        """
         if name == self.state_var:
             return self._getWorkflowStateOf(ob, 1)
         vdef = self.variables[name]
@@ -1242,7 +1246,6 @@ class WorkflowDefinition(DCWorkflowDefinition):
             value = vdef.default_expr(ec)
         else:
             value = vdef.default_value
-
         return value
 
     security.declarePrivate('insertIntoWorkflow')
