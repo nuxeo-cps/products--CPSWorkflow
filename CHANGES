@@ -6,9 +6,7 @@ New features:
 -
 Bug fixes:
 ~~~~~~~~~~
-- #472 : Add methods to know if there are upper/lower levels for current
-   level in hierarchical stacks
-
+-
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
 -
