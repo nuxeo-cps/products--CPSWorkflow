@@ -40,6 +40,20 @@ from Products.CMFCore.WorkflowTool import WorkflowTool as BaseWorkflowTool
 from stackregistries import WorkflowStackRegistry
 from stackregistries import WorkflowStackDefRegistry
 
+from transitions import TRANSITION_ALLOWSUB_CREATE
+from transitions import TRANSITION_ALLOWSUB_DELETE
+from transitions import TRANSITION_ALLOWSUB_MOVE
+from transitions import TRANSITION_ALLOWSUB_COPY
+from transitions import TRANSITION_ALLOWSUB_PUBLISHING
+from transitions import TRANSITION_ALLOWSUB_CHECKOUT
+from transitions import TRANSITION_INITIAL_CREATE
+from transitions import TRANSITION_INITIAL_MOVE
+from transitions import TRANSITION_INITIAL_COPY
+from transitions import TRANSITION_INITIAL_PUBLISHING
+from transitions import TRANSITION_INITIAL_CHECKOUT
+from transitions import TRANSITION_ALLOW_CHECKIN
+from transitions import TRANSITION_BEHAVIOR_PUBLISHING
+
 #
 # CPSCore is optional now.
 # Check DEPENDENCIES.txt
@@ -77,21 +91,7 @@ except ImportError, e:
     class ProxyBTreeFolderishDocument:
         pass
 
-from Products.CPSWorkflow.transitions import TRANSITION_ALLOWSUB_CREATE
-from Products.CPSWorkflow.transitions import TRANSITION_ALLOWSUB_DELETE
-from Products.CPSWorkflow.transitions import TRANSITION_ALLOWSUB_MOVE
-from Products.CPSWorkflow.transitions import TRANSITION_ALLOWSUB_COPY
-from Products.CPSWorkflow.transitions import TRANSITION_ALLOWSUB_PUBLISHING
-from Products.CPSWorkflow.transitions import TRANSITION_ALLOWSUB_CHECKOUT
-from Products.CPSWorkflow.transitions import TRANSITION_INITIAL_CREATE
-from Products.CPSWorkflow.transitions import TRANSITION_INITIAL_MOVE
-from Products.CPSWorkflow.transitions import TRANSITION_INITIAL_COPY
-from Products.CPSWorkflow.transitions import TRANSITION_INITIAL_PUBLISHING
-from Products.CPSWorkflow.transitions import TRANSITION_INITIAL_CHECKOUT
-from Products.CPSWorkflow.transitions import TRANSITION_ALLOW_CHECKIN
-from Products.CPSWorkflow.transitions import TRANSITION_BEHAVIOR_PUBLISHING
-
-
+# id of the cps workflow configuration objects
 Config_id = '.cps_workflow_configuration'
 
 
