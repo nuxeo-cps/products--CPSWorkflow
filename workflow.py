@@ -273,7 +273,9 @@ class WorkflowDefinition(DCWorkflowDefinition):
         for behavior in _interested_behaviors:
             var_ids = t.getStackWorkflowVariablesForBehavior(behavior)
             for var_id in var_ids:
+                
                 if wftool.canManageStack(ob, var_id):
+
 
                     #
                     # Check in here if the transition flag is compatible with
@@ -282,14 +284,13 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
                     stack = wftool.getStackFor(ob, var_id)
                     if var_id in t.workflow_down_on_workflow_variable:
-                        stack = wftool.getStackFor(var_id)
                         if (not stack or
-                            not stack.hasUpperLevel()):
+                            not stack.hasLowerLevel()):
                             return 0
 
                     if var_id in t.workflow_up_on_workflow_variable:
                         if (not stack or
-                            not stack.hasLowerLevel()):
+                            not stack.hasUpperLevel()):
                             return 0
 
                     # XXX cope with other cases if needed
