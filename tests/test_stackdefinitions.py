@@ -162,7 +162,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         sstack = SimpleStack()
 
         # Push one guy in it
-        new_stack = simple._push(sstack, member_ids=['user1'])
+        new_stack = simple._push(sstack, push_ids=['user:user1'])
 
         # Not the same instance since it's a copy
         self.assertNotEqual(new_stack, sstack)
@@ -177,7 +177,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Try to remove the user1
 
         # get a copy of the initial stack
-        self.assertNotEqual(new_stack, simple._pop(new_stack, ids=['user1']))
+        self.assertNotEqual(new_stack, simple._pop(new_stack, pop_ids=['user:user1']))
         self.assertEqual(new_stack.getStackContent(), [])
         self.assertEqual(new_stack.meta_type, 'Simple Stack')
         self.assertEqual(simple._getLocalRolesMapping(new_stack),
@@ -195,10 +195,11 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                          {})
 
         # Push again
-        new_stack = simple._push(new_stack, member_ids=['user1', 'user2'])
+        new_stack = simple._push(new_stack,
+                                 push_ids=['user:user1', 'user:user2'])
         self.assertNotEqual(new_stack, None)
         self.assertEqual(new_stack.meta_type, 'Simple Stack')
-        self.assertEqual(new_stack.getStackContent(), ['user1', 'user2'])
+        self.assertEqual(new_stack.getStackContent(), ['user:user1', 'user:user2'])
 
         # Local Roles
         self.assertEqual(simple._getLocalRolesMapping(new_stack),
@@ -234,14 +235,14 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                context=self),
                          0)
         # Add user3 wich is the one authenticated within the fake tool
-        new_stack = simple._push(new_stack, member_ids=['user3'])
+        new_stack = simple._push(new_stack, push_ids=['user:user3'])
         self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
                                                context=self),
                          1)
         # Remove user1 and user2
-        new_stack = simple._pop(new_stack, ids=['user1', 'user2'])
+        new_stack = simple._pop(new_stack, pop_ids=['user:user1', 'user:user2'])
         self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
@@ -261,7 +262,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                          1)
 
         # Add group group1 where user1 is a user
-        new_stack = simple._push(new_stack, group_ids=['group1'])
+        new_stack = simple._push(new_stack, push_ids=['group:group1'])
         self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
@@ -281,7 +282,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                          1)
 
         # Add a group in the stack that doesn't exist
-        new_stack = simple._push(new_stack, group_ids=['group3'])
+        new_stack = simple._push(new_stack, push_ids=['group:group3'])
         self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
@@ -301,9 +302,9 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                          1)
 
         # user1 and user2 defined within group2
-        new_stack = simple._push(new_stack, group_ids=['group2'])
+        new_stack = simple._push(new_stack, push_ids=['group:group2'])
         self.assertEqual(new_stack.getStackContent(),
-                         ['user3', 'group:group1', 'group:group3',
+                         ['user:user3', 'group:group1', 'group:group3',
                           'group:group2'])
         self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
@@ -324,10 +325,10 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                          1)
 
         # Remove group1 and group3
-        new_stack = simple._pop(new_stack, ids=['group:group1',
+        new_stack = simple._pop(new_stack, pop_ids=['group:group1',
                                                'group:group3',])
         self.assertEqual(new_stack.getStackContent(),
-                         ['user3', 'group:group2'])
+                         ['user:user3', 'group:group2'])
         self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
@@ -348,9 +349,9 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         # Remove group2
         # User 1 stil within the stack by himself
-        new_stack = simple._pop(new_stack, ids=['group:group2'])
+        new_stack = simple._pop(new_stack, pop_ids=['group:group2'])
         self.assertEqual(new_stack.getStackContent(),
-                         ['user3',])
+                         ['user:user3',])
         self.assertEqual(simple._canManageStack(ds=new_stack,
                                                aclu=aclu,
                                                mtool=mtool,
@@ -370,7 +371,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                          1)
 
         # Remove user1
-        new_stack = simple._pop(new_stack, ids=['user3'])
+        new_stack = simple._pop(new_stack, pop_ids=['user:user3'])
         self.assertEqual(new_stack.getStackContent(), [])
 
 
@@ -465,7 +466,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         # Push one guy in it
         new_stack = hierarchical._push(hstack,
-                                      member_ids=['user1'],
+                                      push_ids=['user:user1'],
                                       levels=[0])
 
         # Not the same instance since it's a copy
@@ -488,7 +489,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         # get a copy of the initial stack
         self.assertNotEqual(new_stack, hierarchical._pop(new_stack,
-                                                        ids=['0,user1',]))
+                                                        pop_ids=['0,user:user1',]))
         self.assertEqual(new_stack.getLevelContentValues(), [])
         self.assertEqual(new_stack.meta_type, 'Hierarchical Stack')
         self.assertEqual(hierarchical._getLocalRolesMapping(new_stack),
@@ -507,11 +508,12 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         # Push again
         new_stack = hierarchical._push(new_stack,
-                                      member_ids=['user1', 'user2'],
+                                      push_ids=['user:user1', 'user:user2'],
                                       levels=[0,0])
         self.assertNotEqual(new_stack, None)
         self.assertEqual(new_stack.meta_type, 'Hierarchical Stack')
-        self.assertEqual(new_stack.getLevelContentValues(), ['user1', 'user2'])
+        self.assertEqual(new_stack.getLevelContentValues(),
+                         ['user:user1', 'user:user2'])
 
         # Local Roles
         self.assertEqual(hierarchical._getLocalRolesMapping(new_stack),
@@ -548,7 +550,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                          0)
         # Add user3 wich is the one authenticated within the fake tool
         new_stack = hierarchical._push(new_stack,
-                                      member_ids=['user3'],
+                                      push_ids=['user:user3'],
                                       levels=[0])
         self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
@@ -557,7 +559,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                          1)
         # Remove user1 and user2
         new_stack = hierarchical._pop(new_stack,
-                                     ids=['0,user1', '0,user2'])
+                                     pop_ids=['0,user:user1', '0,user:user2'])
         self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
@@ -578,7 +580,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         # Add group group1 where user1 is a user
         new_stack = hierarchical._push(new_stack,
-                                      group_ids=['group1'],
+                                      push_ids=['group:group1'],
                                       levels=[0])
         self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
@@ -600,7 +602,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         # Add a group in the tack that doesn't exist
         new_stack = hierarchical._push(new_stack,
-                                      group_ids=['group3'],
+                                      push_ids=['group:group3'],
                                       levels=[0])
         self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
@@ -622,10 +624,10 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         # user1 and user2 defined within group2
         new_stack = hierarchical._push(new_stack,
-                                      group_ids=['group2'],
+                                      push_ids=['group:group2'],
                                       levels=[0])
         self.assertEqual(new_stack.getLevelContentValues(),
-                         ['user3', 'group:group1', 'group:group3',
+                         ['user:user3', 'group:group1', 'group:group3',
                           'group:group2'])
         self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
@@ -647,9 +649,9 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         # Remove group1 and group3
         new_stack = hierarchical._pop(new_stack,
-                                     ids=['0,group:group1', '0,group:group3',])
+                                     pop_ids=['0,group:group1', '0,group:group3',])
         self.assertEqual(new_stack.getLevelContentValues(),
-                         ['user3', 'group:group2'])
+                         ['user:user3', 'group:group2'])
         self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
@@ -671,9 +673,9 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Remove group2
         # User 1 stil within the stack by himself
         new_stack = hierarchical._pop(new_stack,
-                                     ids=['0,group:group2'])
+                                     pop_ids=['0,group:group2'])
         self.assertEqual(new_stack.getLevelContentValues(),
-                         ['user3',])
+                         ['user:user3',])
         self.assertEqual(hierarchical._canManageStack(ds=new_stack,
                                                      aclu=aclu,
                                                      mtool=mtool,
@@ -694,7 +696,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         # Remove user1
         new_stack = hierarchical._pop(new_stack,
-                                     ids=['0,user3'])
+                                     pop_ids=['0,user:user3'])
         self.assertEqual(new_stack.getLevelContentValues(), [])
 
         #
@@ -797,27 +799,27 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         # Push one guy in it
         new_stack = hierarchical._push(hstack,
-                                      member_ids=['user1'],
+                                      push_ids=['user:user1'],
                                       levels=[0])
 
         new_stack = hierarchical._push(new_stack,
-                                      member_ids=['user2'],
+                                      push_ids=['user:user2'],
                                       levels=[0])
 
         new_stack = hierarchical._push(new_stack,
-                                      member_ids=['user3'],
+                                      push_ids=['user:user3'],
                                       levels=[1])
 
         new_stack = hierarchical._push(new_stack,
-                                      member_ids=['user4'],
+                                      push_ids=['user:user4'],
                                       levels=[-1])
 
         new_stack = hierarchical._push(new_stack,
-                                      member_ids=['user5'],
+                                      push_ids=['user:user5'],
                                       levels=[2])
 
         new_stack = hierarchical._push(new_stack,
-                                      member_ids=['user6'],
+                                      push_ids=['user:user6'],
                                       levels=[-2])
 
         # Not the same instance since it's a copy
@@ -1302,11 +1304,11 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
             'Simple Stack',
             'toto')
 
-        stack = simple._push(None, member_ids=['user1'])
+        stack = simple._push(None, push_ids=['user:user1'])
         self.assertEqual(stack.getMetaType(),
                          'Simple Stack')
         self.assertEqual(stack.getStackContent(),
-                         ['user1'])
+                         ['user:user1'])
         stack = simple._reset(stack)
         self.assertEqual(stack.getMetaType(),
                          'Simple Stack')
@@ -1325,12 +1327,12 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
             )
 
         stack = hierarchical._push(None,
-                                  member_ids=['user1'],
+                                  push_ids=['user:user1'],
                                   levels=[0])
         self.assertEqual(stack.getMetaType(),
                          'Hierarchical Stack')
         self.assertEqual(stack.getLevelContentValues(),
-                         ['user1'])
+                         ['user:user1'])
         stack = hierarchical._reset(stack)
         self.assertEqual(stack.getMetaType(),
                          'Hierarchical Stack')
@@ -1544,12 +1546,12 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         sstackdef._addExpressionForRole('WorkspaceManager',
                                         'python:len(stack.getStackContent())%2==1')
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack), {})
-        sstack = sstackdef._push(sstack, **{'member_ids': ('elt1',)})
+        sstack = sstackdef._push(sstack, **{'push_ids': ('elt1',)})
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
                          {'elt1': ('WorkspaceManager',)})
-        sstack = sstackdef._push(sstack, **{'member_ids': ('elt2',)})
+        sstack = sstackdef._push(sstack, **{'push_ids': ('elt2',)})
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack), {})
-        sstack = sstackdef._push(sstack, **{'member_ids': ('elt3',)})
+        sstack = sstackdef._push(sstack, **{'push_ids': ('elt3',)})
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
                          {'elt1': ('WorkspaceManager',),
                           'elt2': ('WorkspaceManager',),
@@ -1561,10 +1563,10 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         sstackdef._addExpressionForRole('WorkspaceManager',
                                         "python:elt.startswith('hello')")
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack), {})
-        sstack = sstackdef._push(sstack, **{'member_ids': ('hello_elt1',)})
+        sstack = sstackdef._push(sstack, **{'push_ids': ('hello_elt1',)})
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
                          {'hello_elt1': ('WorkspaceManager',)})
-        sstack = sstackdef._push(sstack, **{'member_ids': ('elt2',)})
+        sstack = sstackdef._push(sstack, **{'push_ids': ('elt2',)})
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
                          {'hello_elt1': ('WorkspaceManager',)})
 
@@ -1590,7 +1592,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                         'python:len(stack.getLevelContent(level))%2==1')
         self.assertEqual(hstackdef._getLocalRolesMapping(hstack), {})
         kw = {
-            'member_ids': ('elt1',),
+            'push_ids': ('elt1',),
             'levels': (0,)
             }
         hstack = hstackdef._push(hstack, **kw)
@@ -1599,13 +1601,13 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertEqual(hstackdef._getLocalRolesMapping(hstack),
                          {'elt1': ('WorkspaceManager',)})
         kw = {
-            'member_ids': ('elt2',),
+            'push_ids': ('elt2',),
             'levels': (0,)
             }
         hstack = hstackdef._push(hstack, **kw)
         self.assertEqual(hstackdef._getLocalRolesMapping(hstack), {})
         kw = {
-            'member_ids': ('elt3',),
+            'push_ids': ('elt3',),
             'levels': (1,)
             }
         hstack = hstackdef._push(hstack, **kw)
@@ -1618,14 +1620,14 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                         "python:elt.startswith('hello')")
         self.assertEqual(hstackdef._getLocalRolesMapping(hstack), {})
         kw = {
-            'member_ids': ('hello_elt1',),
+            'push_ids': ('hello_elt1',),
             'levels': (0,)
             }
         hstack = hstackdef._push(hstack, **kw)
         self.assertEqual(hstackdef._getLocalRolesMapping(hstack),
                          {'hello_elt1': ('WorkspaceManager',)})
         kw = {
-            'member_ids': ('elt2',),
+            'push_ids': ('elt2',),
             'levels': (0,)
             }
         hstack = hstackdef._push(hstack, **kw)
@@ -1644,29 +1646,29 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                          'Fake')
 
         kw = {}
-        kw['member_ids'] = ('elt1',)
+        kw['push_ids'] = ('elt1',)
         stack = stackdef._push(stack, **kw)
         self.assertEqual([x for x in stack._getElementsContainer()],
                          ['elt1'])
 
         # Reset with one (1) new user
-        stack = stackdef._reset(stack, new_users=('elt2',))
+        stack = stackdef._reset(stack, new_ids=('elt2',))
         self.assertEqual([x() for x in stack._getElementsContainer()],
                          ['elt2'])
 
         # Reset with two (2) new users
-        stack = stackdef._reset(stack, new_users=('elt3', 'elt4'))
+        stack = stackdef._reset(stack, new_ids=('elt3', 'elt4'))
         self.assertEqual([x() for x in stack._getElementsContainer()],
                          ['elt3', 'elt4'])
 
         # Reset with one (1) new group
-        stack = stackdef._reset(stack, new_users=('group:elt2',))
+        stack = stackdef._reset(stack, new_ids=('group:elt2',))
         self.assertEqual([x() for x in stack._getElementsContainer()],
                          ['group:elt2'])
-        
+
         # Reset with two (2) new users
         stack = stackdef._reset(stack,
-                                    new_users=('group:elt3', 'group:elt4'))
+                                    new_ids=('group:elt3', 'group:elt4'))
         self.assertEqual([x() for x in stack._getElementsContainer()],
                          ['group:elt3', 'group:elt4'])
 
@@ -1680,8 +1682,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Reset with a new stack, new users and new groups
         new_stack = SimpleStack()
         stack = stackdef._reset(stack, new_stack=new_stack,
-                                    new_users=('elt1', 'elt2'),
-                                    new_groups=('group:elt3', 'group:elt4'))
+                                new_ids=('elt1', 'elt2', 'group:elt3', 'group:elt4'))
         self.assertEqual([x() for x in stack._getElementsContainer()],
                          ['elt1', 'elt2', 'group:elt3', 'group:elt4'])
 
@@ -1697,30 +1698,30 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                'Fake')
 
         kw = {}
-        kw['member_ids'] = ('elt1',)
+        kw['push_ids'] = ('elt1',)
         kw['levels'] = (0,)
         stack = stackdef._push(stack, **kw)
         self.assertEqual([x for x in stack._getElementsContainer()[0]],
                          ['elt1'])
 
         # Reset with one (1) new user
-        stack = stackdef._reset(stack, new_users=('elt2',))
+        stack = stackdef._reset(stack, new_ids=('elt2',))
         self.assertEqual([x() for x in stack._getElementsContainer()[0]],
                          ['elt2'])
 
         # Reset with two (2) new users
-        stack = stackdef._reset(stack, new_users=('elt3', 'elt4'))
+        stack = stackdef._reset(stack, new_ids=('elt3', 'elt4'))
         self.assertEqual([x() for x in stack._getElementsContainer()[0]],
                          ['elt3', 'elt4'])
 
         # Reset with one (1) new group
-        stack = stackdef._reset(stack, new_users=('group:elt2',))
+        stack = stackdef._reset(stack, new_ids=('group:elt2',))
         self.assertEqual([x() for x in stack._getElementsContainer()[0]],
                          ['group:elt2'])
-        
+
         # Reset with two (2) new users
         stack = stackdef._reset(stack,
-                                    new_users=('group:elt3', 'group:elt4'))
+                                    new_ids=('group:elt3', 'group:elt4'))
         self.assertEqual([x() for x in stack._getElementsContainer()[0]],
                          ['group:elt3', 'group:elt4'])
 
@@ -1734,8 +1735,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Reset with a new stack, new users and new groups
         new_stack = HierarchicalStack()
         stack = stackdef._reset(stack, new_stack=new_stack,
-                                    new_users=('elt1', 'elt2'),
-                                    new_groups=('group:elt3', 'group:elt4'))
+                                new_ids=('elt1', 'elt2', 'group:elt3', 'group:elt4'))
         self.assertEqual([x() for x in stack._getElementsContainer()[0]],
                          ['elt1', 'elt2', 'group:elt3', 'group:elt4'])
 
@@ -1747,7 +1747,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         hstackdef = HierarchicalStackDefinition('Hierarhical Stack', 'fake')
 
-        # Normal 
+        # Normal
         #hstack = hstackdef._push(hstack, elt='elt1')
         hstack.push('elt1')
         hstack.push('elt3', level=1)
