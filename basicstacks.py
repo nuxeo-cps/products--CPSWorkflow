@@ -60,7 +60,31 @@ class SimpleStack(Stack):
     def __init__(self, **kw):
         """Default constructor
         """
-        Stack.__init__(self, **kw)
+        self.max_size = kw.get('maxsize')
+        self._elements_container = PersistentList()
+
+    #
+    # BORING ACCESSRORS
+    #
+
+    def getSize(self):
+        """ Return the current size of the Stack
+        """
+        return len(self._getElementsContainer())
+
+    def isFull(self):
+        """Is the queue Full ?
+
+        Used in the case of max size is specified
+        """
+        if self.max_size is not None:
+            return self.getSize() >= self.max_size
+        return 0
+
+    def isEmpty(self):
+        """Is the Stack empty ?
+        """
+        return self.getSize() == 0
 
     #
     # PRIVATE API
@@ -92,7 +116,7 @@ class SimpleStack(Stack):
             i += 1
         return -1
 
-    def push(self, elt=None, **kw):
+    def _push(self, elt=None, **kw):
         """Push an element in the queue
 
         1  : ok
@@ -100,17 +124,24 @@ class SimpleStack(Stack):
         -1 : elt is None
         -2 : already in here
         """
+        if self.isFull():
+            return 0
         if elt not in self.getStackContent():
-            return Stack.push(self, elt)
-        else:
-            return -2
+            elt = self._prepareElement(elt)
+            if elt is None:
+                return -1
+            self._getElementsContainer().append(elt)
+            return 1
+        return -2
 
-    def pop(self, element=None):
+    def _pop(self, element=None):
         """Remove a given element
 
         O : failed
         1 : sucsess
         """
+        if self.isEmpty():
+            return 0
         if element is not None:
             index = self._getStackElementIndex(element)
             if index >= 0:
@@ -120,7 +151,10 @@ class SimpleStack(Stack):
                 except IndexError:
                     pass
         else:
-            return Stack.pop(self)
+            last_elt_index = self.getSize() - 1
+            res = self._getElementsContainer()[last_elt_index]
+            del self._getElementsContainer()[last_elt_index]
+            return res
         return 0
 
 
@@ -128,47 +162,38 @@ class SimpleStack(Stack):
     # API
     #
 
-    def _push(self, **kw):
+    def push(self, elt=None, **kw):
         """Public push
         """
 
-        #
         # First extract the needed information
         # No level information is needed in here
-        #
-
         member_ids = kw.get('member_ids', ())
         group_ids  = kw.get('group_ids',  ())
 
         if not (member_ids or group_ids):
-            return self
+            return self._push(elt, **kw)
 
-        #
         # Push members / groups
         # groups gota prefixed id  'group:'
-        #
-
         for member_id in member_ids:
-            self.push(member_id)
+            self._push(member_id, **kw)
         for group_id in group_ids:
             prefixed_group_id = 'group:'+group_id
-            self.push(prefixed_group_id)
+            self._push(prefixed_group_id, **kw)
 
-    def _pop(self, **kw):
+    def pop(self, element=None, **kw):
         """Public pop
         """
 
-        #
         # Pop member / group given ids
-        #
-
         ids = kw.get('ids', ())
 
         if not ids:
-            return self
+            return self._pop(element)
 
         for id in ids:
-            self.pop(id)
+            self._pop(id)
 
     def getStackContent(self, level=None):
         """Return the stack content
@@ -208,6 +233,31 @@ class SimpleStack(Stack):
             self._elements_container[old_elt_index] = new_elt
         except ValueError:
             pass
+
+    def reset(self, **kw):
+        """Reset the stack
+
+        new_stack  : stack that might be a substitute of self
+        new_users  : users to add at current level
+        new_groups : groups to add ar current level
+        """
+        new_stack = kw.get('new_stack')
+
+        # Translate for push
+        new_users = kw.get('new_users', ())
+        new_groups = kw.get('new_groups', ())
+
+        if new_stack is not None:
+            self._elements_container = new_stack._getElementsContainer()
+        else:
+            self.__init__()
+
+        for new_user in new_users:
+            self.push(new_user)
+        for new_group in new_groups:
+            self.push(new_group)
+
+        return self
 
     #
     # MISC
@@ -281,6 +331,108 @@ class HierarchicalStack(SimpleStack):
             if id == each():
                 return i
             i += 1
+        return -1
+
+    def _push(self, elt=None, level=0, **kw):
+        """Push elt at given level or in between two levels
+
+        Coderrors are :
+
+           1  : ok
+           0  : queue id full
+          -1  : elt is None
+          -2  : elt already within the stack
+        """
+
+        if elt is None:
+            return -1
+        if self.isFull():
+            return 0
+
+        low_level = kw.get('low_level', None)
+        high_level = kw.get('high_level', None)
+
+        # Compatibility
+        if (low_level is not None and
+            high_level is not None):
+            level = None
+
+        # Simply insert a new elt at a given level
+        if level is not None:
+            content_level = self.getLevelContent(level)
+            content_level_values = self.getLevelContentValues(level)
+            if elt not in content_level_values:
+                elt = self._prepareElement(elt)
+                content_level.append(elt)
+                self._getElementsContainer()[level] = content_level
+            else:
+                return -2
+
+        #
+        # Check if this is an insertion in between two levels either
+        # the high_level and low_level are equal and then this is the
+        # same as a regular insertion at a given level, either it's an
+        # insertion in between two levels and then we need to inset
+        # and change levels. The current level is invariant
+        #
+
+        elif (low_level is not None and
+              high_level is not None and
+              abs(low_level - high_level) <= 1):
+            levels = self.getAllLevels()
+            if low_level == high_level:
+                self.push(elt, level=low_level)
+            elif (low_level not in levels and
+                  abs(min(levels) - low_level) <= 1):
+                self.push(elt, level=low_level)
+            elif (high_level not in levels and
+                  abs(max(levels) - high_level) <= 1):
+                self.push(elt, level=high_level)
+            elif (low_level in levels and
+                    high_level in levels):
+                container = self._getElementsContainer()
+                if low_level < self.getCurrentLevel():
+                    clevels = [x for x in levels if x <= low_level]
+                    for clevel in clevels:
+                        container[clevel-1] = container[clevel]
+                    container[low_level] = [self._prepareElement(elt)]
+                else:
+                    clevels = [x for x in levels if x > low_level]
+                    clevels.reverse()
+                    for clevel in clevels:
+                        container[clevel+1] = container[clevel]
+                    container[low_level+1] = [self._prepareElement(elt)]
+        return 1
+
+    def _pop(self, elt=None, level=None):
+        """Remove elt at given level
+
+        -1 : not found
+        elt  : ok
+        """
+
+        if level is None:
+            level = self.getCurrentLevel()
+        levelc = self.getLevelContent(level=level)
+
+        if elt is None:
+            last = None
+            if len(levelc) > 0:
+                last = levelc[len(levelc)-1]
+                if last is not None:
+                    elt = last()
+                    
+        if elt is None:
+            return 0
+
+        index = self._getStackElementIndex(elt, level)
+        if index >= 0:
+            try:
+                elt_obj = self.getLevelContent(level=level)[index]
+                del self.getLevelContent(level=level)[index]
+                return elt_obj
+            except KeyError:
+                pass
         return -1
 
     #
@@ -411,31 +563,28 @@ class HierarchicalStack(SimpleStack):
 
     ###################################################
 
-    def _push(self, **kw):
-        """Internal push
+    def push(self, elt=None, level=None, **kw):
+        """Push element
         """
 
-        #
         # First extract the needed information
         # No level information is needed in here
-        #
-
         member_ids = kw.get('member_ids', ())
         group_ids  = kw.get('group_ids',  ())
         levels = kw.get('levels', ())
 
         if not ((member_ids or group_ids) and levels):
-            return self
+            # XXX compatibility
+            if level is None:
+                level = 0
+            return self._push(elt, level, **kw)
 
-        #
         # Push members / groups
         # groups gota prefixed id  'group:'
-        #
-
         i = 0
         for member_id in member_ids:
             try:
-                self.push(member_id, int(levels[i]))
+                self._push(member_id, int(levels[i]))
                 i += 1
             except IndexError:
                 # wrong user input
@@ -444,135 +593,26 @@ class HierarchicalStack(SimpleStack):
         for group_id in group_ids:
             prefixed_group_id = 'group:'+group_id
             try:
-                self.push(prefixed_group_id, int(levels[i]))
+                self._push(prefixed_group_id, int(levels[i]))
                 i += 1
             except IndexError:
                 # wrong user input
                 pass
 
-    def push(self, elt=None, level=0, **kw):
-        """Push elt at given level or in between two levels
-
-        Coderrors are :
-
-           1  : ok
-           0  : queue id full
-          -1  : elt is None
-          -2  : elt already within the stack
+    def pop(self, elt=None, level=None, **kw):
+        """Pop element
         """
 
-        if elt is None:
-            return -1
-        if self.isFull():
-            return 0
-
-        low_level = kw.get('low_level', None)
-        high_level = kw.get('high_level', None)
-
-        # Compatibility
-        if (low_level is not None and
-            high_level is not None):
-            level = None
-
-        # Simply insert a new elt at a given level
-        if level is not None:
-            content_level = self.getLevelContent(level)
-            content_level_values = self.getLevelContentValues(level)
-            if elt not in content_level_values:
-                elt = self._prepareElement(elt)
-                content_level.append(elt)
-                self._getElementsContainer()[level] = content_level
-            else:
-                return -2
-
-        #
-        # Check if this is an insertion in between two levels either
-        # the high_level and low_level are equal and then this is the
-        # same as a regular insertion at a given level, either it's an
-        # insertion in between two levels and then we need to inset
-        # and change levels. The current level is invariant
-        #
-
-        elif (low_level is not None and
-              high_level is not None and
-              abs(low_level - high_level) <= 1):
-            levels = self.getAllLevels()
-            if low_level == high_level:
-                self.push(elt, level=low_level)
-            elif (low_level not in levels and
-                  abs(min(levels) - low_level) <= 1):
-                self.push(elt, level=low_level)
-            elif (high_level not in levels and
-                  abs(max(levels) - high_level) <= 1):
-                self.push(elt, level=high_level)
-            elif (low_level in levels and
-                    high_level in levels):
-                container = self._getElementsContainer()
-                if low_level < self.getCurrentLevel():
-                    clevels = [x for x in levels if x <= low_level]
-                    for clevel in clevels:
-                        container[clevel-1] = container[clevel]
-                    container[low_level] = [self._prepareElement(elt)]
-                else:
-                    clevels = [x for x in levels if x > low_level]
-                    clevels.reverse()
-                    for clevel in clevels:
-                        container[clevel+1] = container[clevel]
-                    container[low_level+1] = [self._prepareElement(elt)]
-        return 1
-
-    def _pop(self, **kw):
-        """Internal pop
-        """
-
-        #
         # Check arguments in here.
-        # Might be wrongly called
-        #
-
         ids = kw.get('ids', ())
         if not ids:
-            return self
+            return self._pop(elt, level)
 
-        #
         # Pop member / group given ids
-        #
-
         for id in ids:
             level = int(id.split(',')[0])
             the_id = id.split(',')[1]
-            self.pop(elt=the_id, level=int(level))
-
-    def pop(self, elt=None, level=None):
-        """Remove elt at given level
-
-        -1 : not found
-        elt  : ok
-        """
-
-        if level is None:
-            level = self.getCurrentLevel()
-        levelc = self.getLevelContent(level=level)
-
-        if elt is None:
-            last = None
-            if len(levelc) > 0:
-                last = levelc[len(levelc)-1]
-                if last is not None:
-                    elt = last()
-                    
-        if elt is None:
-            return 0
-
-        index = self._getStackElementIndex(elt, level)
-        if index >= 0:
-            try:
-                elt_obj = self.getLevelContent(level=level)[index]
-                del self.getLevelContent(level=level)[index]
-                return elt_obj
-            except KeyError:
-                pass
-        return -1
+            self._pop(elt=the_id, level=int(level))
 
     def replace(self, old, new):
         """Replace old with new within the elements container
