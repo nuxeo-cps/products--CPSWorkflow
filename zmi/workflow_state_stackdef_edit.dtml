@@ -174,6 +174,52 @@ The following namespace is available within expression
 </table>
 </form>
 
+<hr />
+
+<h2>Who can manage the stack when the stack is empty ?</h2>
+
+<p>Configure the guard below for this behavior</p>
+<form action="<dtml-var absolute_url>/<dtml-var stackdef_id>" method="POST">
+<input type="hidden" name="stackdef_id" value="<dtml-var stackdef_id>" />
+<dtml-with "getStackDefinitionFor(stackdef_id)">
+ <dtml-with getEmptyStackManageGuard>
+  <dtml-var guardForm>
+ </dtml-with>
+<input type="submit" name="setEmptyStackManageGuard:method"
+       value="Change empty stack manage guard" />
+</dtml-with>
+
+</form>
+
+<hr />
+
+<h2>Who can edit a given stack element ?</h2>
+
+<p>Configure the guard below for this behavior</p>
+<form action="<dtml-var absolute_url>/<dtml-var stackdef_id>" method="POST">
+<dtml-with "getStackDefinitionFor(stackdef_id)">
+ <dtml-with getEditStackElementGuard>
+  <dtml-var guardForm>
+ </dtml-with>
+<input type="submit" name="setEditStackElementGuard:method"
+       value="Change edit stack element guard" />
+</dtml-with>
+
+</form>
+
+<h2>Who can view a given stack element ?</h2>
+
+<p>Configure the guard below for this behavior</p>
+<form action="<dtml-var absolute_url>/<dtml-var stackdef_id>" method="POST">
+<dtml-with "getStackDefinitionFor(stackdef_id)">
+ <dtml-with getViewStackElementGuard>
+  <dtml-var guardForm>
+ </dtml-with>
+<input type="submit" name="setViewStackElementGuard:method"
+       value="Change view stack element guard" />
+</dtml-with>
+
+</form>
 
 
 <dtml-var manage_page_footer>
