@@ -33,7 +33,7 @@ from Products.CMFCore.CMFCorePermissions import View, ModifyPortalContent
 
 from interfaces import IWorkflowStackDefinition
 
-class BaseWorkflowStackDefinition(SimpleItem):
+class StackDefinition(SimpleItem):
     """BaseWorkflowStackConfiguration
 
     Holds the basis configuration for a stack
@@ -178,5 +178,5 @@ class BaseWorkflowStackDefinition(SimpleItem):
         ds.reset()
         return ds
 
-InitializeClass(BaseWorkflowStackDefinition)
+InitializeClass(StackDefinition)
 

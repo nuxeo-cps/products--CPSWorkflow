@@ -32,12 +32,12 @@ from OFS.SimpleItem import SimpleItem
 from Products.CMFCore.CMFCorePermissions import View, ModifyPortalContent
 
 from basicstacks import SimpleStack, HierarchicalStack
-from stackdefinition import BaseWorkflowStackDefinition
+from stackdefinition import StackDefinition
 from stackregistries import WorkflowStackDefRegistry
 
 from interfaces import IWorkflowStackDefinition
 
-class SimpleWorkflowStackDefinition(BaseWorkflowStackDefinition):
+class SimpleStackDefinition(StackDefinition):
     """Simple Workflow Stack Definition
     """
 
@@ -62,10 +62,10 @@ class SimpleWorkflowStackDefinition(BaseWorkflowStackDefinition):
         delegatees in here
         """
 
-        BaseWorkflowStackDefinition.__init__(self,
-                                             stack_ds_type,
-                                             wf_var_id,
-                                             **kw)
+        StackDefinition.__init__(self,
+                                 stack_ds_type,
+                                 wf_var_id,
+                                 **kw)
 
     def _prepareStack(self, ds):
         """Prepare stack on wich we gonna work one
@@ -86,7 +86,7 @@ class SimpleWorkflowStackDefinition(BaseWorkflowStackDefinition):
 
         This method has to be implemented by a child class
         """
-        LOG("::SimpleWorkflowStackDefinition.push()::",
+        LOG("::SimpleStackDefinition.push()::",
             DEBUG,
             str(kw))
 
@@ -133,7 +133,7 @@ class SimpleWorkflowStackDefinition(BaseWorkflowStackDefinition):
         """pop delegatees
         """
 
-        LOG("::SimpleWorkflowStackDefinition.pop()::",
+        LOG("::SimpleStackDefinition.pop()::",
             DEBUG,
             str(kw))
 
@@ -282,12 +282,12 @@ class SimpleWorkflowStackDefinition(BaseWorkflowStackDefinition):
         """
         return getattr(self, 'manager_stack_ids', [])
 
-InitializeClass(SimpleWorkflowStackDefinition)
+InitializeClass(SimpleStackDefinition)
 
 ###################################################
 ###################################################
 
-class HierarchicalWorkflowStackDefinition(BaseWorkflowStackDefinition):
+class HierarchicalStackDefinition(StackDefinition):
     """Hierarchical Workflow Stack Definition
     """
 
@@ -317,10 +317,10 @@ class HierarchicalWorkflowStackDefinition(BaseWorkflowStackDefinition):
 
         __implements__ = (IWorkflowStackDefinition,)
 
-        BaseWorkflowStackDefinition.__init__(self,
-                                             stack_ds_type,
-                                             wf_var_id,
-                                             **kw)
+        StackDefinition.__init__(self,
+                                 stack_ds_type,
+                                 wf_var_id,
+                                 **kw)
     def _prepareStack(self, ds):
         """Prepare stack on wich we gonna work one
 
@@ -400,7 +400,7 @@ class HierarchicalWorkflowStackDefinition(BaseWorkflowStackDefinition):
         """pop delegatees
         """
 
-        LOG("::SimpleWorkflowStackDefinition.pop()::",
+        LOG("::SimpleStackDefinition.pop()::",
             DEBUG,
             str(kw))
 
@@ -642,10 +642,10 @@ class HierarchicalWorkflowStackDefinition(BaseWorkflowStackDefinition):
         """
         return getattr(self, 'manager_stack_ids', [])
 
-InitializeClass(HierarchicalWorkflowStackDefinition)
+InitializeClass(HierarchicalStackDefinition)
 
 #####################################################################
 #####################################################################
 
-WorkflowStackDefRegistry.register(SimpleWorkflowStackDefinition)
-WorkflowStackDefRegistry.register(HierarchicalWorkflowStackDefinition)
+WorkflowStackDefRegistry.register(SimpleStackDefinition)
+WorkflowStackDefRegistry.register(HierarchicalStackDefinition)

@@ -27,7 +27,7 @@ from Products.CPSWorkflow.basicstacks import SimpleStack, \
      HierarchicalStack
 
 from Products.CPSWorkflow.basicstackdefinitions import \
-     SimpleWorkflowStackDefinition, HierarchicalWorkflowStackDefinition
+     SimpleStackDefinition, HierarchicalStackDefinition
 
 from Products.CPSWorkflow.basicstackelements import \
      UserStackElement, GroupStackElement, UserSubstituteStackElement, \
@@ -151,24 +151,24 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
         self.assertEqual(WorkflowStackDefRegistry.listWorkflowStackDefTypes(),
                          [])
         self.assertEqual(WorkflowStackDefRegistry.register(
-            SimpleWorkflowStackDefinition), 1)
+            SimpleStackDefinition), 1)
         self.assertEqual(WorkflowStackDefRegistry.listWorkflowStackDefTypes(),
                          ['Simple Workflow Stack Definition'])
 
         # Not possible to duplicate registration
         self.assertEqual(WorkflowStackDefRegistry.register(
-            SimpleWorkflowStackDefinition), 0)
+            SimpleStackDefinition), 0)
         self.assertEqual(WorkflowStackDefRegistry.listWorkflowStackDefTypes(),
                          ['Simple Workflow Stack Definition'])
 
         # Test registry API with Simple Stack
         self.assertEqual(WorkflowStackDefRegistry.getClass(
-            'Simple Workflow Stack Definition'), SimpleWorkflowStackDefinition)
+            'Simple Workflow Stack Definition'), SimpleStackDefinition)
         self.assertEqual(WorkflowStackDefRegistry.getClass('Fake Stack'), None)
 
         icls = WorkflowStackDefRegistry.makeWorkflowStackDefTypeInstance(
             'Simple Workflow Stack Definition', 'Simple Stack', 'Pilot')
-        self.assert_(isinstance(icls, SimpleWorkflowStackDefinition))
+        self.assert_(isinstance(icls, SimpleStackDefinition))
 
         #
         # Now test with Hierarchical Stack
@@ -179,7 +179,7 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
 
         # Test registry API with Hierarchical Stack
         self.assertEqual(WorkflowStackDefRegistry.register(
-            HierarchicalWorkflowStackDefinition), 1)
+            HierarchicalStackDefinition), 1)
         self.assert_('Hierarchical Workflow Stack Definition' in
                      WorkflowStackDefRegistry.listWorkflowStackDefTypes())
         self.assert_('Simple Workflow Stack Definition' in
@@ -188,7 +188,7 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
 
         # Test duplication again
         self.assertEqual(WorkflowStackDefRegistry.register(
-            HierarchicalWorkflowStackDefinition), 0)
+            HierarchicalStackDefinition), 0)
         self.assert_('Hierarchical Workflow Stack Definition' in
                      WorkflowStackDefRegistry.listWorkflowStackDefTypes())
         self.assert_('Simple Workflow Stack Definition' in
@@ -198,12 +198,12 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
         # Test registry API with Hierarchical  Stack
         self.assertEqual(WorkflowStackDefRegistry.getClass(
             'Hierarchical Workflow Stack Definition'),
-                         HierarchicalWorkflowStackDefinition)
+                         HierarchicalStackDefinition)
 
         icls = WorkflowStackDefRegistry.makeWorkflowStackDefTypeInstance(
             'Hierarchical Workflow Stack Definition', 'Hierarchical Stack',
             'Pilot')
-        self.assert_(isinstance(icls, HierarchicalWorkflowStackDefinition))
+        self.assert_(isinstance(icls, HierarchicalStackDefinition))
 
         # test instance creation with a not registered type
         icls = WorkflowStackDefRegistry.makeWorkflowStackDefTypeInstance(

@@ -9,9 +9,9 @@ from Products.CMFCore.tests.base.testcase import SecurityRequestTest
 
 from Products.CPSWorkflow.basicstacks import SimpleStack, HierarchicalStack
 from Products.CPSWorkflow.basicstackdefinitions import  \
-     BaseWorkflowStackDefinition, \
-     SimpleWorkflowStackDefinition, \
-     HierarchicalWorkflowStackDefinition
+     StackDefinition, \
+     SimpleStackDefinition, \
+     HierarchicalStackDefinition
 
 from Products.CPSWorkflow.interfaces import IWorkflowStackDefinition
 
@@ -64,14 +64,14 @@ class FakeMembershipTool:
 class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
     def test_interface(self):
-        verifyClass(IWorkflowStackDefinition, BaseWorkflowStackDefinition)
-        verifyClass(IWorkflowStackDefinition, SimpleWorkflowStackDefinition)
-        verifyClass(IWorkflowStackDefinition, HierarchicalWorkflowStackDefinition)
+        verifyClass(IWorkflowStackDefinition, StackDefinition)
+        verifyClass(IWorkflowStackDefinition, SimpleStackDefinition)
+        verifyClass(IWorkflowStackDefinition, HierarchicalStackDefinition)
 
-    def test_BaseWorkflowStackDefinition(self):
-        base = BaseWorkflowStackDefinition(101,
-                                           'toto',
-                                           ass_local_role='WorkspaceManager')
+    def test_StackDefinition(self):
+        base = StackDefinition(101,
+                               'toto',
+                               ass_local_role='WorkspaceManager')
 
         # Basics
         self.assertEqual(base.meta_type, 'Base Workflow Stack Definition')
@@ -93,8 +93,8 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         base.doUnLockStack()
         self.assertEqual(base.isLocked(), 0)
 
-    def test_SimpleWorkflowStackDefinition(self):
-        simple = SimpleWorkflowStackDefinition(101,
+    def test_SimpleStackDefinition(self):
+        simple = SimpleStackDefinition(101,
                                                'toto',
                                                ass_local_role='WorkspaceManager')
 
@@ -405,8 +405,8 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                context=self),
                          1)
 
-    def test_HierarchicalWorkflowStackDefinitionCurrentLevel(self):
-        hierarchical = HierarchicalWorkflowStackDefinition(
+    def test_HierarchicalStackDefinitionCurrentLevel(self):
+        hierarchical = HierarchicalStackDefinition(
             101,
             'toto',
             ass_local_role='WorkspaceManager',
@@ -736,14 +736,14 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                                                      context=self),
                          1)
 
-    def test_HierarchicalWorkflowStackDefinitionWithLevelChanges(self):
+    def test_HierarchicalStackDefinitionWithLevelChanges(self):
 
         # Add a fake acl_users to the instance
         aclu = FakeUserFolderWithGroups()
         # Add a fake membership tool
         mtool = FakeMembershipTool()
 
-        hierarchical = HierarchicalWorkflowStackDefinition(
+        hierarchical = HierarchicalStackDefinition(
             101,
             'toto',
             ass_local_role='WorkspaceManager',
@@ -1370,7 +1370,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Test reset simple sdef
         #
 
-        simple = SimpleWorkflowStackDefinition(
+        simple = SimpleStackDefinition(
             101,
             'toto',
             ass_local_role='WorkspaceManager')
@@ -1392,7 +1392,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Test reset simple sdef
         #
 
-        hierarchical = HierarchicalWorkflowStackDefinition(
+        hierarchical = HierarchicalStackDefinition(
             101,
             'toto',
             ass_local_role='WorkspaceManager',

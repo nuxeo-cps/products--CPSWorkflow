@@ -34,8 +34,8 @@ from Globals import DTMLFile
 from Products.DCWorkflow.States import StateDefinition as DCWFStateDefinition
 from Products.DCWorkflow.States import States as DCWFStates
 
-from basicstackdefinitions import SimpleWorkflowStackDefinition, \
-     HierarchicalWorkflowStackDefinition
+from basicstackdefinitions import SimpleStackDefinition, \
+     HierarchicalStackDefinition
 
 from stack import DATA_STRUCT_STACK_TYPE_LIFO, \
      DATA_STRUCT_STACK_TYPE_HIERARCHICAL, data_struct_types_export_dict

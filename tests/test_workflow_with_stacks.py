@@ -140,7 +140,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # STACKS
         #
 
-        pilots = HierarchicalWorkflowStackDefinition(
+        pilots = HierarchicalStackDefinition(
             DATA_STRUCT_STACK_TYPE_HIERARCHICAL,
             'Pilots',
             ass_local_role='WorkspaceManager',
@@ -148,12 +148,12 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
             down_ass_local_role='WorkspaceMember',
             # the pilots stack can manage the Associates and Observers stacks
             manager_stack_ids=['Associates', 'Observers'])
-        associates = SimpleWorkflowStackDefinition(
+        associates = SimpleStackDefinition(
             DATA_STRUCT_STACK_TYPE_LIFO,
             'Associates',
             ass_local_role='WorkspaceMember',
             manager_stack_ids=['Pilots',])
-        observers = SimpleWorkflowStackDefinition(
+        observers = SimpleStackDefinition(
             DATA_STRUCT_STACK_TYPE_LIFO,
             'Observers',
             ass_local_role='WorkspaceReader',
@@ -500,11 +500,11 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         self.assert_(len(keys) == 3)
         self.assertEqual(keys, ['associates', 'observers', 'pilots'])
         self.assert_(isinstance(stackdefs['associates'],
-                                SimpleWorkflowStackDefinition))
+                                SimpleStackDefinition))
         self.assert_(isinstance(stackdefs['observers'],
-                                SimpleWorkflowStackDefinition))
+                                SimpleStackDefinition))
         self.assert_(isinstance(stackdefs['pilots'],
-                                HierarchicalWorkflowStackDefinition))
+                                HierarchicalStackDefinition))
         self.assertNotEqual(stackdefs['associates'], None)
         self.assertNotEqual(stackdefs['observers'], None)
         self.assertNotEqual(stackdefs['pilots'], None)
@@ -518,11 +518,11 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         pilots = wftool.getStackDefinitionFor(content, 'pilots')
 
         self.assert_(isinstance(assos,
-                                SimpleWorkflowStackDefinition))
+                                SimpleStackDefinition))
         self.assert_(isinstance(obs,
-                                SimpleWorkflowStackDefinition))
+                                SimpleStackDefinition))
         self.assert_(isinstance(pilots,
-                                HierarchicalWorkflowStackDefinition))
+                                HierarchicalStackDefinition))
         self.assertNotEqual(assos, None)
         self.assertNotEqual(obs, None)
         self.assertNotEqual(pilots, None)
@@ -596,11 +596,11 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         self.assert_(isinstance(stackdefs, DictType))
         self.assertEqual(keys, ['associates', 'observers', 'pilots'])
         self.assert_(isinstance(stackdefs['associates'],
-                                SimpleWorkflowStackDefinition))
+                                SimpleStackDefinition))
         self.assert_(isinstance(stackdefs['observers'],
-                                SimpleWorkflowStackDefinition))
+                                SimpleStackDefinition))
         self.assert_(isinstance(stackdefs['pilots'],
-                                HierarchicalWorkflowStackDefinition))
+                                HierarchicalStackDefinition))
 
         # Check consistency
         self.assertEqual(current_state.getDelegateesVarInfoFor('associates'),
