@@ -53,18 +53,6 @@ class IWorkflowStack(Interface.Base):
         1 : ok
         """
 
-    def getFormerLocalRolesMapping():
-        """Return the former local roles mapping
-
-        So that we can make diff and update local roles.
-        """
-
-    def setFormerLocalRolesMapping(mapping):
-        """Set the former local roles mapping information
-
-        So that we can make diff and update local roles.
-        """
-
     def reset():
         """Reset the stack
 
