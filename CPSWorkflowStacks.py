@@ -73,7 +73,7 @@ class BaseStack(SimpleItem):
         """ Possiblity to specify a maximum size
         """
         self.max_size = maxsize
-        self.container = PersistentList()
+        self.container = []
 
         #
         # We need that for being able to perform diffs on the previous local
@@ -191,7 +191,7 @@ class SimpleStack(BaseStack):
         """Default constructor
         """
         BaseStack.__init__(self, **kw)
-        self.container = PersistentList()
+        self.container = []
 
     def __deepcopy__(self, ob):
         """Deep copy. Just to call a clean API while calling getCopy()
@@ -200,7 +200,7 @@ class SimpleStack(BaseStack):
         for attr, value in self.__dict__.items():
             if attr == 'container':
                 # Break reference with mutable structure
-                new_container_ref = PersistentList()
+                new_container_ref = []
                 for each in value:
                     new_container_ref.append(each)
                 copy.__dict__[attr] = new_container_ref
@@ -283,7 +283,7 @@ class HierarchicalStack(SimpleStack):
           - 1 down
         """
         SimpleStack.__init__(self, **kw)
-        self.container = PersistentMapping()
+        self.container = {}
         self.level = 0
         self.direction = 1
 
@@ -294,7 +294,7 @@ class HierarchicalStack(SimpleStack):
         for attr, value in self.__dict__.items():
             if attr == 'container':
                 # Break reference with mutable structure
-                new_container_ref = PersistentMapping()
+                new_container_ref = {}
                 for key in value.keys():
                     new_container_ref[key] = value[key]
                 copy.__dict__[attr] = new_container_ref
