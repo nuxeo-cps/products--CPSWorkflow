@@ -51,18 +51,28 @@ class StackElement(SimpleItem):
 
     guard = None
 
-    def __call__(self):
-        raise NotImplementedError
-
-    def __str__(self):
-        raise NotImplementedError
-
     def __cmp__(self, other):
         if isinstance(other, StackElement):
             return cmp(self(), other())
         elif isinstance(other, StringType):
             return cmp(self(), other)
         return 0
+
+    def __call__(self):
+        raise NotImplementedError
+
+    def __str__(self):
+        raise NotImplementedError
+
+    def getPrefix(self):
+        """Returns the prefix for this stack element
+        """
+        return self.prefix
+
+    def getIdWithoutPrefix(self):
+        """Return the group id without the 'group:' prefix
+        """
+        return self()[len(self.getPrefix())+1:]
 
     def getGuard(self):
         """Return a temporarly guard instance
