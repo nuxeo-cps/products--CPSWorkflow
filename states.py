@@ -236,12 +236,6 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
                 default_expr="python:state_change.getStackFor(var_id='%s')" %var_id,
                 for_status=1,
                 update_always=0)
-        ##else:
-        ##    if REQUEST is not None:
-        ##        return self.manage_advanced_properties(
-        ##            REQUEST,
-        ##            'The id you choose is already taken !')
-        ##    return -1
 
         stackdef = None
 
@@ -258,18 +252,6 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
             **kw)
 
         if stackdef is not None:
-            # Managed role exprs
-            managed_role_exprs = kw.get('managed_role_exprs', {})
-            if isinstance(managed_role_exprs, DictType):
-                for k, v in managed_role_exprs.items():
-                    stackdef.addManagedRole(k, v)
-
-            # Master role
-            master_role = kw.get('master_role', '')
-            if master_role:
-                stackdef.setMasterRole(master_role)
-
-            # Store the stackdef as a sub-object
             if self.getStackDefinitionFor(var_id) is not None:
                 self.manage_delObjects([var_id])
             self._setObject(var_id, stackdef)
@@ -339,12 +321,12 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
                 REQUEST, 'Stack definition updated !')
 
     def addManagedRoleExpressionFor(self, wf_var_id, role_id, expression,
-                                    master_role=1, REQUEST=None):
+                                    REQUEST=None):
         """Add managed role expression to a stack definition
         """
         stackdef = self.getStackDefinitionFor(wf_var_id)
         if stackdef is not None:
-            stackdef.addManagedRole(role_id, expression, master_role)
+            stackdef.addManagedRole(role_id, expression)
         if REQUEST is not None:
             return self.manage_advanced_properties(
                 REQUEST, 'Stack definition updated !')
