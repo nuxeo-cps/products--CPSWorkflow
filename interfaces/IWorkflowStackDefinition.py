@@ -38,15 +38,6 @@ class IWorkflowStackDefinition(Interface.Base):
         """Returns the workflow variable id mapping this configuration
         """
 
-    def getAssociatedLocalRole():
-        """Returns the workflow variable id mapping this configuration
-        """
-
-    def getGrantedLocalRolesForManage():
-        """Returns the local roles granted to manage the stack.
-        It's in use when the stack is not initialized yet
-        """
-
     def push(ds, **kw):
         """Push delegatees
 
@@ -59,20 +50,17 @@ class IWorkflowStackDefinition(Interface.Base):
         This method has to be implemented by a child class
         """
 
-    def canManageStack(ds, aclu, mtool, context, **kw):
-        """Can the current member manage the stack ?
-
-        It will depend on the stack data structure.
-        """
-
-    def listLocalRoles(ds):
-        """Give the local roles mapping for the member / group ids within the
-        stack
-        """
-
     def isLocked():
         """Is the stack locked
         """
+
+    def resetStack(ds, **kw):
+        """Reset stack.
+
+        ds contains the data structure.
+        """
+
+    ########################################################################
 
     def doLockStack():
         """Lock the stack
@@ -82,15 +70,52 @@ class IWorkflowStackDefinition(Interface.Base):
         """UnLock stack
         """
 
+    ########################################################################
+
+    def getManagedRoles():
+        """Returns all the roles tha stack can manage
+        """
+
+    def addManagedRole(role_id):
+        """Add a role to to the list of local role
+        """
+
+    def delManagedRole(role_id):
+        """Del a role to the list of local role
+        """
+
+    ########################################################################
+
+    def _createExpressionNS(role_id, stack, level, elt):
+        """Create an expression context for expression evaluation
+        """
+
+    def _addExpressionForRole(role_id, expresion):
+        """Add a TALES expression for a given role
+        """
+
+    def _getExpressionForRole(role_id, stack, level=None, elt=None):
+        """Compute the expression for a given role
+        """
+
+    #######################################################################
+
+    def listLocalRoles(ds):
+        """Give the local roles mapping for the member / group ids within the
+        stack
+        """
+
+    #######################################################################
+
+    def canManageStack(ds, aclu, mtool, context, **kw):
+        """Can the current member manage the stack ?
+
+        It will depend on the stack data structure.
+        """
+
     def getManagerStackIds():
         """Returns the ids of other stacks for which the people within those
         can manage this stack. For instance in the common use case members
         within the 'Pilots' stack can manage 'Associates' and 'Watchers'
         stacks.
-        """
-
-    def resetStack(ds, **kw):
-        """Reset stack.
-
-        ds contains the data structure.
         """
