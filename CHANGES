@@ -20,4 +20,5 @@ New internal features:
   with just user/group ids. This does not change anything for basic objects but
   make it easier to inherit from them when we want to use stack elements that
   store more information than just the user/group id. Basic use case: store the
-  date when user/group was added in the stack.
+  date when user/group was added in the stack
+- Stack._prepareElement() delegate to stack element registry for instance construction.(prefix cast)
