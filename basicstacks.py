@@ -166,36 +166,41 @@ class SimpleStack(Stack):
         """Public push
         """
 
-        # First extract the needed information
-        # No level information is needed in here
-        member_ids = kw.get('member_ids', ())
-        group_ids  = kw.get('group_ids',  ())
+        # XXX kws are prefixed by 'push_' because in a transition with push and
+        # pop flags, _executeTransition will perform both pop and push actions
+        # (and with the same kws ids, pop and push actions could cancel each
+        # others)
+        push_ids = kw.get('push_ids', ())
 
-        if not (member_ids or group_ids):
+        # XXX case where a single element is passed (compatibility)
+        if not push_ids:
             return self._push(elt, **kw)
 
-        # Push members / groups
-        # groups gota prefixed id  'group:'
-        for member_id in member_ids:
-            self._push(member_id, **kw)
-        for group_id in group_ids:
-            prefixed_group_id = group_id
-            if not group_id.startswith('group:'):
-                prefixed_group_id = 'group:'+group_id
-            self._push(prefixed_group_id, **kw)
+        # Push elements
+        # Ids in push_ids have to be prefixed so the registry can find out the
+        # element type (exp: groups got a prefixed id 'group:')
+        for push_id in push_ids:
+            self._push(push_id, **kw)
 
-    def pop(self, element=None, **kw):
+
+    def pop(self, elt=None, **kw):
         """Public pop
         """
 
-        # Pop member / group given ids
-        ids = kw.get('ids', ())
+        # XXX kws are prefixed by 'pop_' because in a transition with push and
+        # pop flags, _executeTransition will perform both pop and push actions
+        # (and with the same kws ids, pop and push actions could cancel each
+        # others).
+        pop_ids = kw.get('pop_ids', ())
 
-        if not ids:
-            return self._pop(element)
+        # XXX case where a single element is passed (compatibility)
+        if not pop_ids:
+            return self._pop(elt)
 
-        for id in ids:
-            self._pop(id)
+        # pop_ids have to be prefixed
+        for pop_id in pop_ids:
+            self._pop(pop_id)
+
 
     def getStackContent(self, type='str', level=None, **kw):
         """Return the stack content
@@ -240,14 +245,12 @@ class SimpleStack(Stack):
         """Reset the stack
 
         new_stack  : stack that might be a substitute of self
-        new_users  : users to add at current level
-        new_groups : groups to add ar current level
+        new_ids    : new elements to add at current level
         """
         new_stack = kw.get('new_stack')
 
         # Translate for push()
-        kw['member_ids'] = kw.get('new_users', ())
-        kw['group_ids']  = kw.get('new_groups', ())
+        kw['push_ids'] = kw.get('new_ids', ())
 
         # Replace the stack container
         if new_stack is not None:
@@ -422,7 +425,7 @@ class HierarchicalStack(SimpleStack):
                 last = levelc[len(levelc)-1]
                 if last is not None:
                     elt = last()
-                    
+
         if elt is None:
             return 0
 
@@ -568,35 +571,26 @@ class HierarchicalStack(SimpleStack):
         """Push element
         """
 
-        # First extract the needed information
-        # No level information is needed in here
-        member_ids = kw.get('member_ids', ())
-        group_ids  = kw.get('group_ids',  ())
+        # XXX kws are prefixed by 'push_' because in a transition with push and
+        # pop flags, _executeTransition will perform both pop and push actions
+        # (and with the same kws ids, pop and push actions could cancel each
+        # others).
+        push_ids = kw.get('push_ids', ())
         levels = kw.get('levels', ())
 
-        if not ((member_ids or group_ids) and levels):
-            # XXX compatibility
+        # XXX case where a single element is passed (compatibility)
+        if not (push_ids and levels):
             if level is None:
                 level = 0
             return self._push(elt, level, **kw)
 
-        # Push members / groups
-        # groups gota prefixed id  'group:'
+        # Push elements
+        # Ids in push_ids have to be prefixed so the registry can find out the
+        # element type (exp: groups got a prefixed id 'group:')
         i = 0
-        for member_id in member_ids:
+        for push_id in push_ids:
             try:
-                self._push(member_id, int(levels[i]))
-                i += 1
-            except IndexError:
-                # wrong user input
-                pass
-        i = 0
-        for group_id in group_ids:
-            prefixed_group_id = group_id
-            if not group_id.startswith('group:'):
-                prefixed_group_id = 'group:'+group_id
-            try:
-                self._push(prefixed_group_id, int(levels[i]))
+                self._push(push_id, int(levels[i]))
                 i += 1
             except IndexError:
                 # wrong user input
@@ -606,17 +600,24 @@ class HierarchicalStack(SimpleStack):
         """Pop element
         """
 
+        # XXX kws are prefixed by 'pop_' because in a transition with push and
+        # pop flags, _executeTransition will perform both pop and push actions
+        # (and with the same kws ids, pop and push actions could cancel each
+        # others).
         # Check arguments in here.
-        ids = kw.get('ids', ())
-        if not ids:
+        pop_ids = kw.get('pop_ids', ())
+        if not pop_ids:
             return self._pop(elt, level)
 
         # Pop member / group given ids
-        for id in ids:
-            level = int(id.split(',')[0])
-            the_id = id.split(',')[1]
+        for pop_id in pop_ids:
+            # Convention used: 'level,prefix:elt_id'
+            # pop_id example: '1,user:toto' or '2,group:titi'
+            split = pop_id.split(',')
+            level = int(split[0])
+            the_id = split[1]
+            self._pop(elt=the_id, level=level)
 
-            self._pop(elt=the_id, level=int(level))
 
     def replace(self, old, new):
         """Replace old with new within the elements container
@@ -637,9 +638,10 @@ class HierarchicalStack(SimpleStack):
         """Reset the stack
 
         new_stack  : stack that might be a substitute of self
-        new_users  : users to add at current level
-        new_groups : groups to add ar current level
+        new_ids    : new elements to add at current level
         """
+        # Replace the stack container
+
         new_stack = kw.get('new_stack')
         if new_stack is not None:
             self._elements_container = new_stack._getElementsContainer()
@@ -647,14 +649,11 @@ class HierarchicalStack(SimpleStack):
             self.__init__()
 
         # Translate for push
-        new_users  = kw['member_ids'] = kw.get('new_users', ())
-        new_groups = kw['group_ids']  = kw.get('new_groups', ())
+        new_elts  = kw['push_ids'] = kw.get('new_ids', ())
 
         if kw.get('levels') is None:
-            levels = ()
-            for i in range(max(len(new_users), len(new_groups))):
-                levels += (0,)
-                kw['levels'] = levels
+            # init with level 0
+            kw['levels'] = len(new_elts)*[0]
 
         # Push elements
         self.push(**kw)
