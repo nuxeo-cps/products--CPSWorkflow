@@ -300,7 +300,7 @@ class StackDefinition(SimpleItem):
         This method has to be implemented by a child class
         """
         ds = self._prepareStack(ds)
-        ds._push(**kw)
+        ds.push(**kw)
         ds = ds.getCopy()
         return ds
 
@@ -308,7 +308,7 @@ class StackDefinition(SimpleItem):
         """pop delegatees
         """
         ds = self._prepareStack(ds)
-        ds._pop(**kw)
+        ds.pop(**kw)
         ds = ds.getCopy()
         return ds
 
