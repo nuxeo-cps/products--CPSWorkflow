@@ -270,6 +270,8 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
                 stackdef.setMasterRole(master_role)
 
             # Store the stackdef as a sub-object
+            if self.getStackDefinitionFor(var_id) is not None:
+                self.manage_delObjects([var_id])
             self._setObject(var_id, stackdef)
 
         if REQUEST is not None:
