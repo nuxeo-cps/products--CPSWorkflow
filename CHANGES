@@ -6,7 +6,7 @@ New features:
 - Stack and stack def registries.
 Bug fixes:
 ~~~~~~~~~~
--
+- 'stock' CMF compatible
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
 - Renamming files and classes
