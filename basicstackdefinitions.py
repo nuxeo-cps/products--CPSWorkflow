@@ -1,5 +1,5 @@
 # -*- coding: iso-8859-15 -*-
-# (C) Copyright 2004 Nuxeo SARL <http://nuxeo.com>
+# (C) Copyright 2004-2005 Nuxeo SARL <http://nuxeo.com>
 # Author: Julien Anguenot <ja@nuxeo.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -18,18 +18,17 @@
 #
 # $Id$
 
-"""CPS Workflow Stack Definitions
+"""Basic stack definitions modules
 
-This module contains all CPS Stack definitions
+This module contains basic stack definitions.
+
+c.f : doc/stackdefinitions.txt
 """
 
 from zLOG import LOG, DEBUG
 
-from types import DictType
-
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
-from OFS.SimpleItem import SimpleItem
 
 from Products.CMFCore.permissions import View, ModifyPortalContent
 
@@ -40,7 +39,7 @@ from stackregistries import WorkflowStackDefRegistry
 from interfaces import IWorkflowStackDefinition
 
 class SimpleStackDefinition(StackDefinition):
-    """Simple Workflow Stack Definition
+    """Simple Stack Definition
     """
 
     meta_type = 'Simple Stack Definition'
@@ -48,26 +47,6 @@ class SimpleStackDefinition(StackDefinition):
     security = ClassSecurityInfo()
 
     __implements__ = (IWorkflowStackDefinition,)
-
-    def __init__(self,
-                 stack_ds_type,
-                 wf_var_id,
-                 **kw
-                 ):
-        """Constructor
-
-        stack_ds_type   : Data Structure type holding the deleggatees
-        wf_var_id       : Workflow variable holding the ds instance
-        ass_local_role  : Local role assigned to members of the DS
-
-        The constructor will create an instance of SimpleStack to hold
-        delegatees in here
-        """
-
-        StackDefinition.__init__(self,
-                                 stack_ds_type,
-                                 wf_var_id,
-                                 **kw)
 
     def _prepareStack(self, ds):
         """Prepare stack on wich we gonna work one
@@ -248,6 +227,8 @@ class SimpleStackDefinition(StackDefinition):
         # having the same local role as the associated local roles of the stack
         #
 
+        # XXX Owner is hardcoded
+        # change this for a guard
         _granted_local_roles = ('Owner', self._master_role)
 
         if ds.getStackContent() == []:
@@ -259,21 +240,13 @@ class SimpleStackDefinition(StackDefinition):
 
         return 0
 
-    def getManagerStackIds(self):
-        """Returns the ids of other stacks for which the people within those
-        can manage this stack. For instance in the common use case members
-        within the 'Pilots' stack can manage 'Associates' and 'Watchers'
-        stacks.
-        """
-        return getattr(self, 'manager_stack_ids', [])
-
 InitializeClass(SimpleStackDefinition)
 
 ###################################################
 ###################################################
 
 class HierarchicalStackDefinition(StackDefinition):
-    """Hierarchical Workflow Stack Definition
+    """Hierarchical Stack Definition
     """
 
     meta_type = 'Hierarchical Stack Definition'
@@ -281,30 +254,6 @@ class HierarchicalStackDefinition(StackDefinition):
     __implements__ = (IWorkflowStackDefinition,)
 
     security = ClassSecurityInfo()
-
-    def __init__(self,
-                 stack_ds_type,
-                 wf_var_id,
-                 **kw
-                 ):
-        """Constructor
-
-        stack_ds_type   : Data Structure type holding the deleggatees
-        wf_var_id       : Workflow variable holding the ds instance
-        ass_local_role : Local role assigned to members of the DS at current
-        level
-        up_ass_local_role : Local role assigned to members of the DS above the
-        current level
-        down_ass_local_role : Local role assigned to members of the DS below
-        the current level
-
-        The constructor will create an instance of HierarchicalStack to hold
-        delegatees in here
-        """
-        StackDefinition.__init__(self,
-                                 stack_ds_type,
-                                 wf_var_id,
-                                 **kw)
 
     def _prepareStack(self, ds):
         """Prepare stack on wich we gonna work one
@@ -478,6 +427,7 @@ class HierarchicalStackDefinition(StackDefinition):
         # having the same local role as the associated local roles of the stack
         #
 
+
         _granted_local_roles = ('Owner', self._master_role)
 
         if ds.getLevelContentValues() == []:
@@ -572,14 +522,6 @@ class HierarchicalStackDefinition(StackDefinition):
 
         ds = ds.getCopy()
         return ds
-
-    def getManagerStackIds(self):
-        """Returns the ids of other stacks for which the people within those
-        can manage this stack. For instance in the common use case members
-        within the 'Pilots' stack can manage 'Associates' and 'Watchers'
-        stacks.
-        """
-        return getattr(self, 'manager_stack_ids', [])
 
 InitializeClass(HierarchicalStackDefinition)
 
