@@ -48,13 +48,13 @@ class IWorkflowStackDefinition(Interface.Base):
         """Set the master role for this stack definition.
         """
 
-    def push(ds, **kw):
+    def _push(ds, **kw):
         """Push delegatees
 
         This method has to be implemented by a child class
         """
 
-    def pop(ds, **kw):
+    def _pop(ds, **kw):
         """Pop delegatees
 
         This method has to be implemented by a child class
@@ -110,14 +110,14 @@ class IWorkflowStackDefinition(Interface.Base):
 
     #######################################################################
 
-    def listLocalRoles(ds):
+    def _getLocalRolesMapping(ds):
         """Give the local roles mapping for the member / group ids within the
         stack
         """
 
     #######################################################################
 
-    def canManageStack(ds, aclu, mtool, context, **kw):
+    def _canManageStack(ds, aclu, mtool, context, **kw):
         """Can the current member manage the stack ?
 
         It will depend on the stack data structure.
