@@ -23,7 +23,7 @@
 stack workflows support.
 """
 
-from zLOG import LOG, ERROR, DEBUG, TRACE
+from zLOG import LOG, ERROR, DEBUG, TRACE, INFO
 from types import StringType
 from Acquisition import aq_base, aq_parent, aq_inner
 from Globals import InitializeClass, DTMLFile
@@ -46,11 +46,12 @@ from stackregistries import WorkflowStackDefRegistry
 #
 
 try:
-    from Products.CPSCore.EventServiceTool import getEventService
     from Products.CPSCore.ProxyBase import ProxyBase, ProxyFolderishDocument
     from Products.CPSCore.ProxyBase import ProxyBTreeFolderishDocument
+    from Products.CPSCore.EventServiceTool import getEventService
 except ImportError, e:
-    if str(e) != 'No module named CPSCore':
+    if str(e) not in ('No module named CPSCore.EventServiceTool'
+                      'No module named CPSCore.ProxyBase'):
         raise
 
     LOG("Optional Dependencies missing", INFO,

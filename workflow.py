@@ -28,7 +28,7 @@ It adds, as well, a stack workflow support to be able to define dynamic
 delegation / validation chains through dedicated transitions.
 """
 
-from zLOG import LOG, ERROR, DEBUG
+from zLOG import LOG, ERROR, DEBUG, INFO
 from cgi import escape
 from types import StringType
 
@@ -60,10 +60,11 @@ from expression import createExprContext
 #
 
 try:
-    from Products.CPSCore.EventServiceTool import getEventService
     from Products.CPSCore.ProxyBase import ProxyBase
+    from Products.CPSCore.EventServiceTool import getEventService
 except ImportError, e:
-    if str(e) != 'No module named CPSCore':
+    if str(e) not in ('No module named CPSCore.EventServiceTool'
+                      'No module named CPSCore.ProxyBase'):
         raise
 
     LOG("Optional Dependencies missing", INFO,
