@@ -87,6 +87,9 @@ class UserStackElement(StackElement):
         return self.user_id
 
     def getIdForRoleSettings(self):
+        # XXX change this when no empty prefix are given anymore
+        if self.user_id.startswith('user:'):
+            return self.getIdWithoutPrefix()
         return self.user_id
 
 InitializeClass(UserStackElement)

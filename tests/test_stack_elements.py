@@ -212,13 +212,20 @@ class TestStackElements(ZopeTestCase):
         self.assertEqual(elt.getIdForRoleSettings(), 'anguenot')
         self.assertEqual(elt.getPrefix(), 'user')
 
+        elt = UserStackElement('user:anguenot')
+        self.assertEqual(elt(), 'user:anguenot')
+        self.assertEqual(str(elt), 'user:anguenot')
+        self.assert_('user:anguenot' == elt)
+        self.assertEqual(elt.getIdForRoleSettings(), 'anguenot')
+        self.assertEqual(elt.getPrefix(), 'user')
+
     def test_GroupStackElement(self):
         elt = GroupStackElement('group:nuxeo')
         self.assertEqual(elt(), 'group:nuxeo')
         self.assertEqual(str(elt), 'group:nuxeo')
         self.assert_('group:nuxeo' == elt)
         self.assertEqual(elt.getIdForRoleSettings(), 'group:nuxeo')
-        self.assertEqual(elt.getPrefix(), 'group')
+        self.assertEqual(elt.getPrefix(), 'group')        
 
     def test_HiddenUserStackElement(self):
         elt = HiddenUserStackElement()
