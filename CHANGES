@@ -3,7 +3,9 @@ Requires:
 -
 New features:
 ~~~~~~~~~~~~~
--
+- managed roles expressions on stack definition instead of the former hardcoded
+properties
+
 Bug fixes:
 ~~~~~~~~~~
 -
