@@ -1,5 +1,5 @@
 # -*- coding: iso-8859-15 -*-
-# (C) Copyright 2004 Nuxeo SARL <http://nuxeo.com>
+# (C) Copyright 2004-2005 Nuxeo SARL <http://nuxeo.com>
 # Author: Julien Anguenot <ja@nuxeo.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -18,63 +18,89 @@
 #
 # $Id$
 
-"""CPS Workflow Stack Definitions
+"""Stack Definition
 
-This module contains all CPS Stack definitions
+StackDefinition is the base class for the StackDefinition type.
+
+To be able to register your own class within the WorkflowStackDefRegistry you
+need to sub-class this bare definition and implement the
+IWorkflowStackDefinition interface. (Check basicstackdefinitions.py)
+
+A stack definition is instancied wthin a State object. It holds the basic
+configuration for a stack.
+
+A stack definition is defined by :
+
+ - the stack def type
+ - the stack type the stack def will be able to manage
+ - the id of the workflow variable where the stack instance will be stored
+ - the managed roles. They are roles that the stack def can cope with.
+ roles have an associated tales expression evaluated within the stackdef context
+ that defined the policy for the given role.
+
 """
 
-from zLOG import LOG, DEBUG
-
+from DateTime import DateTime
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
 from OFS.SimpleItem import SimpleItem
+from Acquisition import aq_parent, aq_inner
+from ZODB.PersistentMapping import PersistentMapping
 
 from Products.CMFCore.CMFCorePermissions import View, ModifyPortalContent
+from Products.CMFCore.CMFCorePermissions import ManagePortal
+from Products.CMFCore.utils import getToolByName
+from Products.CMFCore.Expression import Expression
+from Products.CMFCore.Expression import getEngine
 
 from interfaces import IWorkflowStackDefinition
 
 class StackDefinition(SimpleItem):
-    """BaseWorkflowStackConfiguration
-
-    Holds the basis configuration for a stack
+    """Stack Definition base class
     """
 
     meta_type = 'Stack Definition'
 
-    __implements__ = IWorkflowStackDefinition
+    __implements__ = (IWorkflowStackDefinition, )
 
     security = ClassSecurityInfo()
 
     def __init__(self,
-                 stack_ds_type,
+                 stack_type,
                  wf_var_id,
                  **kw
                  ):
         """Constructor
 
-        stack_ds_type   : Data Structure type holding the deleggatees
+        stack_type   : Data Structure type holding the deleggatees
         wf_var_id       : Workflow variable holding the ds instance
-        ass_local_role  : Local role assigned to members of the DS
         """
-        self.stack_ds_type = stack_ds_type
+        self._isLocked = 0
+        self.stack_type = stack_type
         self.wf_var_id = wf_var_id
 
+        # Fetch from the kw the argument we are interested in
         for k, v in kw.items():
-            setattr(self, k, v)
+            if k == 'manager_stack_ids':
+                setattr(self, k, v)
 
-        #
-        # This information has to be on the stackdef since the data structure
-        # doesn't need to care about that
-        #
+        # Managed Roles
+        self._managed_role_exprs = PersistentMapping()
+        self._master_role = 'Manager'
 
-        self._isLocked = 0
+        # Containement
+        self.parent = None
+
+    #
+    # Boring accessors
+    #
 
     security.declareProtected(View, 'getStackDataStructureType')
     def getStackDataStructureType(self):
         """Returns the id of the stack data structure the stack definition is
         hodling
         """
-        return self.stack_ds_type
+        return self.stack_type
 
     security.declareProtected(View, 'getStackDataStructureType')
     def getStackWorkflowVariableId(self):
@@ -82,18 +108,9 @@ class StackDefinition(SimpleItem):
         """
         return self.wf_var_id
 
-    security.declareProtected(View, 'getAssociatedLocalRole')
-    def getAssociatedLocalRole(self):
-        """Returns the workflow variable id mapping this configuration
-        """
-        return self.ass_local_role
-
-    security.declareProtected(View, 'getGrantedLocalRole')
-    def getGrantedLocalRolesForManage(self):
-        """Returns the local roles granted to manage the stack.
-        It's in use when the
-        """
-        raise NotImplementedError
+    #
+    # API : Lock / Unlock
+    #
 
     security.declareProtected(View, 'isLocked')
     def isLocked(self):
@@ -101,17 +118,131 @@ class StackDefinition(SimpleItem):
         """
         return self._isLocked
 
-    security.declareProtected(ModifyPortalContent, 'doLockStack')
+    security.declareProtected(ManagePortal, 'doLockStack')
     def doLockStack(self):
         """Lock the stack
         """
         self._isLocked = 1
 
-    security.declareProtected(ModifyPortalContent, 'doUnLockStack')
+    security.declareProtected(ManagePortal, 'doUnLockStack')
     def doUnLockStack(self):
         """UnLock stack
         """
         self._isLocked = 0
+
+    #
+    # API : Reinitialization
+    #
+
+    security.declareProtected(ManagePortal, 'resetStack')
+    def resetStack(self, ds, **kw):
+        """Reset stack contained within ds.
+        """
+        ds = self._prepareStack(ds)
+        ds.reset()
+        return ds
+
+    #
+    # API : Managed roles
+    #
+
+    security.declareProtected(ModifyPortalContent, 'getManagedRoles')
+    def getManagedRoles(self):
+        """Returns all the roles tha stack will cope with.
+
+        A managed role is a role that might be assigned to an element of the
+        stack in a given context (context here means the location of the
+        elements within the stack and meta information about the stack itself)
+
+        It's under the stack definition policy
+        """
+        return self._managed_role_exprs.keys()
+
+    security.declareProtected(ManagePortal, 'addManagedRole')
+    def addManagedRole(self, role_id, expression='python:1', master_role=1):
+        """Add a role to to the list of role this stack definition can cope
+        with
+
+        master_role is the role that will be considered as a manager role if
+        the stack dosen't contain any elts
+
+        Check _createExpressionNS() for the available namespace variables you
+        may use within your TALES expression
+        """
+        if master_role:
+            self._master_role = role_id
+        self._managed_role_exprs[role_id] = expression
+
+    security.declareProtected(ManagePortal, 'delManagedRole')
+    def delManagedRole(self, role_id):
+        """Delete a role from the list of managed roles
+        """
+        if role_id in self.getManagedRoles():
+            del self._managed_role_exprs[role_id]
+
+    def _addExpressionForRole(self, role_id, expression):
+        """Add a TALES expression for a given role
+
+        The expression should return a boolean value and reply to the question
+        : 'Is the elt at level X stored within stack granted with this role ?'
+        """
+        if role_id in self.getManagedRoles():
+            self._managed_role_exprs[role_id] = expression
+
+    def _createExpressionNS(self, role_id, stack, level, elt):
+        """Create an expression context for expression evaluation
+
+        - stack : the current stack
+        - stackdef : the stack definition where the stack is defined
+        - elt : the current element (UserElement child)
+        - level : the level given as an argument where the elt is
+        - role : the role we want to check
+        - portal : the portal itself
+
+        Check the documentation within the doc sub-folder of this component
+        """
+
+        # We might be in standalone instanciation (no state parent and thus no portal)
+        portal = None
+        if self.parent is not None:
+            portal = getToolByName(self.parent, 'portal_url').getPortalObject(),
+
+        mapping = {'stack': stack,
+                   'role' : role_id,
+                   'stackdef' : self,
+                   'level'  : level,
+                   'elt'    : elt,
+                   'portal' : portal,
+                   'DateTime': DateTime,
+                   'nothing': None,
+                   }
+        return getEngine().getContext(mapping)
+
+    def _getExpressionForRole(self, role_id, stack, level=0, elt=None):
+        """Compute the expression according to the parameters for a given role.
+
+        Typically, the use case is : 'Is the elt at level X stored within
+        stack granted with this role  ?'
+
+        This is an internal function used while constructing role mappings
+        within listLocalRoles() (Check basicstackdefinitions.py)
+        """
+        _expression_c = Expression(self._managed_role_exprs.get(role_id,
+                                                                'python:1'))
+        expr_context = self._createExpressionNS(role_id, stack, level, elt)
+        return _expression_c(expr_context)
+
+    #
+    # To be implemented within child class definitions
+    #
+
+    security.declarePrivate('_prepareStack')
+    def _prepareStack(self, ds):
+        """Prepare stack on wich we gonna work one
+
+        ds is the data structure holding the delegatees
+        """
+        raise NotImplementedError
 
     security.declareProtected(ModifyPortalContent, 'push')
     def push(self, ds, **kw):
@@ -155,21 +286,4 @@ class StackDefinition(SimpleItem):
         """
         raise NotImplementedError
 
-    security.declarePrivate('_prepareStack')
-    def _prepareStack(self, ds):
-        """Prepare stack on wich we gonna work one
-
-        ds is the data structure holding the delegatees
-        """
-        raise NotImplementedError
-
-    security.declareProtected(ModifyPortalContent, 'resetStack')
-    def resetStack(self, ds, **kw):
-        """Reset stack contained within ds.
-        """
-        ds = self._prepareStack(ds)
-        ds.reset()
-        return ds
-
 InitializeClass(StackDefinition)
-
