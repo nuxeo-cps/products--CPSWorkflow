@@ -120,7 +120,7 @@ class SimpleStackDefinition(StackDefinition):
         # the stack content
         #
 
-        for each in ds.getStackContentForRoleSettings():
+        for each in ds.getStackContent(type='role'):
             if not each.startswith('group:'):
                 if each == member_id:
                     return 1
@@ -201,7 +201,7 @@ class HierarchicalStackDefinition(StackDefinition):
         # the stack content
         #
 
-        for each in ds.getLevelContentValuesForRoleSettings():
+        for each in ds.getLevelContent(type='role'):
             if not each.startswith('group:'):
                 if each == member_id:
                     return 1
@@ -255,7 +255,8 @@ class HierarchicalStackDefinition(StackDefinition):
         # Check if this is the wanted behaviour.
         stack_content = {}
         for clevel in ds.getAllLevels():
-            stack_content[clevel] = ds.getLevelContent(level=clevel)
+            stack_content[clevel] = ds.getLevelContent(level=clevel,
+                                                       type='object')
         for level, elts in stack_content.items():
             for elt in elts:
                 elt_id = elt.getIdForRoleSettings()

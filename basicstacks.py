@@ -32,6 +32,7 @@ from ZODB.PersistentMapping import PersistentMapping
 
 from stack import Stack
 from stackregistries import WorkflowStackRegistry
+from stackregistries import WorkflowStackElementRegistry as ElementReg
 
 from interfaces import IWorkflowStack
 from interfaces import ISimpleWorkflowStack
@@ -134,7 +135,7 @@ class SimpleStack(Stack):
             return 1
         return -2
 
-    def _pop(self, elt=None, **kw):
+    def _pop(self, element=None):
         """Remove a given element
 
         O : failed
@@ -142,8 +143,8 @@ class SimpleStack(Stack):
         """
         if self.isEmpty():
             return 0
-        if elt is not None:
-            index = self._getStackElementIndex(elt)
+        if element is not None:
+            index = self._getStackElementIndex(element)
             if index >= 0:
                 try:
                     del self._getElementsContainer()[index]
@@ -157,7 +158,6 @@ class SimpleStack(Stack):
             return res
         return 0
 
-
     #
     # API
     #
@@ -166,10 +166,10 @@ class SimpleStack(Stack):
         """Public push
         """
 
-        # XXX kws are prefixed by 'push_' because in a transition with push and
-        # pop flags, _executeTransition will perform both pop and push actions
-        # (and with the same kws ids, pop and push actions could cancel each
-        # others)
+        # XXX kws are prefixed by 'push_' because in a transition with
+        # push and pop flags, _executeTransition will perform both pop
+        # and push actions (and with the same kws ids, pop and push
+        # actions could cancel each others)
         push_ids = kw.get('push_ids', ())
 
         # XXX case where a single element is passed (compatibility)
@@ -195,12 +195,11 @@ class SimpleStack(Stack):
 
         # XXX case where a single element is passed (compatibility)
         if not pop_ids:
-            return self._pop(elt, **kw)
+            return self._pop(elt)
 
         # pop_ids have to be prefixed
         for pop_id in pop_ids:
-            self._pop(pop_id, **kw)
-
+            self._pop(pop_id)
 
     def getStackContent(self, type='str', level=None, **kw):
         """Return the stack content
@@ -209,23 +208,24 @@ class SimpleStack(Stack):
         """
         res = []
         for each in self._getElementsContainer():
-            if each.getGuard().check(getSecurityManager(),
-                                     None, aq_parent(aq_inner(self))):
+            if not each.getGuard().check(getSecurityManager(),
+                                         None, aq_parent(aq_inner(self))):
+                # XXX hack
+                hidden_meta_type = 'Hidden ' + each.meta_type
+                each = ElementReg.makeWorkflowStackElementTypeInstance(
+                    hidden_meta_type
+                    )
+            if type == 'str':
+                res.append(str(each))
+            elif type == 'call':
                 res.append(each())
-            else:
-                res.append('not_visible')
-        return res
-
-    def getStackContentForRoleSettings(self):
-        """Return the stack content for role settings
-        """
-        res = []
-        for each in self._getElementsContainer():
-            if each.getGuard().check(getSecurityManager(),
-                                     None, aq_parent(aq_inner(self))):
+            elif type == 'role':
                 res.append(each.getIdForRoleSettings())
+            elif type == 'object':
+                res.append(each)
             else:
-                res.append('not_visible')
+                emsg = "getStackContent(). Wrong type specified"
+                raise ValueError, emsg
         return res
 
     def replace(self, old, new):
@@ -332,7 +332,7 @@ class HierarchicalStack(SimpleStack):
             level = self.getCurrentLevel()
         i = 0
         for each in self.getLevelContent(level=level):
-            if id == each():
+            if id == each:
                 return i
             i += 1
         return -1
@@ -363,9 +363,8 @@ class HierarchicalStack(SimpleStack):
 
         # Simply insert a new elt at a given level
         if level is not None:
-            content_level = self.getLevelContent(level)
-            content_level_values = self.getLevelContentValues(level)
-            if elt not in content_level_values:
+            content_level = self.getLevelContent(level, type='object')
+            if elt not in self.getLevelContent(level):
                 elt = self._prepareElement(elt)
                 content_level.append(elt)
                 self._getElementsContainer()[level] = content_level
@@ -408,7 +407,7 @@ class HierarchicalStack(SimpleStack):
                     container[low_level+1] = [self._prepareElement(elt)]
         return 1
 
-    def _pop(self, elt=None, level=None, **kw):
+    def _pop(self, elt=None, level=None):
         """Remove elt at given level
 
         -1 : not found
@@ -417,7 +416,7 @@ class HierarchicalStack(SimpleStack):
 
         if level is None:
             level = self.getCurrentLevel()
-        levelc = self.getLevelContent(level=level)
+        levelc = self._getLevelContentValues(level=level)
 
         if elt is None:
             last = None
@@ -432,8 +431,9 @@ class HierarchicalStack(SimpleStack):
         index = self._getStackElementIndex(elt, level)
         if index >= 0:
             try:
-                elt_obj = self.getLevelContent(level=level)[index]
-                del self.getLevelContent(level=level)[index]
+                elt_obj = self.getLevelContent(level=level,
+                                               type='object')[index]
+                del self._getElementsContainer()[level][index]
                 return elt_obj
             except KeyError:
                 pass
@@ -475,15 +475,7 @@ class HierarchicalStack(SimpleStack):
         """
         res = {}
         for clevel in self.getAllLevels():
-            res[clevel] = self.getLevelContentValues(level=clevel)
-        return res
-
-    def getStackContentForRoleSettings(self):
-        """Return the stack content for role settings
-        """
-        res = {}
-        for clevel in self.getAllLevels():
-            res[clevel] = self.getLevelContentValuesForRoleSettings(level=clevel)
+            res[clevel] = self.getLevelContent(level=clevel, type=type)
         return res
 
     def getCurrentLevel(self):
@@ -521,7 +513,7 @@ class HierarchicalStack(SimpleStack):
             self._level -= 1
         return self._level
 
-    def getLevelContent(self, level=None):
+    def _getLevelContentValues(self, level=None):
         """Return  the content of the level given as parameter
 
         If not specified let's return the current level content
@@ -535,20 +527,28 @@ class HierarchicalStack(SimpleStack):
 
         return value
 
-    def getLevelContentValues(self, level=None):
-        content = self.getLevelContent(level)
+    def getLevelContent(self, level=None, type='str'):
+        content = self._getLevelContentValues(level)
         res = []
         for each in content:
-            res.append(each())
-
-        return res
-
-    def getLevelContentValuesForRoleSettings(self, level=None):
-        content = self.getLevelContent(level)
-        res = []
-        for each in content:
-            res.append(each.getIdForRoleSettings())
-
+            if not each.getGuard().check(getSecurityManager(),
+                                         None, aq_parent(aq_inner(self))):
+                # XXX hack
+                hidden_meta_type = 'Hidden ' + each.meta_type
+                each = ElementReg.makeWorkflowStackElementTypeInstance(
+                    hidden_meta_type
+                    )
+            if type == 'str':
+                res.append(str(each))
+            elif type == 'call':
+                res.append(each())
+            elif type == 'role':
+                res.append(each.getIdForRoleSettings())
+            elif type == 'object':
+                res.append(each)
+            else:
+                emsg = "getStackContent(). Wrong type specified"
+                raise ValueError, emsg
         return res
 
     def getAllLevels(self):
@@ -607,7 +607,7 @@ class HierarchicalStack(SimpleStack):
         # Check arguments in here.
         pop_ids = kw.get('pop_ids', ())
         if not pop_ids:
-            return self._pop(elt, level, **kw)
+            return self._pop(elt, level)
 
         # Pop member / group given ids
         for pop_id in pop_ids:
@@ -616,7 +616,7 @@ class HierarchicalStack(SimpleStack):
             split = pop_id.split(',')
             level = int(split[0])
             the_id = split[1]
-            self._pop(elt=the_id, level=level, **kw)
+            self._pop(elt=the_id, level=level)
 
 
     def replace(self, old, new):
