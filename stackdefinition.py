@@ -39,7 +39,7 @@ class StackDefinition(SimpleItem):
     Holds the basis configuration for a stack
     """
 
-    meta_type = 'Base Workflow Stack Definition'
+    meta_type = 'Stack Definition'
 
     __implements__ = IWorkflowStackDefinition
 
