@@ -17,7 +17,7 @@ The normal workflow in workspaces is::
 
   [create] -> (work) -> [copy-submit]
 
-Our goal is two add a validation step before the submission in order to ask 
+Our goal is to add a validation step before the submission in order to ask 
 other WorkspaceMembers to review the document before submission::
 
   [create] -> (work) -> [submit_to_validation] -> (collaborative_validation) ->
