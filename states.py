@@ -296,7 +296,8 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
                 REQUEST, 'Delegate workflow variables removed !')
 
     def updateStackDefinition(self, stackdef_type='', stack_type='',
-                              old_wf_var_id='', wf_var_id='', REQUEST=None, **kw):
+                              old_wf_var_id='', wf_var_id='', REQUEST=None,
+                              **kw):
         """Update an existing stack definition
         """
 
@@ -335,8 +336,8 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
             return self.manage_advanced_properties(
                 REQUEST, 'Stack definition updated !')
 
-    def addManagedRoleExpressionFor(self, wf_var_id, role_id, expression, master_role=1,
-                                    REQUEST=None):
+    def addManagedRoleExpressionFor(self, wf_var_id, role_id, expression,
+                                    master_role=1, REQUEST=None):
         """Add managed role expression to a stack definition
         """
         stackdef = self.getStackDefinitionFor(wf_var_id)
