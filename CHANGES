@@ -9,4 +9,10 @@ Bug fixes:
 -
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
--
+- Former local roles are now stored within the status of the object and not
+  within the stack itself.
+- No access to former local roles from the stack and stackdef
+- wftool.getInfoFor() overriden since we want to use the StateChangeInfo from
+  within CPSWorkflow.expression.
+- API : wftool.getFormerLocalRoleMappingForStack()
+- API : wftool.updateFormerLocalRoleMappingForStack()
