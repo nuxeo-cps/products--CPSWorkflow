@@ -3,10 +3,17 @@ Requires:
 -
 New features:
 ~~~~~~~~~~~~~
--
+
+- #503 : initialize stack after a reset
+- #504 : roles managing local roles restriction (membership tool)
+- #505 : Be able to reuse stacks
+- #507 : Delegatees managment
+
 Bug fixes:
 ~~~~~~~~~~
--
+- Keep former local roles mapping during non stack flaged transition
+and non stack flaged states for further use.
+
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
 -
