@@ -182,7 +182,7 @@ class Stack(SimpleItem):
             self.push(new_group)
 
         return self
-        
+
     #
     # MISC
     #
@@ -198,6 +198,6 @@ class Stack(SimpleItem):
             raise RuntimeError(
                 "Unknown Render method %s for stack type %s"
                     %(self.render_method, self.meta_type))
-        return meth(mode=mode, stack=self)
+        return meth(context=context, mode=mode, stack=self)
 
 InitializeClass(Stack)
