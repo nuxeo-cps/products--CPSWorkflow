@@ -8,7 +8,8 @@ properties
 
 Bug fixes:
 ~~~~~~~~~~
--
+- Fix bug on states that was preventing the use of acquisition on
+stackdefs. (Use _getOb())
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
 - Former local roles are now stored within the status of the object and not
