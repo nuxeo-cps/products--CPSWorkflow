@@ -377,6 +377,13 @@ class TestStackElements(ZopeTestCase):
 
         self.assertEqual(elt.getHiddenMetaType(), 'Hidden User Stack Element')
 
+    def test_UserStackElementCopy(self):
+        elt = UserStackElement('user:anguenot')
+        copy = elt.getCopy()
+        # Try changing one attr and check
+        copy.id = 'other'
+        self.assertNotEqual(elt.getId(), copy.getId())
+
     def test_GroupStackElement(self):
         elt = GroupStackElement('group:nuxeo')
         self.assertEqual(elt(), 'group:nuxeo')
@@ -388,17 +395,38 @@ class TestStackElements(ZopeTestCase):
 
         self.assertEqual(elt.getHiddenMetaType(), 'Hidden Group Stack Element')
 
+    def test_GroupStackElementCopy(self):
+        elt = GroupStackElement('group:nuxeo')
+        copy = elt.getCopy()
+        # Try changing one attr and check
+        copy.id = 'other'
+        self.assertNotEqual(elt.getId(), copy.getId())
+
     def test_HiddenUserStackElement(self):
         elt = HiddenUserStackElement('fake')
         self.assertEqual(elt(),  USER_STACK_ELEMENT_NOT_VISIBLE)
         self.assertEqual(str(elt),  USER_STACK_ELEMENT_NOT_VISIBLE)
         self.assertEqual(elt.getIdForRoleSettings(), '')
 
+    def test_HiddenUserStackElementCopy(self):
+        elt = HiddenUserStackElement('user:anguenot')
+        copy = elt.getCopy()
+        # Try changing one attr and check
+        copy.id = 'other'
+        self.assertNotEqual(elt.getId(), copy.getId())
+
     def test_HiddenGroupStackElement(self):
         elt = HiddenGroupStackElement('fake')
         self.assertEqual(elt(),  GROUP_STACK_ELEMENT_NOT_VISIBLE)
         self.assertEqual(str(elt),  GROUP_STACK_ELEMENT_NOT_VISIBLE)
         self.assertEqual(elt.getIdForRoleSettings(), '')
+
+    def test_HiddeGroupStackElementCopy(self):
+        elt = HiddenGroupStackElement('group:nuxeo')
+        copy = elt.getCopy()
+        # Try changing one attr and check
+        copy.id = 'other'
+        self.assertNotEqual(elt.getId(), copy.getId())
 
     def test_UserSubstituteStackElement(self):
         elt = UserSubstituteStackElement('user_substitute:anguenot')
@@ -409,6 +437,13 @@ class TestStackElements(ZopeTestCase):
         self.assertEqual(elt.getPrefix(), 'user_substitute')
 
         self.assertEqual(elt.getHiddenMetaType(), 'Hidden User Stack Element')
+
+    def test_UserSustituteStackElementCopy(self):
+        elt = UserSubstituteStackElement('user_substitute:user:anguenot')
+        copy = elt.getCopy()
+        # Try changing one attr and check
+        copy.id = 'other'
+        self.assertNotEqual(elt.getId(), copy.getId())
         
     def test_GroupSubstituteStackElement(self):
         elt = GroupSubstituteStackElement('group_substitute:group:nuxeo')
@@ -419,6 +454,13 @@ class TestStackElements(ZopeTestCase):
         self.assertEqual(elt.getPrefix(), 'group_substitute')
 
         self.assertEqual(elt.getHiddenMetaType(), 'Hidden Group Stack Element')
+
+    def test_GroupSustituteStackElementCopy(self):
+        elt = GroupSubstituteStackElement('group_substitute:group:nuxeo')
+        copy = elt.getCopy()
+        # Try changing one attr and check
+        copy.id = 'other'
+        self.assertNotEqual(elt.getId(), copy.getId())
 
 def test_suite():
     loader = unittest.TestLoader()
