@@ -981,7 +981,6 @@ class WorkflowDefinition(DCWorkflowDefinition):
         # update stack variables, initializing stacks defined in given state
         stacks = {}
         stackdefs = new_sdef.getStackDefinitions()
-        LOG("_executeTransition", DEBUG, "sdef=%s, stackdefs=%s"%(new_sdef, stackdefs))
         for k in stackdefs.keys():
             # stack is a variable, it has just been updated in the status
             if status[k] is None:
@@ -990,9 +989,6 @@ class WorkflowDefinition(DCWorkflowDefinition):
                 new_stack = StackReg.makeWorkflowStackTypeInstance(
                     stype)
                 status[k] = new_stack
-                LOG("_executeTransition", DEBUG, "new stack %s for %s"%(stype, k))
-            else:
-                LOG("_executeTransition", DEBUG, "stack %s existed"%(k,))
 
         # Update state.
         status[self.state_var] = new_state
