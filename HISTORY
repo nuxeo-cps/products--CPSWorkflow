@@ -1,4 +1,46 @@
 *******************************************
+** CPSWorkflow V0.3.0 [R1 build 2005/03/07-16:11 by madarche]
+
+Requires:
+~~~~~~~~~
+-
+New features:
+~~~~~~~~~~~~~
+- #503 : initialize stack after a reset
+- #504 : roles managing local roles restriction (membership tool)
+- #505 : Be able to reuse stacks
+- #507 : Delegatees managment
+- #509 : Inserting people in hierarchical stacks
+- #529 : New: api misc
+- #521 : bug in role settings algorythm
+Bug fixes:
+~~~~~~~~~~
+- Keep former local roles mapping during non stack flaged transition
+  and non stack flaged states for further use.
+- stack element available in managed roles expression namespace was always None
+- deep copy of the stack did not use copies of stack elements.
+New internal features:
+~~~~~~~~~~~~~~~~~~~~~~
+- Set the proxy into the datamodel as early as possible during construction.
+- Add new methods to basic stack elements and basic stacks to get stack content
+  with just user/group ids. This does not change anything for basic objects but
+  make it easier to inherit from them when we want to use stack elements that
+  store more information than just the user/group id. Basic use case: store the
+  date when user/group was added in the stack
+- Stack._prepareElement() delegate to stack element registry for
+  instance construction.(prefix cast)
+- Unify API. Only use pop(). removeElement() method disappeared
+- YAGNI (reversed). Remove useless API for direction and locking stuffs.
+- Internal API refactoring
+- Security on getStackContent(). Filter depending the the stack def
+  edit stack element guard or the guard on the element itself
+- Use getId() instead of __str__ for stack elements.
+- pop and _pop refactoring: drop the support for the elt kw. The use of pop_ids
+  is now mandatory. pop_ids=[] does nothing. pop now always returns codes : 0 =
+  at least one id in pop_ids was not found ; 1 = all element in pop_ids were
+  sucessfully removed
+
+*******************************************
 ** CPSWorkflow V0.2.1 [R1 build 2005/02/09-14:04 by anahide]
 
 Requires:
