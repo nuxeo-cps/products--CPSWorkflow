@@ -26,9 +26,9 @@ New internal features:
 - Stack._prepareElement() delegate to stack element registry for
   instance construction.(prefix cast)
 - Unify API. Only use pop(). removeElement() method disappeared
-- YAGNI (reversed). Remove useless API for direction and locking
-stuffs.
+- YAGNI (reversed). Remove useless API for direction and locking stuffs.
 - Internal API refactoring
 - Security on getStackContent(). Filter depending the the stack def
-edit stack element guard or the guard on the element itself
+  edit stack element guard or the guard on the element itself
 - Use getId() instead of __str__ for stack elements.
+- stack is now protected by view permission on wf variable.

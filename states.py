@@ -214,7 +214,9 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
                 description="Variable holding a stack",
                 default_expr="python:state_change.getStackFor(var_id='%s')" %var_id,
                 for_status=1,
-                update_always=0)
+                update_always=0,
+                props={'guard_permissions': 'View',},
+                )
 
         stackdef = None
 
