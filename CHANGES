@@ -24,4 +24,6 @@ New internal features:
 - Stack._prepareElement() delegate to stack element registry for
   instance construction.(prefix cast)
 - Unify API. Only use pop(). removeElement() method disappeared
-- YAGNI (reversed). Remove useless API for direction and locking stuffs.
+- YAGNI (reversed). Remove useless API for direction and locking
+stuffs.
+- Internal API refactoring

@@ -30,9 +30,6 @@ from zLOG import LOG, DEBUG
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo, getSecurityManager
 
-from Products.CMFCore.permissions import View, ModifyPortalContent
-
-from basicstacks import SimpleStack, HierarchicalStack
 from stackdefinition import StackDefinition
 from stackregistries import WorkflowStackDefRegistry
 
@@ -45,104 +42,14 @@ class SimpleStackDefinition(StackDefinition):
     meta_type = 'Simple Stack Definition'
 
     security = ClassSecurityInfo()
+    security.declareObjectPublic()
 
     __implements__ = (IWorkflowStackDefinition,)
 
-    def _prepareStack(self, ds):
-        """Prepare stack on wich we gonna work one
-
-        ds is the data structure holding the delegatees
-        """
-        LOG("_prepareStack()", DEBUG, 'Simple Stack')
-        if ds is not None:
-            if ds.meta_type != 'Simple Stack':
-                ds = None
-        if ds is None:
-            ds = SimpleStack()
-        return ds
-
-    def _push(self, ds, **kw):
-        """Push delegatees
-
-        This method has to be implemented by a child class
-        """
-        LOG("::SimpleStackDefinition.push()::",
-            DEBUG,
-            str(kw))
-
-        #
-        # Prepare stack.
-        # ds comes usually from the status
-        # It might be None of not yet initialized
-        #
-
-        ds = self._prepareStack(ds)
-
-        #
-        # First extract the needed information
-        # No level information is needed in here
-        #
-
-        member_ids = kw.get('member_ids', ())
-        group_ids  = kw.get('group_ids',  ())
-
-        if not (member_ids or group_ids):
-            return ds
-
-        #
-        # Push members / groups
-        # groups gota prefixed id  'group:'
-        #
-
-        for member_id in member_ids:
-            ds.push(member_id)
-        for group_id in group_ids:
-            prefixed_group_id = 'group:'+group_id
-            ds.push(prefixed_group_id)
-
-        #
-        # For the workflow history.
-        # Let's do a copy of the stack instance
-        #
-
-        ds = ds.getCopy()
-        return ds
-
-    def _pop(self, ds, **kw):
-        """pop delegatees
-        """
-
-        LOG("::SimpleStackDefinition.pop()::",
-            DEBUG,
-            str(kw))
-
-        #
-        # Prepare stack.
-        # ds comes usually from the status
-        # It might be None of not yet initialized
-        #
-
-        ds = self._prepareStack(ds)
-
-        #
-        # Pop member / group given ids
-        #
-
-        ids = kw.get('ids', ())
-
-        if not ids:
-            return ds
-
-        for id in ids:
-            ds.pop(id)
-
-        #
-        # For the workflow history.
-        # Let's do a copy of the stack instance
-        #
-
-        ds = ds.getCopy()
-        return ds
+    #
+    # PRIVATE API
+    # Overrides the not implemented method of Stack
+    # 
 
     def _getLocalRolesMapping(self, ds):
         """Give the local roles mapping for the member / group ids within the
@@ -174,7 +81,8 @@ class SimpleStackDefinition(StackDefinition):
         for elt in stack_content:
             elt_id = elt.getIdForRoleSettings()
             for role_id in self.getManagedRoles():
-                if self._getExpressionForRole(role_id, ds, level=None, elt=elt()):
+                if self._getExpressionForRole(role_id, ds, level=None,
+                                              elt=elt()):
                     mapping[elt_id] = mapping.get(elt_id, ()) + (role_id,)
 
         return mapping
@@ -228,7 +136,7 @@ class SimpleStackDefinition(StackDefinition):
                     pass
 
         #
-        # Now let's cope with the first case when the stack is not et
+        # Now let's cope with the first case when the stack is not yet
         # intialized. Call the specific guard for this
         #
 
@@ -253,123 +161,12 @@ class HierarchicalStackDefinition(StackDefinition):
     __implements__ = (IWorkflowStackDefinition,)
 
     security = ClassSecurityInfo()
+    security.declareObjectPublic()
 
-    def _prepareStack(self, ds):
-        """Prepare stack on wich we gonna work one
-
-        ds is the data structure holding the delegatees
-        """
-        LOG("_prepareStack()", DEBUG, 'Hierarchical Stack')
-        if ds is not None:
-            if ds.meta_type != 'Hierarchical Stack':
-                ds = None
-        if ds is None:
-            ds = HierarchicalStack()
-        return ds
-
-    def _push(self, ds, **kw):
-        """Push delegatees
-
-        This method has to be implemented by a child class
-        """
-        LOG("::HierarchicalStackDefinition.push()::",
-            DEBUG,
-            str(kw))
-
-        #
-        # First extract the needed information
-        # No level information is needed in here
-        #
-
-        member_ids = kw.get('member_ids', ())
-        group_ids  = kw.get('group_ids',  ())
-        levels = kw.get('levels', ())
-
-        if not ((member_ids or group_ids) and levels):
-            return ds
-
-        #
-        # Prepare stack.
-        # ds comes usually from the status
-        # It might be None of not yet initialized
-        #
-
-
-        ds = self._prepareStack(ds)
-
-        #
-        # Push members / groups
-        # groups gota prefixed id  'group:'
-        #
-
-        i = 0
-        for member_id in member_ids:
-            try:
-                ds.push(member_id, int(levels[i]))
-                i += 1
-            except IndexError:
-                # wrong user input
-                pass
-        i = 0
-        for group_id in group_ids:
-            prefixed_group_id = 'group:'+group_id
-            try:
-                ds.push(prefixed_group_id, int(levels[i]))
-                i += 1
-            except IndexError:
-                # wrong user input
-                pass
-
-        #
-        # For the workflow history.
-        # Let's do a copy of the stack instance
-        #
-
-        ds = ds.getCopy()
-        return ds
-
-    def _pop(self, ds, **kw):
-        """pop delegatees
-        """
-
-        LOG("::HierarchicalStackDefinition.pop()::",
-            DEBUG,
-            str(kw))
-
-        #
-        # Check arguments in here.
-        # Might be wrongly called
-        #
-
-        ids = kw.get('ids', ())
-        if not ids:
-            return ds
-
-        #
-        # Prepare stack.
-        # ds comes usually from the status
-        # It might be None of not yet initialized
-        #
-
-        ds = self._prepareStack(ds)
-
-        #
-        # Pop member / group given ids
-        #
-
-        for id in ids:
-            level = int(id.split(',')[0])
-            the_id = id.split(',')[1]
-            # XXX AT: why do not use the classic stack api (e.g method pop)?
-            ds.pop(elt=the_id, level=int(level))
-
-        #
-        # For the workflow history.
-        # Let's do a copy of the stack instance
-        #
-
-        ds = ds.getCopy()
-        return ds
+    #
+    # PRIVATE API
+    # Overrides the not implemented method of Stack
+    #
 
     def _canManageStack(self, ds, aclu, mtool, context, **kw):
         """Check if the current authenticated member scan manage stack
@@ -468,41 +265,23 @@ class HierarchicalStackDefinition(StackDefinition):
 
         return mapping
 
-    security.declareProtected(ModifyPortalContent, 'doIncLevel')
-    def doIncLevel(self, ds):
+    #
+    # SPECIFIC PRIVATE API
+    #
+
+    def _doIncLevel(self, ds):
         """Increase the stack level
         """
-
-        # Prepare the ds
         ds = self._prepareStack(ds)
-
-        # Increase level
         ds.doIncLevel()
-
-        #
-        # For the workflow history.
-        # Let's do a copy of the stack instance
-        #
-
         ds = ds.getCopy()
         return ds
 
-    security.declareProtected(ModifyPortalContent, 'doDecLevel')
-    def doDecLevel(self, ds):
+    def _doDecLevel(self, ds):
         """Decrease the stack level
         """
-
-        # Prepare the ds
         ds = self._prepareStack(ds)
-
-        # Decrease level
         ds.doDecLevel()
-
-        #
-        # For the workflow history.
-        # Let's do a copy of the stack instance
-        #
-
         ds = ds.getCopy()
         return ds
 

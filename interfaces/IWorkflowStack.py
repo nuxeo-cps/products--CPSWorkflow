@@ -38,20 +38,20 @@ class IWorkflowStack(Interface.Base):
         """Is the Stack empty ?
         """
 
-    def push(elt=None):
-        """Push an element in the queue
-
-        1  : ok
-        0  : queue id full
-        -1 : elt is None
-        """
-
-    def pop():
-        """Get the first element of the queue
-
-        0 : empty
-        1 : ok
-        """
+    #def push(elt=None):
+    #    """Push an element in the queue
+    #
+    #    1  : ok
+    #    0  : queue id full
+    #    -1 : elt is None
+    #    """
+    #
+    #def pop():
+    #    """Get the first element of the queue
+    #
+    #    0 : empty
+    #    1 : ok
+    #    """
 
     def reset():
         """Reset the stack

@@ -92,11 +92,7 @@ class SimpleStack(Stack):
             i += 1
         return -1
 
-    #
-    # API
-    #
-
-    def push(self, elt=None):
+    def push(self, elt=None, **kw):
         """Push an element in the queue
 
         1  : ok
@@ -126,6 +122,53 @@ class SimpleStack(Stack):
         else:
             return Stack.pop(self)
         return 0
+
+
+    #
+    # API
+    #
+
+    def _push(self, **kw):
+        """Public push
+        """
+
+        #
+        # First extract the needed information
+        # No level information is needed in here
+        #
+
+        member_ids = kw.get('member_ids', ())
+        group_ids  = kw.get('group_ids',  ())
+
+        if not (member_ids or group_ids):
+            return self
+
+        #
+        # Push members / groups
+        # groups gota prefixed id  'group:'
+        #
+
+        for member_id in member_ids:
+            self.push(member_id)
+        for group_id in group_ids:
+            prefixed_group_id = 'group:'+group_id
+            self.push(prefixed_group_id)
+
+    def _pop(self, **kw):
+        """Public pop
+        """
+
+        #
+        # Pop member / group given ids
+        #
+
+        ids = kw.get('ids', ())
+
+        if not ids:
+            return self
+
+        for id in ids:
+            self.pop(id)
 
     def getStackContent(self, level=None):
         """Return the stack content
@@ -368,6 +411,45 @@ class HierarchicalStack(SimpleStack):
 
     ###################################################
 
+    def _push(self, **kw):
+        """Internal push
+        """
+
+        #
+        # First extract the needed information
+        # No level information is needed in here
+        #
+
+        member_ids = kw.get('member_ids', ())
+        group_ids  = kw.get('group_ids',  ())
+        levels = kw.get('levels', ())
+
+        if not ((member_ids or group_ids) and levels):
+            return self
+
+        #
+        # Push members / groups
+        # groups gota prefixed id  'group:'
+        #
+
+        i = 0
+        for member_id in member_ids:
+            try:
+                self.push(member_id, int(levels[i]))
+                i += 1
+            except IndexError:
+                # wrong user input
+                pass
+        i = 0
+        for group_id in group_ids:
+            prefixed_group_id = 'group:'+group_id
+            try:
+                self.push(prefixed_group_id, int(levels[i]))
+                i += 1
+            except IndexError:
+                # wrong user input
+                pass
+
     def push(self, elt=None, level=0, **kw):
         """Push elt at given level or in between two levels
 
@@ -438,6 +520,28 @@ class HierarchicalStack(SimpleStack):
                         container[clevel+1] = container[clevel]
                     container[low_level+1] = [self._prepareElement(elt)]
         return 1
+
+    def _pop(self, **kw):
+        """Internal pop
+        """
+
+        #
+        # Check arguments in here.
+        # Might be wrongly called
+        #
+
+        ids = kw.get('ids', ())
+        if not ids:
+            return self
+
+        #
+        # Pop member / group given ids
+        #
+
+        for id in ids:
+            level = int(id.split(',')[0])
+            the_id = id.split(',')[1]
+            self.pop(elt=the_id, level=int(level))
 
     def pop(self, elt=None, level=None):
         """Remove elt at given level

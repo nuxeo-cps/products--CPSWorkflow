@@ -57,6 +57,8 @@ from Products.CMFCore.permissions import ManagePortal
 
 from stackdefinitionguard import StackDefinitionGuard as Guard
 
+from stackregistries import WorkflowStackRegistry
+
 from interfaces import IWorkflowStackDefinition
 
 class StackDefinition(SimpleItem):
@@ -161,6 +163,7 @@ class StackDefinition(SimpleItem):
     #
     # Boring accessors
     #
+
     def _getWorkflowDefinition(self):
         statedef = aq_parent(aq_inner(self))
         states = aq_parent(aq_inner(statedef))
@@ -189,18 +192,6 @@ class StackDefinition(SimpleItem):
         # XXX has to be refactored
         return self.manager_stack_ids
 
-
-    #
-    # API : Reinitialization
-    #
-
-    security.declareProtected(ManagePortal, 'resetStack')
-    def resetStack(self, ds, **kw):
-        """Reset stack contained within ds.
-        """
-        ds = self._prepareStack(ds)
-        ds.reset(**kw)
-        return ds
 
     #
     # API : Managed roles
@@ -287,7 +278,7 @@ class StackDefinition(SimpleItem):
         return _expression_c(expr_context)
 
     #
-    # To be implemented within child class definitions
+    # PRIVATE API
     #
 
     def _prepareStack(self, ds):
@@ -295,25 +286,46 @@ class StackDefinition(SimpleItem):
 
         ds is the data structure holding the delegatees
         """
-        raise NotImplementedError
-
-    def _getLocalRolesMapping(self, ds):
-        """Give the local roles mapping for the member / group ids within the
-        stack
-        """
-        raise NotImplementedError
+        if ds is not None:
+            if ds.meta_type != self.getStackDataStructureType():
+                ds = None
+        if ds is None:
+            ds = WorkflowStackRegistry.makeWorkflowStackTypeInstance(
+                self.getStackDataStructureType())
+        return ds
 
     def _push(self, ds, **kw):
         """Push delegatees
 
         This method has to be implemented by a child class
         """
-        raise NotImplementedError
+        ds = self._prepareStack(ds)
+        ds._push(**kw)
+        ds = ds.getCopy()
+        return ds
 
     def _pop(self, ds, **kw):
-        """Pop delegatees
+        """pop delegatees
+        """
+        ds = self._prepareStack(ds)
+        ds._pop(**kw)
+        ds = ds.getCopy()
+        return ds
 
-        This method has to be implemented by a child class
+    def _reset(self, ds, **kw):
+        """Reset stack contained within ds.
+        """
+        ds = self._prepareStack(ds)
+        ds.reset(**kw)
+        return ds
+
+    #
+    # To be implemented within child class definitions
+    #
+
+    def _getLocalRolesMapping(self, ds):
+        """Give the local roles mapping for the member / group ids within the
+        stack
         """
         raise NotImplementedError
 

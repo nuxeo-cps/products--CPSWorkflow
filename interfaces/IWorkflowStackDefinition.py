@@ -50,7 +50,7 @@ class IWorkflowStackDefinition(Interface.Base):
         This method has to be implemented by a child class
         """
 
-    def resetStack(ds, **kw):
+    def _reset(ds, **kw):
         """Reset stack.
 
         ds contains the data structure.

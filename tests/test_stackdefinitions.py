@@ -117,8 +117,6 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         self.assertEqual(base.getStackWorkflowVariableId(), 'toto')
 
         # Not implemented methods
-        self.assertRaises(NotImplementedError, base._push, None)
-        self.assertRaises(NotImplementedError, base._pop, None)
         self.assertRaises(NotImplementedError, base._getLocalRolesMapping,
                           None)
         self.assertRaises(NotImplementedError, base._canManageStack,
@@ -896,7 +894,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Change current level to -1
         #
 
-        hierarchical.doDecLevel(new_stack)
+        hierarchical._doDecLevel(new_stack)
 
         # Local roles
 
@@ -965,7 +963,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Change current level to -2
         #
 
-        hierarchical.doDecLevel(new_stack)
+        hierarchical._doDecLevel(new_stack)
 
         # Current Local roles mapping
         self.assertEqual(hierarchical._getLocalRolesMapping(new_stack),
@@ -1032,7 +1030,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Change current level to -1
         #
 
-        hierarchical.doIncLevel(new_stack)
+        hierarchical._doIncLevel(new_stack)
 
         # Current Local roles mapping
         self.assertEqual(hierarchical._getLocalRolesMapping(new_stack),
@@ -1099,7 +1097,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Change current level to 0
         #
 
-        hierarchical.doIncLevel(new_stack)
+        hierarchical._doIncLevel(new_stack)
 
         # Current Local roles mapping
         self.assertEqual(hierarchical._getLocalRolesMapping(new_stack),
@@ -1166,7 +1164,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Change current level to 1
         #
 
-        hierarchical.doIncLevel(new_stack)
+        hierarchical._doIncLevel(new_stack)
 
         # Current Local roles mapping
         self.assertEqual(hierarchical._getLocalRolesMapping(new_stack),
@@ -1232,7 +1230,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Change current level to 2
         #
 
-        hierarchical.doIncLevel(new_stack)
+        hierarchical._doIncLevel(new_stack)
 
         # Current Local roles mapping
         self.assertEqual(hierarchical._getLocalRolesMapping(new_stack),
@@ -1301,16 +1299,15 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         #
 
         simple = SimpleStackDefinition(
-            101,
-            'toto',
-            ass_local_role='WorkspaceManager')
+            'Simple Stack',
+            'toto')
 
         stack = simple._push(None, member_ids=['user1'])
         self.assertEqual(stack.getMetaType(),
                          'Simple Stack')
         self.assertEqual(stack.getStackContent(),
                          ['user1'])
-        stack = simple.resetStack(stack)
+        stack = simple._reset(stack)
         self.assertEqual(stack.getMetaType(),
                          'Simple Stack')
         self.assertEqual(stack.getStackContent(),
@@ -1323,11 +1320,9 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         #
 
         hierarchical = HierarchicalStackDefinition(
-            101,
-            'toto',
-            ass_local_role='WorkspaceManager',
-            up_local_role='WorkspaceReader',
-            down_local_role='WorkspaceReader')
+            'Hierarchical Stack',
+            'toto'
+            )
 
         stack = hierarchical._push(None,
                                   member_ids=['user1'],
@@ -1336,7 +1331,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                          'Hierarchical Stack')
         self.assertEqual(stack.getLevelContentValues(),
                          ['user1'])
-        stack = hierarchical.resetStack(stack)
+        stack = hierarchical._reset(stack)
         self.assertEqual(stack.getMetaType(),
                          'Hierarchical Stack')
         self.assertEqual(stack.getLevelContent(),
@@ -1537,8 +1532,8 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # - stack
         # - elt
         #
-        sstackdef = SimpleStackDefinition('Simple Stack Definition',
-                                          'Simple Stack')
+        sstackdef = SimpleStackDefinition('Simple Stack',
+                                          'toto')
 
         # Add WorkspaceManager as managed role
         sstackdef.addManagedRole('WorkspaceManager')
@@ -1582,8 +1577,8 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # - level
         #
         hstack = HierarchicalStack()
-        hstackdef = HierarchicalStackDefinition('Hierarchical Stack Definition',
-                                                'Hierarchical Stack')
+        hstackdef = HierarchicalStackDefinition('Hierarchical Stack',
+                                                'toto')
 
         # Add WorkspaceManager as managed role
         hstackdef.addManagedRole('WorkspaceManager')
@@ -1655,22 +1650,22 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                          ['elt1'])
 
         # Reset with one (1) new user
-        stack = stackdef.resetStack(stack, new_users=('elt2',))
+        stack = stackdef._reset(stack, new_users=('elt2',))
         self.assertEqual([x() for x in stack._getElementsContainer()],
                          ['elt2'])
 
         # Reset with two (2) new users
-        stack = stackdef.resetStack(stack, new_users=('elt3', 'elt4'))
+        stack = stackdef._reset(stack, new_users=('elt3', 'elt4'))
         self.assertEqual([x() for x in stack._getElementsContainer()],
                          ['elt3', 'elt4'])
 
         # Reset with one (1) new group
-        stack = stackdef.resetStack(stack, new_users=('group:elt2',))
+        stack = stackdef._reset(stack, new_users=('group:elt2',))
         self.assertEqual([x() for x in stack._getElementsContainer()],
                          ['group:elt2'])
         
         # Reset with two (2) new users
-        stack = stackdef.resetStack(stack,
+        stack = stackdef._reset(stack,
                                     new_users=('group:elt3', 'group:elt4'))
         self.assertEqual([x() for x in stack._getElementsContainer()],
                          ['group:elt3', 'group:elt4'])
@@ -1678,13 +1673,13 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Reset with one new stack
         new_stack = SimpleStack()
         new_stack.push('new_elt')
-        stack = stackdef.resetStack(stack, new_stack=new_stack)
+        stack = stackdef._reset(stack, new_stack=new_stack)
         self.assertEqual(stack._getElementsContainer(),
                          new_stack._getElementsContainer())
 
         # Reset with a new stack, new users and new groups
         new_stack = SimpleStack()
-        stack = stackdef.resetStack(stack, new_stack=new_stack,
+        stack = stackdef._reset(stack, new_stack=new_stack,
                                     new_users=('elt1', 'elt2'),
                                     new_groups=('group:elt3', 'group:elt4'))
         self.assertEqual([x() for x in stack._getElementsContainer()],
@@ -1709,22 +1704,22 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                          ['elt1'])
 
         # Reset with one (1) new user
-        stack = stackdef.resetStack(stack, new_users=('elt2',))
+        stack = stackdef._reset(stack, new_users=('elt2',))
         self.assertEqual([x() for x in stack._getElementsContainer()[0]],
                          ['elt2'])
 
         # Reset with two (2) new users
-        stack = stackdef.resetStack(stack, new_users=('elt3', 'elt4'))
+        stack = stackdef._reset(stack, new_users=('elt3', 'elt4'))
         self.assertEqual([x() for x in stack._getElementsContainer()[0]],
                          ['elt3', 'elt4'])
 
         # Reset with one (1) new group
-        stack = stackdef.resetStack(stack, new_users=('group:elt2',))
+        stack = stackdef._reset(stack, new_users=('group:elt2',))
         self.assertEqual([x() for x in stack._getElementsContainer()[0]],
                          ['group:elt2'])
         
         # Reset with two (2) new users
-        stack = stackdef.resetStack(stack,
+        stack = stackdef._reset(stack,
                                     new_users=('group:elt3', 'group:elt4'))
         self.assertEqual([x() for x in stack._getElementsContainer()[0]],
                          ['group:elt3', 'group:elt4'])
@@ -1732,17 +1727,82 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Reset with one new stack
         new_stack = HierarchicalStack()
         new_stack.push('new_elt')
-        stack = stackdef.resetStack(stack, new_stack=new_stack)
+        stack = stackdef._reset(stack, new_stack=new_stack)
         self.assertEqual(stack._getElementsContainer(),
                          new_stack._getElementsContainer())
 
         # Reset with a new stack, new users and new groups
         new_stack = HierarchicalStack()
-        stack = stackdef.resetStack(stack, new_stack=new_stack,
+        stack = stackdef._reset(stack, new_stack=new_stack,
                                     new_users=('elt1', 'elt2'),
                                     new_groups=('group:elt3', 'group:elt4'))
         self.assertEqual([x() for x in stack._getElementsContainer()[0]],
                          ['elt1', 'elt2', 'group:elt3', 'group:elt4'])
+
+    def test_insertInBetweenLevelWithinHierarchical(self):
+        # test some insertions within a hierarchical stack through
+        # a stack definition
+        hstack = HierarchicalStack()
+        self.assertEqual(hstack.getStackContent(), {})
+
+        hstackdef = HierarchicalStackDefinition('Hierarhical Stack', 'fake')
+
+        # Normal 
+        #hstack = hstackdef._push(hstack, elt='elt1')
+        hstack.push('elt1')
+        hstack.push('elt3', level=1)
+        self.assertEqual(hstack.getStackContent(), {0:['elt1'],
+                                                    1:['elt3']})
+
+        # Insert in between 0 and 1
+        # current_level is 0
+        self.assertEqual(hstack.getCurrentLevel(), 0)
+        hstack.push('elt2', low_level=0, high_level=1)
+        self.assertEqual(hstack.getStackContent(), {0:['elt1'],
+                                                    1:['elt2'],
+                                                    2:['elt3'],
+                                                    })
+        # Change current level and try to insert
+        # 0 is the edge level where we need to test
+        hstack.doIncLevel()
+        self.assertEqual(hstack.getCurrentLevel(), 1)
+        hstack.push('elt4', low_level=0, high_level=1)
+        self.assertEqual(hstack.getStackContent(), {-1:['elt1'],
+                                                    0:['elt4'],
+                                                    1:['elt2'],
+                                                    2:['elt3'],
+                                                    })
+        hstack.push('elt5', low_level=2, high_level=3)
+        self.assertEqual(hstack.getStackContent(), {-1:['elt1'],
+                                                    0:['elt4'],
+                                                    1:['elt2'],
+                                                    2:['elt3'],
+                                                    3:['elt5'],
+                                                    })
+        hstack.push('elt6', low_level=-2, high_level=-1)
+        self.assertEqual(hstack.getStackContent(), {-2:['elt6'],
+                                                    -1:['elt1'],
+                                                    0:['elt4'],
+                                                    1:['elt2'],
+                                                    2:['elt3'],
+                                                    3:['elt5'],
+                                                    })
+        hstack.push('elt7', low_level=-4, high_level=-3)
+        self.assertEqual(hstack.getStackContent(), {-2:['elt6'],
+                                                    -1:['elt1'],
+                                                    0:['elt4'],
+                                                    1:['elt2'],
+                                                    2:['elt3'],
+                                                    3:['elt5'],
+                                                    })
+        hstack.push('elt7', low_level=4, high_level=5)
+        self.assertEqual(hstack.getStackContent(), {-2:['elt6'],
+                                                    -1:['elt1'],
+                                                    0:['elt4'],
+                                                    1:['elt2'],
+                                                    2:['elt3'],
+                                                    3:['elt5'],
+                                                    })
 
 def test_suite():
     loader = unittest.TestLoader()

@@ -33,12 +33,6 @@ class ISimpleWorkflowStack(Interface.Base):
         """Deep copy. Just to call a clean API while calling getCopy()
         """
 
-    def pop(element=None):
-        """Remove a given element
-
-        O : failed
-        1 : sucsess
-        """
     def getStackContent():
         """Return the stack content
         """

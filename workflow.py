@@ -840,7 +840,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
                 stackdef = new_sdef.getStackDefinitionFor(wf_var)
                 if stackdef is not None:
                     ds = stacks.get(wf_var)
-                    stacks[wf_var] = stackdef.doIncLevel(ds)
+                    stacks[wf_var] = stackdef._doIncLevel(ds)
 
         if TRANSITION_BEHAVIOR_WORKFLOW_DOWN in behavior:
 
@@ -910,7 +910,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
                 stackdef = new_sdef.getStackDefinitionFor(wf_var)
                 if stackdef is not None:
                     ds = stacks.get(wf_var)
-                    stacks[wf_var] = stackdef.doDecLevel(ds)
+                    stacks[wf_var] = stackdef._doDecLevel(ds)
 
 
         if TRANSITION_BEHAVIOR_WORKFLOW_RESET in behavior:
@@ -982,7 +982,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
                 stackdef = new_sdef.getStackDefinitionFor(wf_var)
                 if stackdef is not None:
                     ds = stacks.get(wf_var)
-                    stacks[wf_var] = stackdef.resetStack(ds, **kwargs)
+                    stacks[wf_var] = stackdef._reset(ds, **kwargs)
 
         #
         # Update variables.
