@@ -64,7 +64,6 @@ class SimpleStack(Stack):
         """Default constructor
         """
         Stack.__init__(self, **kw)
-        self.container = []
 
     def __deepcopy__(self, ob):
         """Deep copy. Just to call a clean API while calling getCopy()
@@ -101,6 +100,14 @@ class SimpleStack(Stack):
         else:
             return -2
 
+    def _getStackElementIndex(self, id):
+        i = 0
+        for each in self.container:
+            if id == each():
+                return i
+            i += 1
+        return -1
+
     def removeElement(self, element=None):
         """Remove a given element
 
@@ -108,18 +115,22 @@ class SimpleStack(Stack):
         1 : sucsess
         """
         if element is not None:
-            try:
-                index = self.container.index(element)
-                del self.container[index]
-                return 1
-            except ValueError:
-                pass
+            index = self._getStackElementIndex(element)
+            if index >= 0:
+                try:
+                    del self.container[index]
+                    return 1
+                except IndexError:
+                    pass
         return 0
 
     def getStackContent(self, level=None):
         """Return the stack content
         """
-        return self.container
+        res = []
+        for each in self.container:
+            res.append(each())
+        return res
 
     def getCopy(self):
         """Duplicate self
@@ -240,6 +251,14 @@ class HierarchicalStack(SimpleStack):
 
     ###################################################
 
+    def getStackContent(self):
+        """Return the stack content
+        """
+        res = {}
+        for clevel in self.getAllLevels():
+            res[clevel] = self.getLevelContentValues(level=clevel)
+        return res
+
     def getCurrentLevel(self):
         """Return the current level
         """
@@ -277,7 +296,15 @@ class HierarchicalStack(SimpleStack):
                 value = []
         else:
             value = self.getLevelContent(level=self.getCurrentLevel())
+
         return value
+
+    def getLevelContentValues(self, level=None):
+        content = self.getLevelContent(level)
+        res = []
+        for each in content:
+            res.append(each())
+        return res
 
     def getAllLevels(self):
         """Return all the existing levels with elts
@@ -307,13 +334,13 @@ class HierarchicalStack(SimpleStack):
             return 0
 
         content_level = self.getLevelContent(level)
-        if elt not in content_level:
+        content_level_values = self.getLevelContentValues(level)
+        if elt not in content_level_values:
+            elt = self._prepareElement(elt)
             content_level.append(elt)
+            self.container[level] = content_level
         else:
             return -2
-
-        self.container[level] = content_level
-
         return 1
 
     def pop(self, level=None):
@@ -329,7 +356,20 @@ class HierarchicalStack(SimpleStack):
         last = None
         if len(levelc) > 0:
             last = levelc[len(levelc)-1]
+
+        if last is not None:
+            last = last()
         return self.removeElement(elt=last, level=level)
+
+    def _getStackElementIndex(self, id, level=None):
+        if level is None:
+            level = self.getCurrentLevel()
+        i = 0
+        for each in self.getLevelContent(level=level):
+            if id == each():
+                return i
+            i += 1
+        return -1
 
     def removeElement(self, elt=None, level=None):
         """Remove elt at given level
@@ -342,12 +382,14 @@ class HierarchicalStack(SimpleStack):
             return 0
         if level is None:
             level = self.getCurrentLevel()
-        try:
-            index = self.getLevelContent(level=level).index(elt)
-            del self.getLevelContent(level=level)[index]
-            return elt
-        except ValueError:
-            pass
+        index = self._getStackElementIndex(elt, level)
+        if index >= 0:
+            try:
+                elt_obj = self.getLevelContent(level=level)[index]
+                del self.getLevelContent(level=level)[index]
+                return elt_obj
+            except KeyError:
+                pass
         return -1
 
     ################################################################
