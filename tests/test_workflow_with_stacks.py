@@ -705,6 +705,9 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
             if k == 'user:toto':
                 self.assert_('WorkspaceManager' in v)
 
+        # Manager can't manage the stack
+        self.assert_(not wftool.canManageStack(content, 'Pilots'))
+
         #
         # Delegate tata
         #
@@ -744,6 +747,57 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         for k, v in lc.items():
             if k in ('user:toto', 'user:tata',):
                 self.assert_('WorkspaceManager' in v)
+
+        # Manager can't manage the stack
+        self.assert_(not wftool.canManageStack(content, 'Pilots'))
+
+        #
+        # Delegate Manager
+        #
+
+        wftool.doActionFor(content, 'delegate',
+                           current_wf_var_id='Pilots',
+                           member_ids=['manager'],
+                           levels=[0])
+        pstacks = wftool.getStackFor(content, 'Pilots')
+
+        # Check stack status
+        self.assert_(pstacks is not None)
+        self.assert_(pstacks.getStackContent())
+        self.assertEqual({0:['toto', 'tata', 'manager']},
+                         pstacks.getStackContent())
+
+        # Check local roles mapping
+        pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
+        self.assert_(pstackdef.listLocalRoles(pstacks))
+        self.assertEqual(pstackdef.listLocalRoles(pstacks),
+                         {'toto': ('WorkspaceManager',),
+                          'manager': ('WorkspaceManager',),
+                          'tata': ('WorkspaceManager',),
+                          })
+
+        # Check the former local role mapping
+        flrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Pilots')
+
+        # It's been updated for next time
+        self.assertEqual(flrm,
+                         {'toto': ('WorkspaceManager',),
+                          'manager': ('WorkspaceManager',),
+                          'tata': ('WorkspaceManager',)},
+                         )
+
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        for k, v in lc.items():
+            if k in ('user:toto', 'user:tata',):
+                self.assert_('WorkspaceManager' in v)
+
+        # Manager can't manage the stack
+        self.assert_(wftool.canManageStack(content, 'Pilots'))
+        
 
 def test_suite():
     suite = unittest.TestSuite()
