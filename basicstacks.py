@@ -94,7 +94,8 @@ class SimpleStack(Stack):
     def __deepcopy__(self, ob):
         """Deep copy. Just to call a clean API while calling getCopy()
 
-        Cope with mutable attrs to break reference
+        Cope with mutable attrs to break reference, and deep copy stack
+        elements too.
         """
         copy = WorkflowStackRegistry.makeWorkflowStackTypeInstance(
             self.meta_type)
@@ -103,7 +104,7 @@ class SimpleStack(Stack):
                 # Break reference with mutable structure
                 new_container_ref = PersistentList()
                 for each in value:
-                    new_container_ref.append(each)
+                    new_container_ref.append(each.getCopy())
                 copy.__dict__[attr] = new_container_ref
             else:
                 copy.__dict__[attr] = value
@@ -316,6 +317,9 @@ class HierarchicalStack(SimpleStack):
 
     def __deepcopy__(self, ob):
         """Deep copy. Just to call a clean API while calling getCopy()
+
+        Cope with mutable attrs to break reference, and deep copy stack
+        elements too.
         """
         copy = WorkflowStackRegistry.makeWorkflowStackTypeInstance(
             self.meta_type)
@@ -324,7 +328,8 @@ class HierarchicalStack(SimpleStack):
                 # Break reference with mutable structure
                 new_container_ref = PersistentMapping()
                 for key in value.keys():
-                    new_container_ref[key] = value[key]
+                    new_key_value = [x.getCopy() for x in value[key]]
+                    new_container_ref[key] = new_key_value
                 copy.__dict__[attr] = new_container_ref
             else:
                 copy.__dict__[attr] = value
