@@ -38,16 +38,6 @@ class IWorkflowStackDefinition(Interface.Base):
         """Returns the workflow variable id mapping this configuration
         """
 
-    def getMasterRole():
-        """Returns the master role for this stack definition.
-
-        The master role is the role
-        """
-
-    def setMasterRole(role_id):
-        """Set the master role for this stack definition.
-        """
-
     def _push(ds, **kw):
         """Push delegatees
 
