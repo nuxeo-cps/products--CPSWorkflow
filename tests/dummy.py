@@ -4,6 +4,9 @@
 from OFS.SimpleItem import SimpleItem
 from OFS.Folder import Folder
 
+from Products.CPSCore.CPSBase import CPSBaseFolder
+from Products.CPSCore.CPSBase import CPSBaseDocument
+
 class DummyRoot(Folder):
     def _getProductRegistryData(self, name):
         if name == 'ac_permissions':
@@ -39,7 +42,7 @@ class DummyPortalUrl(SimpleItem):
     def getPortalObject(self):
         return self.aq_parent
 
-class Dummy(SimpleItem):
+class Dummy(CPSBaseDocument):
     def __init__(self, id, data=None):
         self._id = id
         self._data = data

@@ -34,12 +34,16 @@ from Testing import ZopeTestCase
 ZopeTestCase.installProduct('CMFCore')
 ZopeTestCase.installProduct('CMFDefault')
 ZopeTestCase.installProduct('MailHost')
+
+ZopeTestCase.installProduct('CPSCore')
 ZopeTestCase.installProduct('CPSWorkflow')
 
 import Zope
 import unittest
 
-from OFS.Folder import Folder
+from Acquisition import aq_parent, aq_inner
+
+from Products.CPSCore.CPSBase import CPSBaseFolder as Folder
 from Products.CMFDefault.Portal import manage_addCMFSite
 
 from Products.CMFCore.utils import getToolByName
@@ -91,6 +95,17 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         self.ttool = getToolByName(self.portal, 'portal_types')
         self.wftool = getToolByName(self.portal, 'portal_workflow')
 
+        # Proxy / repo tools
+        self.portal.manage_addProduct['CPSCore'].manage_addTool(
+            'CPS Proxies Tool')
+        self.portal.manage_addProduct['CPSCore'].manage_addTool(
+            'CPS Repository Tool')
+
+        # Set the CPS Membership tool for group support
+        self.portal.manage_delObjects(['portal_membership'])
+        self.portal.manage_addProduct['CPSCore'].manage_addTool(
+            'CPS Membership Tool')
+
         # Set workflow definitions that we gonna test
         self._makeWorkflows()
 
@@ -100,8 +115,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
     ####################################################################
 
     def _makeTree(self):
-        f = Folder()
-        f.id = 'f'
+        f = Folder('f')
         self.portal._setObject(f.id, f)
         f = self.portal.f
         dummy = DummyContent('dummy')
@@ -115,9 +129,39 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         config.setChain('File', ('wf',))
 
         # Create a dummy File objects
-        f.invokeFactory('File','dummy')
+        self.wftool.invokeFactoryFor(f, 'File','dummy')
 
     ######################################################################
+
+    def _setStackDefinitionsFor(self, s):
+
+        # Add Pilots stack
+        s.addDelegateesWorkflowVariableInfo(
+            'Hierarchical Stack Definition',
+            'Hierarchical Stack',
+            'Pilots',
+            'WorkspaceManager',
+            'WorkspaceReader',
+            'WorkspaceMember',
+            ['Associates', 'Observers'],
+            )
+
+        # Add Associates stack
+        s.addDelegateesWorkflowVariableInfo(
+            'Simple Stack Definition',
+            'Simple Stack',
+            'Associates',
+            'WorkspaceMember',
+            ['Observers']
+            )
+
+        # Add Observers stack
+        s.addDelegateesWorkflowVariableInfo(
+            'Simple Stack Definition',
+            'Simple Stack',
+            'Observers',
+            'WorkspaceMember',
+            )
 
     def _makeWorkflows(self):
 
@@ -135,29 +179,6 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         wftool._setObject(id, wf)
         wf = wftool.wf
-
-        #
-        # STACKS
-        #
-
-        pilots = HierarchicalStackDefinition(
-            DATA_STRUCT_STACK_TYPE_HIERARCHICAL,
-            'Pilots',
-            ass_local_role='WorkspaceManager',
-            up_ass_local_role='WorkspaceReader',
-            down_ass_local_role='WorkspaceMember',
-            # the pilots stack can manage the Associates and Observers stacks
-            manager_stack_ids=['Associates', 'Observers'])
-        associates = SimpleStackDefinition(
-            DATA_STRUCT_STACK_TYPE_LIFO,
-            'Associates',
-            ass_local_role='WorkspaceMember',
-            manager_stack_ids=['Pilots',])
-        observers = SimpleStackDefinition(
-            DATA_STRUCT_STACK_TYPE_LIFO,
-            'Observers',
-            ass_local_role='WorkspaceReader',
-            manager_stack_ids=['Pilots',])
 
         #
         # STATES
@@ -179,47 +200,6 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                                          'writing',
                                          ))
 
-        ### Check the initial properties
-        ##for state in states:
-        ##    s = wf.states.get(state)
-        ##    self.assertEqual(s.title, '')
-        ##    self.assertEqual(s.description, '')
-        ##    self.assertEqual(s.transitions, ())
-        ##    self.assertEqual(s.state_behaviors, ())
-        ##    self.assertEqual(s.state_delegatees_vars_info, {})
-        ##    self.assertEqual(s.push_on_workflow_variable, [])
-        ##    self.assertEqual(s.pop_on_workflow_variable, [])
-        ##    self.assertEqual(s.returned_up_hierarchy_on_workflow_variable, [])
-        ##    self.assertEqual(s.workflow_up_on_workflow_variable,  [])
-        ##    self.assertEqual(s.workflow_down_on_workflow_variable, [])
-        ##    self.assertEqual(s.workflow_lock_on_workflow_variable, [])
-        ##    self.assertEqual(s.workflow_unlock_on_workflow_variable, [])
-        ##    self.assertEqual(s.workflow_reset_on_workflow_variable, [])
-
-
-        # Set workflow stacks to states
-        for state in states:
-            s = wf.states.get(state)
-            for id, stack in (('pilots',pilots),
-                              ('associates', associates),
-                              ('observers', observers)
-                              ):
-                s.state_delegatees_vars_info[id] = stack
-
-        # Test stack fixture
-        for state in states:
-            s = wf.states.get(state)
-            stackdefs = s.getDelegateesVarsInfo()
-            self.assertNotEqual(stackdefs,
-                                {})
-            self.assert_(len(stackdefs.keys()) == 3)
-
-            for id, stack in (('pilots',pilots),
-                              ('associates', associates),
-                              ('observers', observers)
-                              ):
-                self.assert_(stackdefs[id] == stack)
-
         # Add behaviors to states
         s = wf.states.get('delegating')
         s.setProperties(
@@ -240,6 +220,9 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                                                     'Observers'],
             workflow_reset_on_workflow_variable = ['Pilots', 'Associates',
                                                    'Observers'],)
+
+
+        self._setStackDefinitionsFor(s)
 
         s = wf.states.get('writing')
         s.setProperties(
@@ -289,19 +272,6 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
             workflow_reset_on_workflow_variable = ['Pilots', 'Associates',
                                                    'Observers'],)
 
-        # Test stack defs after property changed
-        for state in states:
-            s = wf.states.get(state)
-            stackdefs = s.getDelegateesVarsInfo()
-            self.assertNotEqual(stackdefs,
-                                {})
-            self.assert_(len(stackdefs.keys()) == 3)
-
-            for id, stack in (('pilots',pilots),
-                              ('associates', associates),
-                              ('observers', observers)
-                              ):
-                self.assert_(stackdefs[id] == stack)
 
         #
         # TRANSITIONS
@@ -311,23 +281,22 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         wf.transitions.addTransition('create')
         t = wf.transitions.get('create')
         t.setProperties('title',
-                        'create',
+                        'delegating',
                         trigger_type=TRIGGER_USER_ACTION,
-                        transition_behavior=(tbdict[TRANSITION_INITIAL_CREATE],
+                        transition_behavior=(TRANSITION_INITIAL_CREATE,
                                              ))
 
         # Delegate
         wf.transitions.addTransition('delegate')
         t = wf.transitions.get('delegate')
         t.setProperties('title',
-                        'delegate',
+                        'delegating',
                         trigger_type=TRIGGER_USER_ACTION,
-                        transition_behavior=('behavior_push_delegatees',
-                                             'behavior_pop_delegatees',
-                                             'behavior_workflow_up',
-                                             'behavior_workflow_lock',
-                                             'behavior_workflow_unlock',
-                                             'behavior_workflow_reset'))
+                        transition_behavior=(
+            TRANSITION_BEHAVIOR_PUSH_DELEGATEES,
+            ),
+                        push_on_workflow_variable=['Pilots'],
+                        )
 
         # to_writing
         wf.transitions.addTransition('to_writing')
@@ -435,6 +404,13 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         wf.variables.setStateVar('review_state')
 
         #
+        # Set transitions on states
+        #
+
+        s = wf.states.get('delegating')
+        s.transitions += ('delegate',)
+
+        #
         # Workflow for the container
         #
 
@@ -498,24 +474,24 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         keys = stackdefs.keys()
         keys.sort()
         self.assert_(len(keys) == 3)
-        self.assertEqual(keys, ['associates', 'observers', 'pilots'])
-        self.assert_(isinstance(stackdefs['associates'],
+        self.assertEqual(keys, ['Associates', 'Observers', 'Pilots'])
+        self.assert_(isinstance(stackdefs['Associates'],
                                 SimpleStackDefinition))
-        self.assert_(isinstance(stackdefs['observers'],
+        self.assert_(isinstance(stackdefs['Observers'],
                                 SimpleStackDefinition))
-        self.assert_(isinstance(stackdefs['pilots'],
+        self.assert_(isinstance(stackdefs['Pilots'],
                                 HierarchicalStackDefinition))
-        self.assertNotEqual(stackdefs['associates'], None)
-        self.assertNotEqual(stackdefs['observers'], None)
-        self.assertNotEqual(stackdefs['pilots'], None)
+        self.assertNotEqual(stackdefs['Associates'], None)
+        self.assertNotEqual(stackdefs['Observers'], None)
+        self.assertNotEqual(stackdefs['Pilots'], None)
 
         #
         # getStackDefinitionFor(self, ob, wf_var_id='')
         #
 
-        assos = wftool.getStackDefinitionFor(content, 'associates')
-        obs = wftool.getStackDefinitionFor(content, 'observers')
-        pilots = wftool.getStackDefinitionFor(content, 'pilots')
+        assos = wftool.getStackDefinitionFor(content, 'Associates')
+        obs = wftool.getStackDefinitionFor(content, 'Observers')
+        pilots = wftool.getStackDefinitionFor(content, 'Pilots')
 
         self.assert_(isinstance(assos,
                                 SimpleStackDefinition))
@@ -528,17 +504,18 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         self.assertNotEqual(pilots, None)
 
         # Test consistency
-        self.assertEqual( wftool.getStackDefinitionFor(content, 'associates'),
-                          wftool.getStackDefinitionsFor(content)['associates'])
-        self.assertEqual( wftool.getStackDefinitionFor(content, 'observers'),
-                          wftool.getStackDefinitionsFor(content)['observers'])
-        self.assertEqual( wftool.getStackDefinitionFor(content, 'pilots'),
-                          wftool.getStackDefinitionsFor(content)['pilots'])
+        self.assertEqual( wftool.getStackDefinitionFor(content, 'Associates'),
+                          wftool.getStackDefinitionsFor(content)['Associates'])
+        self.assertEqual( wftool.getStackDefinitionFor(content, 'Observers'),
+                          wftool.getStackDefinitionsFor(content)['Observers'])
+        self.assertEqual( wftool.getStackDefinitionFor(content, 'Pilots'),
+                          wftool.getStackDefinitionsFor(content)['Pilots'])
 
         # Stack doesn't exist
 
         self.assertEqual(wftool.getStackDefinitionFor(content), None)
-        self.assertEqual(wftool.getStackDefinitionFor(content, 'Pas bien'), None)
+        self.assertEqual(wftool.getStackDefinitionFor(content, 'Pas bien'),
+                         None)
 
         #
         # getDelegateesDataStructures(self, ob)
@@ -550,28 +527,30 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         keys = ds.keys()
         keys.sort()
         self.assert_(len(keys) == 3)
-        self.assertEqual(keys, ['associates', 'observers', 'pilots'])
+        self.assertEqual(keys, ['Associates', 'Observers', 'Pilots'])
 
+        # it's initialized within wftool._changeStatusOf()
         for v in ds.values():
-            self.assertEqual(v, None)
+            self.assertNotEqual(v, None)
 
         #
         # def getDelegateesDataStructureFor(self, ob, stack_id)
         #
 
-        ds_assos = wftool.getStackFor(content, 'associates')
-        ds_obs = wftool.getStackFor(content, 'observers')
-        ds_pilots = wftool.getStackFor(content, 'pilots')
+        ds_assos = wftool.getStackFor(content, 'Associates')
+        ds_obs = wftool.getStackFor(content, 'Observers')
+        ds_pilots = wftool.getStackFor(content, 'Pilots')
 
-        self.assertEqual(ds_assos, None)
-        self.assertEqual(ds_obs, None)
-        self.assertEqual(ds_pilots, None)
+        # it's initialized within wftool._changeStatusOf()
+        self.assertNotEqual(ds_assos, None)
+        self.assertNotEqual(ds_obs, None)
+        self.assertNotEqual(ds_pilots, None)
 
         # concistency
-        self.assertEqual(wftool.getStackFor(content, 'associates'),
-                         wftool.getStacks(content)['associates'])
-        self.assertEqual(wftool.getStackFor(content, 'observers'),
-                         wftool.getStacks(content)['observers'])
+        self.assertEqual(wftool.getStackFor(content, 'Associates'),
+                         wftool.getStacks(content)['Associates'])
+        self.assertEqual(wftool.getStackFor(content, 'Observers'),
+                         wftool.getStacks(content)['Observers'])
 
     def test_current_state(self):
 
@@ -595,21 +574,21 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         keys = stackdefs.keys()
         keys.sort()
         self.assert_(isinstance(stackdefs, DictType))
-        self.assertEqual(keys, ['associates', 'observers', 'pilots'])
-        self.assert_(isinstance(stackdefs['associates'],
+        self.assertEqual(keys, ['Associates', 'Observers', 'Pilots'])
+        self.assert_(isinstance(stackdefs['Associates'],
                                 SimpleStackDefinition))
-        self.assert_(isinstance(stackdefs['observers'],
+        self.assert_(isinstance(stackdefs['Observers'],
                                 SimpleStackDefinition))
-        self.assert_(isinstance(stackdefs['pilots'],
+        self.assert_(isinstance(stackdefs['Pilots'],
                                 HierarchicalStackDefinition))
 
         # Check consistency
-        self.assertEqual(current_state.getDelegateesVarInfoFor('associates'),
-                         stackdefs['associates'])
-        self.assertEqual(current_state.getDelegateesVarInfoFor('observers'),
-                         stackdefs['observers'])
-        self.assertEqual(current_state.getDelegateesVarInfoFor('pilots'),
-                         stackdefs['pilots'])
+        self.assertEqual(current_state.getDelegateesVarInfoFor('Associates'),
+                         stackdefs['Associates'])
+        self.assertEqual(current_state.getDelegateesVarInfoFor('Observers'),
+                         stackdefs['Observers'])
+        self.assertEqual(current_state.getDelegateesVarInfoFor('Pilots'),
+                         stackdefs['Pilots'])
 
         # Check behaviors given this workflow definition
         behaviors = current_state.state_behaviors
@@ -638,7 +617,100 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         allowed_transitions = current_state.getTransitions()
         # Not yet initialized
-        self.assertEqual(allowed_transitions, ())
+        self.assertEqual(allowed_transitions, ('delegate',))
+
+    def test_pilots_hierarchical_alone(self):
+
+        wftool = self.wftool
+        content = getattr(self.portal.f, 'dummy')
+
+        self.assertEqual(wftool.getInfoFor(content, 'review_state'),
+                         'delegating')
+
+        # Check current state fixtures
+        wf = wftool['wf']
+        current_state = wf._getWorkflowStateOf(content)
+        self.assertEqual(current_state.getId(), 'delegating')
+
+        # Check stack intialization
+        pstacks = wftool.getStackFor(content, 'Pilots')
+        self.assert_(pstacks is not None)
+
+        #
+        # Delegate toto
+        #
+
+        wftool.doActionFor(content, 'delegate',
+                           current_wf_var_id='Pilots',
+                           member_ids=['toto'],
+                           levels=[0])
+        pstacks = wftool.getStackFor(content, 'Pilots')
+
+        # Check stack status
+        self.assert_(pstacks is not None)
+        self.assert_(pstacks.getStackContent())
+        self.assertEqual({0:['toto']}, pstacks.getStackContent())
+
+        # Check local roles mapping
+        pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
+        self.assert_(pstackdef.listLocalRoles(pstacks))
+        self.assertEqual(pstackdef.listLocalRoles(pstacks),
+                         {'toto': ('WorkspaceManager',)})
+
+        # Check the former local role mapping
+        flrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Pilots')
+        # It's been updated for next time
+        self.assertEqual(flrm,
+                         {'toto': ('WorkspaceManager',)})
+
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        for k, v in lc.items():
+            if k == 'user:toto':
+                self.assert_('WorkspaceManager' in v)
+
+        #
+        # Delegate tata
+        #
+
+        wftool.doActionFor(content, 'delegate',
+                           current_wf_var_id='Pilots',
+                           member_ids=['tata'],
+                           levels=[0])
+        pstacks = wftool.getStackFor(content, 'Pilots')
+
+        # Check stack status
+        self.assert_(pstacks is not None)
+        self.assert_(pstacks.getStackContent())
+        self.assertEqual({0:['toto', 'tata']}, pstacks.getStackContent())
+
+        # Check local roles mapping
+        pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
+        self.assert_(pstackdef.listLocalRoles(pstacks))
+        self.assertEqual(pstackdef.listLocalRoles(pstacks),
+                         {'toto': ('WorkspaceManager',),
+                          'tata': ('WorkspaceManager',)})
+
+        # Check the former local role mapping
+        flrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Pilots')
+
+        # It's been updated for next time
+        self.assertEqual(flrm,
+                         {'toto': ('WorkspaceManager',),
+                          'tata': ('WorkspaceManager',)},
+                         )
+
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        for k, v in lc.items():
+            if k in ('user:toto', 'user:tata',):
+                self.assert_('WorkspaceManager' in v)
 
 def test_suite():
     suite = unittest.TestSuite()
