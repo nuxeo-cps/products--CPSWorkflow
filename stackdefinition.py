@@ -123,6 +123,16 @@ class StackDefinition(SimpleItem):
         """
         if isinstance(role_id, StringType):
             self._master_role = role_id
+            
+    security.declarePublic('getManagerStackIds')
+    def getManagerStackIds(self):
+        """Returns the ids of other stacks for which the people within those
+        can manage this stack. For instance in the common use case members
+        within the 'Pilots' stack can manage 'Associates' and 'Watchers'
+        stacks.
+        """
+        # XXX has to be refactore 
+        return self.manager_stack_ids
 
     #
     # API : Lock / Unlock
@@ -289,15 +299,6 @@ class StackDefinition(SimpleItem):
         It will depend on the stack data structure.  We need the acl_users in
         use and the member_ship tool since I don't want to explicit acquicition
         in here
-        """
-        raise NotImplementedError
-
-    security.declarePublic('getManagerStackIds')
-    def getManagerStackIds(self):
-        """Returns the ids of other stacks for which the people within those
-        can manage this stack. For instance in the common use case members
-        within the 'Pilots' stack can manage 'Associates' and 'Watchers'
-        stacks.
         """
         raise NotImplementedError
 
