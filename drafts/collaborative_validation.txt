@@ -1,0 +1,51 @@
+==========================================
+Collaborative Validation with SimpleStacks 
+==========================================
+
+$Id$
+Author: Olivier Grisel <og@nuxeo.com>
+
+This draft presents a use case with two SimpleStack objects to implement
+a collaborative validation state in the workspaces.
+
+This use case comes from the BRIQUES project (private CVS only).
+
+Use case:
+---------
+
+The normal workflow in workspaces is::
+
+  [create] -> (work) -> [copy-submit]
+
+Our goal is two add a validation step before the submission in order to ask 
+other WorkspaceMembers to review the document before submission::
+
+  [create] -> (work) -> [submit_to_validation] -> (collaborative_validation) ->
+  [auto_validate] -> (validated) -> [copy-submit] 
+
+The `(collaborative_validation)` state is here to ask several
+WorkspaceMembers to review the document before submission to the sections. Any
+WorkspaceMember can choose to add other WorkspaceMembers to the list of
+requested reviewers. Once they all agree to validate the document, the 
+`[auto_validate]` transition is triggered and the document is ready for
+submission.
+
+Implementation
+--------------
+
+Let us zoom on the interesting part of the workflow::
+
+  [submit_to_validation] -> (collaborative_validation) -> [auto_validate]
+                                |              A
+                                |              |
+                                ---[validate]---
+
+The `(collaborative_validation)` state holds two stacks respectively named 
+`HasToValidate` and `DidValidate`. WorkspaceMembers can add other
+WorkspaceMembers in the `HasToValidate` stack. People in this stack can then
+access then choose to trigger the inplace `[validate]` actions that adds them to
+the second stack. Each time the `[validate]` transitions is triggered, the two
+stacks contents are compared. If they are equals, the `[auto_validate]`
+transition is automatically triggered.
+
+
