@@ -46,7 +46,7 @@ from DateTime import DateTime
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
 from OFS.SimpleItem import SimpleItem
-from Acquisition import aq_parent, aq_inner, Implicit
+from Acquisition import aq_parent, aq_inner
 from ZODB.PersistentMapping import PersistentMapping
 
 from Products.CMFCore.permissions import View, ModifyPortalContent
@@ -67,6 +67,9 @@ class StackDefinition(SimpleItem):
 
     security = ClassSecurityInfo()
 
+    _isLocked = 0
+    manager_stack_ids = []
+
     def __init__(self,
                  stack_type,
                  wf_var_id,
@@ -77,13 +80,8 @@ class StackDefinition(SimpleItem):
         stack_type   : Data Structure type holding the deleggatees
         wf_var_id       : Workflow variable holding the ds instance
         """
-        self._isLocked = 0
         self.stack_type = stack_type
         self.wf_var_id = wf_var_id
-
-        # Ids of the other stacks in which the elements within those are able
-        # to manage this stack.
-        self.manager_stack_ids = []
 
         # Fetch from the kw the argument we are interested in
         for k, v in kw.items():
@@ -92,10 +90,9 @@ class StackDefinition(SimpleItem):
 
         # Managed Roles
         self._managed_role_exprs = PersistentMapping()
-        self._master_role = 'Manager'
 
-        # Containement
-        self.parent = None
+        # XXX change this for a guard
+        self._master_role = 'Manager'
 
     #
     # Boring accessors
