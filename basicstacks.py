@@ -30,10 +30,11 @@ WorkfloStackDefinitions.
 import copy
 
 from Globals import InitializeClass
-from AccessControl import ClassSecurityInfo
+from AccessControl import ClassSecurityInfo, getSecurityManager
+from Acquisition import aq_parent, aq_inner
 
-from ZODB.PersistentMapping import PersistentMapping
 from ZODB.PersistentList import PersistentList
+from ZODB.PersistentMapping import PersistentMapping
 
 from stack import Stack
 from stackregistries import WorkflowStackRegistry
@@ -72,9 +73,9 @@ class SimpleStack(Stack):
         """
         copy = SimpleStack()
         for attr, value in self.__dict__.items():
-            if attr == 'container':
+            if attr == '_elements_container':
                 # Break reference with mutable structure
-                new_container_ref = []
+                new_container_ref = PersistentList()
                 for each in value:
                     new_container_ref.append(each)
                 copy.__dict__[attr] = new_container_ref
@@ -99,7 +100,7 @@ class SimpleStack(Stack):
 
     def _getStackElementIndex(self, id):
         i = 0
-        for each in self.container:
+        for each in self._getElementsContainer():
             if id == each():
                 return i
             i += 1
@@ -115,7 +116,7 @@ class SimpleStack(Stack):
             index = self._getStackElementIndex(element)
             if index >= 0:
                 try:
-                    del self.container[index]
+                    del self._getElementsContainer()[index]
                     return 1
                 except IndexError:
                     pass
@@ -123,10 +124,16 @@ class SimpleStack(Stack):
 
     def getStackContent(self, level=None):
         """Return the stack content
+
+        It returns strings but not objects
         """
         res = []
-        for each in self.container:
-            res.append(each())
+        for each in self._getElementsContainer():
+            if each.getGuard().check(getSecurityManager(),
+                                     None, aq_parent(aq_inner(self))):
+                res.append(each())
+            else:
+                res.append('not_visible')
         return res
 
     def getCopy(self):
@@ -135,6 +142,19 @@ class SimpleStack(Stack):
         Return a new object instance of the same type
         """
         return copy.deepcopy(self)
+
+    def replace(self, old, new):
+        """Replace old with new within the elements container
+
+        It supports both string and element objects as input
+        """
+        new_elt = self._prepareElement(new)
+        old_elt = self._prepareElement(old)
+        try:
+            old_elt_index = self.getStackContent().index(old_elt())
+            self._elements_container[old_elt_index] = new_elt
+        except ValueError:
+            pass
 
 InitializeClass(SimpleStack)
 
@@ -166,7 +186,7 @@ class HierarchicalStack(SimpleStack):
           - 1 down
         """
         SimpleStack.__init__(self, **kw)
-        self.container = {}
+        self._elements_container = PersistentMapping()
         self.level = 0
         self.direction = 1
 
@@ -175,9 +195,9 @@ class HierarchicalStack(SimpleStack):
         """
         copy = HierarchicalStack()
         for attr, value in self.__dict__.items():
-            if attr == 'container':
+            if attr == '_elements_container':
                 # Break reference with mutable structure
-                new_container_ref = {}
+                new_container_ref = PersistentMapping()
                 for key in value.keys():
                     new_container_ref[key] = value[key]
                 copy.__dict__[attr] = new_container_ref
@@ -295,7 +315,7 @@ class HierarchicalStack(SimpleStack):
         """
         if level is not None:
             try:
-                value = self.container[level]
+                value = self._getElementsContainer()[level]
             except KeyError:
                 value = []
         else:
@@ -316,7 +336,7 @@ class HierarchicalStack(SimpleStack):
         It's returned sorted
         """
         returned = []
-        levels = self.container.keys()
+        levels = self._getElementsContainer().keys()
         for level in levels:
             levelc = self.getLevelContent(level=level)
             if levelc != []:
@@ -342,7 +362,7 @@ class HierarchicalStack(SimpleStack):
         if elt not in content_level_values:
             elt = self._prepareElement(elt)
             content_level.append(elt)
-            self.container[level] = content_level
+            self._getElementsContainer()[level] = content_level
         else:
             return -2
         return 1
@@ -396,6 +416,21 @@ class HierarchicalStack(SimpleStack):
                 pass
         return -1
 
+    def replace(self, old, new):
+        """Replace old with new within the elements container
+
+        It supports both string and element objects as input
+        """
+        new_elt = self._prepareElement(new)
+        old_elt = self._prepareElement(old)
+        for level in self.getAllLevels():
+            try:
+                index_level = self.getLevelContent(
+                    level=level).index(old_elt())
+                self._elements_container[level][index_level] = new_elt
+            except ValueError:
+                pass
+            
     ################################################################
 
     def getCopy(self):
