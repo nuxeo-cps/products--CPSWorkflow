@@ -150,48 +150,34 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
             'Hierarchical Stack Definition',
             'Hierarchical Stack',
             'Pilots',
+            managed_role_exprs= {'WorkspaceManager': "python:level == stack.getCurrentLevel() and 1 or nothing",
+                                 'WorkspaceMember' : "python:level < stack.getCurrentLevel() and 1 or nothing",
+                                 'WorkspaceReader' : "python:level > stack.getCurrentLevel() and 1 or nothing",
+                                 },
+            master_role= 'WorkspaceManager',
             manager_stack_ids=['Associates', 'Observers'],
             )
-
-        stackdef = s.getStackDefinitionFor('Pilots')
-
-        # Add expressions
-        stackdef.addManagedRole('WorkspaceManager',
-                                "python:level == stack.getCurrentLevel() and 1 or nothing",
-                                master_role=1)
-        stackdef.addManagedRole('WorkspaceMember',
-                                    "python:level < stack.getCurrentLevel() and 1 or nothing",
-                                    master_role=0)
-        stackdef.addManagedRole('WorkspaceReader',
-                                "python:level > stack.getCurrentLevel() and 1 or nothing",
-                                master_role=0)
 
         # Add Associates stack
         s.addStackDefinition(
             'Simple Stack Definition',
             'Simple Stack',
             'Associates',
+            managed_role_exprs={'WorkspaceMember': 'python:1',
+                                },
+            master_role='WorkspaceMember',
             manager_stack_ids=['Observers']
             )
-
-        stackdef = s.getStackDefinitionFor('Associates')
-        # Add expressions
-        stackdef.addManagedRole('WorkspaceMember',
-                                "python:1",
-                                master_role=1)
 
         # Add Observers stack
         s.addStackDefinition(
             'Simple Stack Definition',
             'Simple Stack',
             'Observers',
+            managed_role_exprs={'WorkspaceReader': 'python:1',
+                                },
+            master_role='WorkspaceReader'
             )
-
-        stackdef = s.getStackDefinitionFor('Observers')
-        # Add expressions
-        stackdef.addManagedRole('WorkspaceMember',
-                                "python:1",
-                                master_role=1)
 
     def _makeWorkflows(self):
 
@@ -241,6 +227,31 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                                STATE_BEHAVIOR_WORKFLOW_LOCK,
                                STATE_BEHAVIOR_WORKFLOW_UNLOCK,
                                STATE_BEHAVIOR_WORKFLOW_RESET,),
+            stackdefs={'Pilots': {'stackdef_type': 'Hierarchical Stack Definition',
+                                  'stack_type'   : 'Hierarchical Stack',
+                                  'var_id'    : 'Pilots',
+                                  'managed_role_exprs' :{'WorkspaceManager': "python:level == stack.getCurrentLevel() and 1 or nothing",
+                                                         'WorkspaceMember' : "python:level < stack.getCurrentLevel() and 1 or nothing",
+                                                         'WorkspaceReader' : "python:level > stack.getCurrentLevel() and 1 or nothing",
+                                                         },
+                                  'master_role': 'WorkspaceManager',
+                                  'manager_stack_ids':['Associates', 'Observers'],
+                                  },
+                       'Associates': {'stackdef_type' : 'Simple Stack Definition',
+                                      'stack_type': 'Simple Stack',
+                                      'var_id':'Associates',
+                                      'managed_role_exprs':{'WorkspaceMember': 'python:1',},
+                                      'master_role':'WorkspaceMember',
+                                      'manager_stack_ids':['Observers'],
+                                      },
+                       'Observers': {'stackdef_type' : 'Simple Stack Definition',
+                                     'stack_type': 'Simple Stack',
+                                     'var_id':'Observers',
+                                     'managed_role_exprs':{'WorkspaceReader': 'python:1',},
+                                     'master_role':'WorkspaceReader',
+                                     'manager_stack_ids':[],
+                                     },
+                       },
             push_on_workflow_variable = ['Pilots', 'Associates', 'Observers'],
             pop_on_workflow_variable = ['Pilots', 'Associates', 'Observers'],
             workflow_up_on_workflow_variable = ['Pilots'],
@@ -252,7 +263,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                                                    'Observers'],)
 
 
-        self._setStackDefinitionsFor(s)
+        #self._setStackDefinitionsFor(s)
 
         s = wf.states.get('writing')
         s.setProperties(
