@@ -69,7 +69,7 @@ class Stack(SimpleItem):
         """
         return self._elements_container
 
-    def _prepareElement(self, elt_str=None):
+    def _prepareElement(self, elt_str=None, **kw):
         """Prepare the element.
 
         Usual format : <prefix : id>
@@ -86,7 +86,7 @@ class Stack(SimpleItem):
             elt_meta_type = ElementRegistry.getMetaTypeForPrefix(prefix)
             if elt_meta_type is not None:
                 elt = ElementRegistry.makeWorkflowStackElementTypeInstance(
-                    elt_meta_type, elt_str)
+                    elt_meta_type, elt_str, **kw)
                 return elt
         return elt_str
 
@@ -159,6 +159,7 @@ class Stack(SimpleItem):
         del self._getElementsContainer()[last_elt_index]
         return res
 
+    # XXX give **kw to push
     def reset(self, **kw):
         """Reset the stack
 
