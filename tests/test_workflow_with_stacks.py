@@ -1057,7 +1057,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         wftool.doActionFor(content, 'remove_delegate',
                            current_wf_var_id='Pilots',
-                           ids=['0,user:manager'],
+                           pop_ids=['0,user:manager'],
                            levels=[0])
         pstacks = wftool.getStackFor(content, 'Pilots')
 
