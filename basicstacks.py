@@ -18,13 +18,7 @@
 #
 # $Id$
 
-""" (Workflow) Stack definitions
-
-Thus, these classes cope with a data structure and the how to store
-elements within.
-
-They are public objects right now. The access will be made through the
-WorkfloStackDefinitions.
+""" Stack type definitions
 """
 
 import copy
@@ -50,7 +44,7 @@ class SimpleStack(Stack):
       - Removals wherever in the stack
       - Don't allow having duplicata within the stack
 
-    Notice :  No Hierachy in this struture
+    Notice :  No Hierachy in this structure
     The container is a simple list with acessors.
     """
 
@@ -68,10 +62,17 @@ class SimpleStack(Stack):
         """
         Stack.__init__(self, **kw)
 
+    #
+    # PRIVATE API
+    #
+
     def __deepcopy__(self, ob):
         """Deep copy. Just to call a clean API while calling getCopy()
+
+        Cope with mutable attrs to break reference
         """
-        copy = SimpleStack()
+        copy = WorkflowStackRegistry.makeWorkflowStackTypeInstance( 
+            self.meta_type)
         for attr, value in self.__dict__.items():
             if attr == '_elements_container':
                 # Break reference with mutable structure
@@ -83,7 +84,17 @@ class SimpleStack(Stack):
                 copy.__dict__[attr] = value
         return copy
 
-    ####################################################################
+    def _getStackElementIndex(self, id):
+        i = 0
+        for each in self._getElementsContainer():
+            if id == each():
+                return i
+            i += 1
+        return -1
+
+    #
+    # API
+    #
 
     def push(self, elt=None):
         """Push an element in the queue
@@ -98,15 +109,7 @@ class SimpleStack(Stack):
         else:
             return -2
 
-    def _getStackElementIndex(self, id):
-        i = 0
-        for each in self._getElementsContainer():
-            if id == each():
-                return i
-            i += 1
-        return -1
-
-    def removeElement(self, element=None):
+    def pop(self, element=None):
         """Remove a given element
 
         O : failed
@@ -120,6 +123,8 @@ class SimpleStack(Stack):
                     return 1
                 except IndexError:
                     pass
+        else:
+            return Stack.pop(self)
         return 0
 
     def getStackContent(self, level=None):
@@ -148,13 +153,6 @@ class SimpleStack(Stack):
                 res.append('not_visible')
         return res
 
-    def getCopy(self):
-        """Duplicate self
-
-        Return a new object instance of the same type
-        """
-        return copy.deepcopy(self)
-
     def replace(self, old, new):
         """Replace old with new within the elements container
 
@@ -167,6 +165,17 @@ class SimpleStack(Stack):
             self._elements_container[old_elt_index] = new_elt
         except ValueError:
             pass
+
+    #
+    # MISC
+    #
+
+    def getCopy(self):
+        """Duplicate self
+
+        Return a new object instance of the same type
+        """
+        return copy.deepcopy(self)
 
 InitializeClass(SimpleStack)
 
@@ -199,13 +208,18 @@ class HierarchicalStack(SimpleStack):
         """
         SimpleStack.__init__(self, **kw)
         self._elements_container = PersistentMapping()
-        self.level = 0
+        self._level = 0
         self.direction = 1
+
+    #
+    # PRIVATE API
+    #
 
     def __deepcopy__(self, ob):
         """Deep copy. Just to call a clean API while calling getCopy()
         """
-        copy = HierarchicalStack()
+        copy = WorkflowStackRegistry.makeWorkflowStackTypeInstance(
+            self.meta_type)
         for attr, value in self.__dict__.items():
             if attr == '_elements_container':
                 # Break reference with mutable structure
@@ -217,7 +231,19 @@ class HierarchicalStack(SimpleStack):
                 copy.__dict__[attr] = value
         return copy
 
-    ##################################################
+    def _getStackElementIndex(self, id, level=None):
+        if level is None:
+            level = self.getCurrentLevel()
+        i = 0
+        for each in self.getLevelContent(level=level):
+            if id == each():
+                return i
+            i += 1
+        return -1
+
+    #
+    # API
+    #
 
     def getDirection(self):
         """Get the direction.
@@ -296,7 +322,7 @@ class HierarchicalStack(SimpleStack):
     def getCurrentLevel(self):
         """Return the current level
         """
-        return self.level
+        return self._level
 
     def hasUpperLevel(self):
         """Has the stack a level upper than current level
@@ -315,8 +341,8 @@ class HierarchicalStack(SimpleStack):
         """
         new_level = self.getCurrentLevel() + 1
         if new_level in self.getAllLevels():
-            self.level += 1
-        return self.level
+            self._level += 1
+        return self._level
 
     def doDecLevel(self):
         """Decrement the level value
@@ -325,8 +351,8 @@ class HierarchicalStack(SimpleStack):
         """
         new_level = self.getCurrentLevel() - 1
         if new_level in self.getAllLevels():
-            self.level -= 1
-        return self.level
+            self._level -= 1
+        return self._level
 
     def getLevelContent(self, level=None):
         """Return  the content of the level given as parameter
@@ -445,45 +471,27 @@ class HierarchicalStack(SimpleStack):
                     container[low_level+1] = [self._prepareElement(elt)]
         return 1
 
-    def pop(self, level=None):
-        """Pop last element of current level
-
-        If level is None we work at current level
-        """
-
-        if level is None:
-            level = self.getCurrentLevel()
-
-        levelc = self.getLevelContent(level=level)
-        last = None
-        if len(levelc) > 0:
-            last = levelc[len(levelc)-1]
-
-        if last is not None:
-            last = last()
-        return self.removeElement(elt=last, level=level)
-
-    def _getStackElementIndex(self, id, level=None):
-        if level is None:
-            level = self.getCurrentLevel()
-        i = 0
-        for each in self.getLevelContent(level=level):
-            if id == each():
-                return i
-            i += 1
-        return -1
-
-    def removeElement(self, elt=None, level=None):
+    def pop(self, elt=None, level=None):
         """Remove elt at given level
 
         -1 : not found
         elt  : ok
-        0 : not found
         """
-        if elt is None:
-            return 0
+
         if level is None:
             level = self.getCurrentLevel()
+        levelc = self.getLevelContent(level=level)
+
+        if elt is None:
+            last = None
+            if len(levelc) > 0:
+                last = levelc[len(levelc)-1]
+                if last is not None:
+                    elt = last()
+                    
+        if elt is None:
+            return 0
+
         index = self._getStackElementIndex(elt, level)
         if index >= 0:
             try:
@@ -508,6 +516,10 @@ class HierarchicalStack(SimpleStack):
                 self._elements_container[level][index_level] = new_elt
             except ValueError:
                 pass
+
+    #
+    # MISC
+    #
 
     def getCopy(self):
         """Duplicate self

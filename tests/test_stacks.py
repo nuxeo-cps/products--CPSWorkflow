@@ -205,14 +205,14 @@ class TestCPSWorkflowStacks(ZopeTestCase):
 
         # Pop now
         elt = sstack.pop()
-        self.assertEqual(elt(), 'elt2')
+        self.assertEqual(elt, 1)
         self.assertEqual(sstack.getSize(), 1)
         self.assertEqual(sstack.isEmpty(), 0)
         self.assertEqual(sstack.isFull(), 0)
 
         # Pop again
         elt = sstack.pop()
-        self.assertEqual(elt(), 'elt1')
+        self.assertEqual(elt, 1)
         self.assertEqual(sstack.getSize(), 0)
         self.assertEqual(sstack.isEmpty(), 1)
         self.assertEqual(sstack.isFull(), 0)
@@ -232,7 +232,7 @@ class TestCPSWorkflowStacks(ZopeTestCase):
 
         # Pop again
         elt = sstack.pop()
-        self.assertEqual(elt(), 'elt1')
+        self.assertEqual(elt, 1)
         self.assertEqual(sstack.getSize(), 0)
         self.assertEqual(sstack.isEmpty(), 1)
         self.assertEqual(sstack.isFull(), 0)
@@ -276,14 +276,14 @@ class TestCPSWorkflowStacks(ZopeTestCase):
 
         # Pop now
         elt = sstack.pop()
-        self.assertEqual(elt(), 'elt2')
+        self.assertEqual(elt, 1)
         self.assertEqual(sstack.getSize(), 1)
         self.assertEqual(sstack.isEmpty(), 0)
         self.assertEqual(sstack.isFull(), 0)
 
         # Pop again
         elt = sstack.pop()
-        self.assertEqual(elt(), 'elt1')
+        self.assertEqual(elt, 1)
         self.assertEqual(sstack.getSize(), 0)
         self.assertEqual(sstack.isEmpty(), 1)
         self.assertEqual(sstack.isFull(), 0)
@@ -303,7 +303,7 @@ class TestCPSWorkflowStacks(ZopeTestCase):
 
         # Pop again
         elt = sstack.pop()
-        self.assertEqual(elt(), 'elt1')
+        self.assertEqual(elt, 1)
         self.assertEqual(sstack.getSize(), 0)
         self.assertEqual(sstack.isEmpty(), 1)
         self.assertEqual(sstack.isFull(), 0)
@@ -314,21 +314,21 @@ class TestCPSWorkflowStacks(ZopeTestCase):
 
         sstack = SimpleStack()
 
-        # Test the removeElement() method
+        # Test the pop() method
         self.assertEqual(sstack.getStackContent(), [])
-        self.assertEqual(sstack.removeElement('elt1'), 0)
+        self.assertEqual(sstack.pop('elt1'), 0)
         sstack.push('elt1')
-        self.assertEqual(sstack.removeElement('elt1'), 1)
+        self.assertEqual(sstack.pop('elt1'), 1)
         sstack.push('elt1')
         sstack.push('elt2')
         self.assertEqual(sstack.getStackContent(), ['elt1', 'elt2'])
         sstack.push('elt3')
         self.assertEqual(sstack.getStackContent(), ['elt1', 'elt2', 'elt3'])
-        self.assertEqual(sstack.removeElement('elt2'), 1)
+        self.assertEqual(sstack.pop('elt2'), 1)
         self.assertEqual(sstack.getStackContent(), ['elt1', 'elt3'])
 
-        sstack.removeElement('elt3')
-        sstack.removeElement('elt1')
+        sstack.pop('elt3')
+        sstack.pop('elt1')
         self.assertEqual(sstack.getStackContent(), [])
 
     def test_simpleHierarchicalStackNoMaxSize(self):
@@ -619,8 +619,9 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         self.assertEqual(hstack.isEmpty(level=1), 0)
 
         # Pop element at level 0
+        # not found
         self.assertEqual(hstack.getCurrentLevel(), 1)
-        self.assertEqual(hstack.pop(level=0)(), 'elt11')
+        self.assertEqual(hstack.pop(level=0), 1)
 
         # Let's check the consistency of the rest
         self.assertEqual(hstack.getSize(), 2)
@@ -670,17 +671,16 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         self.assertEqual(hstack.isEmpty(level=-1), 0)
         self.assertEqual(hstack.isEmpty(level=1), 0)
 
-        # Check now the removeElement
-        self.assertEqual(hstack.removeElement(elt='XXX'), -1)
-        self.assertEqual(hstack.removeElement(), 0)
-        self.assertEqual(hstack.removeElement(level=89), 0)
-        self.assertEqual(hstack.removeElement(elt='elt1', level=89), -1)
-        self.assertEqual(hstack.removeElement(elt='elt1')(), 'elt1')
+        # Check now the pop
+        self.assertEqual(hstack.pop(elt='XXX'), -1)
+        self.assertEqual(hstack.pop(level=89), 0)
+        self.assertEqual(hstack.pop(elt='elt1', level=89), -1)
+        self.assertEqual(hstack.pop(elt='elt1',)(), 'elt1')
         self.assertEqual(hstack.getSize(), 1)
         self.assertEqual(hstack.getSize(level=hstack.getCurrentLevel()), 1)
         self.assertEqual(hstack.getSize(level=0), 1)
-        self.assertEqual(hstack.removeElement(elt='elt1'), -1)
-        self.assertEqual(hstack.removeElement(elt='elt-1')(), 'elt-1')
+        self.assertEqual(hstack.pop(elt='elt1'), -1)
+        self.assertEqual(hstack.pop(elt='elt-1')(), 'elt-1')
         self.assertEqual(hstack.getSize(), 0)
         self.assertEqual(hstack.isEmpty(), 1)
 
@@ -750,7 +750,7 @@ class TestCPSWorkflowStacks(ZopeTestCase):
 
         # Check wiered stuffs
         self.assertEqual(hstack.getLevelContent(level=90000), [])
-        self.assertEqual(hstack.removeElement(level=90000), 0)
+        self.assertEqual(hstack.pop(level=90000), 0)
 
     def test_simpleHierarchicalStackWithMaxSize(self):
 
@@ -834,11 +834,11 @@ class TestCPSWorkflowStacks(ZopeTestCase):
 
         hstack = HierarchicalStack()
 
-        # Test the removeElement() method
+        # Test the pop() method
         self.assertEqual(hstack.getStackContent(), {})
-        self.assertEqual(hstack.removeElement('elt1'), -1)
+        self.assertEqual(hstack.pop('elt1'), -1)
         hstack.push('elt1')
-        self.assertEqual(hstack.removeElement('elt1')(), 'elt1')
+        self.assertEqual(hstack.pop('elt1')(), 'elt1')
         hstack.push('elt1')
         hstack.push('elt2')
         self.assertEqual(hstack.getStackContent(),
@@ -846,12 +846,12 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         hstack.push('elt3')
         self.assertEqual(hstack.getStackContent(),
                          {0:['elt1', 'elt2', 'elt3']})
-        self.assertEqual(hstack.removeElement('elt2')(), 'elt2')
+        self.assertEqual(hstack.pop('elt2')(), 'elt2')
         self.assertEqual(hstack.getStackContent(),
                          {0:['elt1', 'elt3']})
 
-        hstack.removeElement('elt3')
-        hstack.removeElement('elt1')
+        hstack.pop('elt3')
+        hstack.pop('elt1')
         self.assertEqual(hstack.getStackContent(), {})
 
         # direction
@@ -1078,12 +1078,12 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         self.assert_(hstack.getCurrentLevel() == 0)
 
         # Remove elt2 at level -1
-        hstack.removeElement('elt2', level=-1)
+        hstack.pop('elt2', level=-1)
         self.assert_(hstack.hasUpperLevel())
         self.assert_(not hstack.hasLowerLevel())
 
         # Remove elt1 at level 1
-        hstack.removeElement('elt1', level=1)
+        hstack.pop('elt1', level=1)
         self.assert_(not hstack.hasUpperLevel())
         self.assert_(not hstack.hasLowerLevel())
 
