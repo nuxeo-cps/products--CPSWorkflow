@@ -79,6 +79,10 @@ class StackDefinition(SimpleItem):
         self.stack_type = stack_type
         self.wf_var_id = wf_var_id
 
+        # Ids of the other stacks in which the elements within those are able
+        # to manage this stack.
+        self.manager_stack_ids = []
+
         # Fetch from the kw the argument we are interested in
         for k, v in kw.items():
             if k == 'manager_stack_ids':
