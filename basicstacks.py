@@ -164,23 +164,23 @@ class SimpleStack(Stack):
             self._push(push_id, **kw)
 
 
-    def pop(self, elt=None, **kw):
+    def pop(self, pop_ids=[], **kw):
         """Public pop
+
+        0 : at least one pop operation failed
+        1 : success
         """
 
         # XXX kws are prefixed by 'pop_' because in a transition with push and
         # pop flags, _executeTransition will perform both pop and push actions
         # (and with the same kws ids, pop and push actions could cancel each
         # others).
-        pop_ids = kw.get('pop_ids', ())
 
-        # XXX case where a single element is passed (compatibility)
-        if not pop_ids:
-            return self._pop(elt, **kw)
-
+        code = 1
         # pop_ids have to be prefixed
         for pop_id in pop_ids:
-            self._pop(pop_id, **kw)
+            code = code and self._pop(pop_id, **kw)
+        return code
 
     def getStackContent(self, type='id', level=None,
                         context=None, **kw):
@@ -376,8 +376,8 @@ class HierarchicalStack(SimpleStack):
     def _pop(self, elt=None, level=None, **kw):
         """Remove elt at given level
 
-        -1 : not found
-        elt  : ok
+        0 : failed (not found)
+        1 : success
         """
 
         if level is None:
@@ -385,25 +385,16 @@ class HierarchicalStack(SimpleStack):
         levelc = self._getLevelContentValues(level=level)
 
         if elt is None:
-            last = None
-            if len(levelc) > 0:
-                last = levelc[len(levelc)-1]
-                if last is not None:
-                    elt = last()
-
-        if elt is None:
             return 0
 
         index = self._getStackElementIndex(elt, level)
         if index >= 0:
             try:
-                elt_obj = self.getLevelContent(level=level,
-                                               type='object')[index]
                 del self._getElementsContainer()[level][index]
-                return elt_obj
+                return 1
             except KeyError:
                 pass
-        return -1
+        return 0
 
     #
     # API
@@ -562,8 +553,11 @@ class HierarchicalStack(SimpleStack):
                 # wrong user input
                 pass
 
-    def pop(self, elt=None, level=None, **kw):
+    def pop(self, pop_ids=[], level=None, **kw):
         """Pop element
+
+        0 : at least one pop operation failed
+        1 : success
         """
 
         # XXX kws are prefixed by 'pop_' because in a transition with push and
@@ -571,18 +565,21 @@ class HierarchicalStack(SimpleStack):
         # (and with the same kws ids, pop and push actions could cancel each
         # others).
         # Check arguments in here.
-        pop_ids = kw.get('pop_ids', ())
-        if not pop_ids:
-            return self._pop(elt, level, **kw)
 
+        code = 1
         # Pop member / group given ids
         for pop_id in pop_ids:
             # Convention used: 'level,prefix:elt_id'
             # pop_id example: '1,user:toto' or '2,group:titi'
+            # XXX (compatibility): level can be omitted 
             split = pop_id.split(',')
-            level = int(split[0])
-            the_id = split[1]
-            self._pop(elt=the_id, level=level, **kw)
+            if len(split) > 1:
+                level = int(split[0])
+                the_id = split[1]
+            else:
+                the_id = split[0]
+            code = code and self._pop(elt=the_id, level=level, **kw)
+        return code
 
 
     def replace(self, old, new):
