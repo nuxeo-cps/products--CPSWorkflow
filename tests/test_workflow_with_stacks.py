@@ -39,6 +39,7 @@ ZopeTestCase.installProduct('CPSWorkflow')
 
 # XXX Break those dependencies
 ZopeTestCase.installProduct('CPSCore')
+ZopeTestCase.installProduct('CPSDefault')
 ZopeTestCase.installProduct('CPSUserFolder')
 
 import Zope
@@ -119,7 +120,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         # Set the CPS Membership tool for group support
         self.portal.manage_delObjects(['portal_membership'])
-        self.portal.manage_addProduct['CPSCore'].manage_addTool(
+        self.portal.manage_addProduct['CPSDefault'].manage_addTool(
             'CPS Membership Tool')
 
         # Set the URL tool
