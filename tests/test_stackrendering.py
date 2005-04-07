@@ -34,13 +34,20 @@ from Products.CPSWorkflow.stack import Stack
 from Products.CPSWorkflow.basicstacks import SimpleStack
 from Products.CPSWorkflow.basicstacks import HierarchicalStack
 
+# XXX has to be changed.
+from Products.CPSInstaller.CMFInstaller import CMFInstaller
+
 SKINS = {'cps_workflow_default':
          'Products/CPSWorkflow/skins/cps_workflow_default',
          }
 
-class StackRenderingTestCase(ZopeTestCase.PortalTestCase):
+class StackRenderingTestCase(ZopeTestCase.PortalTestCase, CMFInstaller):
 
     portal_name = 'portal'
+
+    def __init__(self, id):
+        ZopeTestCase.PortalTestCase.__init__(self, id)
+        self.messages = []
 
     def getPortal(self):
         if not hasattr(self.app, self.portal_name):
@@ -51,54 +58,7 @@ class StackRenderingTestCase(ZopeTestCase.PortalTestCase):
     def afterSetUp(self):
         self.portal = self.getPortal()
         self.verifySkins(SKINS)
-        self._refreshSkinData()
-
-    def verifySkins(self, skins):
-        """Install or update skins.
-
-        <skins> parameter is a dictionary of {<skin_name>: <skin_path>),}"""
-
-        skin_installed = 0
-        for skin, path in skins.items():
-            path = path.replace('/', os.sep)
-            if skin in self.portal.portal_skins.objectIds():
-                dv = self.portal.portal_skins[skin]
-                oldpath = dv.getDirPath()
-                if oldpath == path:
-                    pass
-                else:
-                    dv.manage_properties(dirpath=path)
-            else:
-                skin_installed = 1
-                # Hack to Fix CMF 1.5 incompatibility
-                if path.startswith("Products/"):
-                    path = path[len("Products/"):]
-                createDirectoryView(self.portal.portal_skins, path, skin)
-
-        if skin_installed:
-            all_skins = self.portal.portal_skins.getSkinPaths()
-            for skin_name, skin_path in all_skins:
-                # Plone skin names are needed to install
-                # CPSIO skins on a Plone site when exporting a Plone site.
-                if skin_name not in  ['Basic',
-                                      'CPSSkins',
-                                      'Plone Default',
-                                      'Plone Tableless']:
-                    continue
-                path = [x.strip() for x in skin_path.split(',')]
-                path = [x for x in path if x not in skins.keys()] # strip all
-                if path and path[0] == 'custom':
-                    path = path[:1] + \
-                           [skin for skin in skins.keys()] + path[1:]
-                else:
-                    path = [skin[0] for skin in skins.keys()] + path
-                npath = ', '.join(path)
-                self.portal.portal_skins.addSkinSelection(skin_name, npath)
-            self.portal_v_reset_skins = 1
-
-    #############################################################
-    # TESTS START HERE
-    #############################################################
+        self.resetSkinCache()
 
     def test_skins_ok(self):
         self.assert_(
@@ -149,7 +109,6 @@ class StackRenderingTestCase(ZopeTestCase.PortalTestCase):
         stackob = getattr(self.portal, 'hstack')
 
         stackob.render(context=self.portal, mode='view')
-
 
 def test_suite():
     loader = unittest.TestLoader()
