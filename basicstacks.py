@@ -24,7 +24,6 @@
 
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo, getSecurityManager
-from Acquisition import aq_parent, aq_inner
 
 from ZODB.PersistentList import PersistentList
 from ZODB.PersistentMapping import PersistentMapping
