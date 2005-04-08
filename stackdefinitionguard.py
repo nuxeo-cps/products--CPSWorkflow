@@ -24,6 +24,7 @@ DCWorkflow guard with extended namespace
 """
 
 from Globals import InitializeClass
+from Acquisition import aq_base
 
 from Products.DCWorkflow.Guard import Guard
 from Products.DCWorkflow.Guard import formatNameUnion
