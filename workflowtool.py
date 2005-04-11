@@ -399,7 +399,8 @@ class WorkflowTool(BaseWorkflowTool):
             if not proxy_type:
                 # XXX constructContent doesn't exist everywhere !
                 # XXX especially when creating at the root of the portal.
-                ob = container.constructContent(type_name, id, **kwargs)
+                id = container.constructContent(type_name, id, **kwargs)
+                ob = getattr(container, id)
             else:
                 # Create a proxy and a document in the repository.
                 proxy = pxtool.createEmptyProxy(proxy_type, container,
