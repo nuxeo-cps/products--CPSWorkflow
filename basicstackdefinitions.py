@@ -120,7 +120,8 @@ class SimpleStackDefinition(StackDefinition):
         # the stack content
         #
 
-        for each in ds.getStackContent(type='role'):
+        # XXX AT: see if stack content needs to be filtered by rights on elt
+        for each in ds.getStackContent(type='role', context=context):
             if not each.startswith('group:'):
                 if each == member_id:
                     return 1
@@ -201,7 +202,8 @@ class HierarchicalStackDefinition(StackDefinition):
         # the stack content.
         # e.g.check that current user, or one of its groups, is at current level
 
-        for each in ds.getLevelContent(type='role'):
+        # XXX AT: see if stack content needs to be filtered by rights on elt
+        for each in ds.getLevelContent(type='role', context=context):
             if not each.startswith('group:'):
                 if each == member_id:
                     return 1
@@ -258,8 +260,7 @@ class HierarchicalStackDefinition(StackDefinition):
         # even if it does not make any difference here).
         stack_content = {}
         for clevel in ds.getAllLevels():
-            stack_content[clevel] = ds.getLevelContent(level=clevel,
-                                                       type='object')
+            stack_content[clevel] = ds._getLevelContentValues(clevel)
         for level, elts in stack_content.items():
             for elt in elts:
                 elt_id = elt.getIdForRoleSettings()
