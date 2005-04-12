@@ -9,4 +9,5 @@ Bug fixes:
 -
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
-- #555 : Use standardized return value for invokeFactory and constructContent
+- #555: Use standardized return value for invokeFactory and constructContent.
+- Moved many logs to TRACE level instead of DEBUG.
