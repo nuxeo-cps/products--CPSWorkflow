@@ -190,7 +190,7 @@ class SimpleStack(Stack):
         """
         res = []
         for each in self._getElementsContainer():
-            if (context is not None and
+            if (context is None or
                 not each.isVisible(sm=getSecurityManager(), stack=self,
                                    context=context)):
                 each = ElementReg.makeWorkflowStackElementTypeInstance(
@@ -488,7 +488,7 @@ class HierarchicalStack(SimpleStack):
         content = self._getLevelContentValues(level)
         res = []
         for each in content:
-            if (context is not None and
+            if (context is None or
                 not each.isVisible(sm=getSecurityManager(), stack=self,
                                    context=context)):
                 each = ElementReg.makeWorkflowStackElementTypeInstance(
