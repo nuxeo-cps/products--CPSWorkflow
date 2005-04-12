@@ -492,7 +492,7 @@ class HierarchicalStack(SimpleStack):
                 not each.isVisible(sm=getSecurityManager(), stack=self,
                                    context=context)):
                 each = ElementReg.makeWorkflowStackElementTypeInstance(
-                    each.getHiddenMetaType()
+                    each.getHiddenMetaType(), 'hidden'
                     )
             if type == 'id':
                 res.append(each.getId())
