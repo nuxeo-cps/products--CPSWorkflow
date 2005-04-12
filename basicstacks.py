@@ -107,7 +107,7 @@ class SimpleStack(Stack):
         """
         if self.isFull():
             return 0
-        if elt not in self.getStackContent():
+        if elt not in self._getElementsContainer():
             elt = self._prepareElement(elt, **kw)
             if elt is None:
                 return -1
@@ -219,7 +219,7 @@ class SimpleStack(Stack):
         new_elt = self._prepareElement(new)
         old_elt = self._prepareElement(old)
         try:
-            old_elt_index = self.getStackContent().index(old_elt())
+            old_elt_index = self._getElementsContainer().index(old_elt())
             self._elements_container[old_elt_index] = new_elt
         except ValueError:
             pass
@@ -292,7 +292,7 @@ class HierarchicalStack(SimpleStack):
         if level is None:
             level = self.getCurrentLevel()
         i = 0
-        for each in self.getLevelContent(level=level, type='object'):
+        for each in self._getLevelContentValues(level=level):
             if elt == each:
                 return i
             i += 1
@@ -329,7 +329,7 @@ class HierarchicalStack(SimpleStack):
             index = self._getStackElementIndex(elt, level)
             if index == -1:
                 # element not found in level
-                content_level = self.getLevelContent(level, type='object')
+                content_level = self._getLevelContentValues(level)
                 content_level.append(prepared_elt)
                 self._getElementsContainer()[level] = content_level
             else:
@@ -590,7 +590,7 @@ class HierarchicalStack(SimpleStack):
         old_elt = self._prepareElement(old)
         for level in self.getAllLevels():
             try:
-                index_level = self.getLevelContent(
+                index_level = self._getLevelContentValues(
                     level=level).index(old_elt())
                 self._elements_container[level][index_level] = new_elt
             except ValueError:
