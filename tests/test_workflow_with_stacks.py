@@ -158,7 +158,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         config.setChain('File', ('wf',))
 
         # Create a dummy File objects
-        self.wftool.invokeFactoryFor(f, 'File','dummy')
+        self.wftool.invokeFactoryFor(f, 'File', 'dummy')
 
     ######################################################################
 
@@ -788,8 +788,9 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         # Check stack status
         self.assert_(pstacks is not None)
-        self.assert_(pstacks.getStackContent())
-        self.assertEqual({0:['user:toto']}, pstacks.getStackContent())
+        self.assert_(pstacks.getStackContent(context=content))
+        self.assertEqual({0:['user:toto']},
+                         pstacks.getStackContent(context=content))
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
@@ -829,8 +830,9 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         # Check stack status
         self.assert_(pstacks is not None)
-        self.assert_(pstacks.getStackContent())
-        self.assertEqual({0:['user:toto', 'user:tata']}, pstacks.getStackContent())
+        self.assert_(pstacks.getStackContent(context=content))
+        self.assertEqual({0:['user:toto', 'user:tata']},
+                         pstacks.getStackContent(context=content))
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
@@ -873,8 +875,9 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         # Check stack status
         self.assert_(pstacks is not None)
-        self.assert_(pstacks.getStackContent())
-        self.assertEqual({0:['user:toto', 'user:tata']}, pstacks.getStackContent())
+        self.assert_(pstacks.getStackContent(context=content))
+        self.assertEqual({0:['user:toto', 'user:tata']},
+                         pstacks.getStackContent(context=content))
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
@@ -915,9 +918,9 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         # Check stack status
         self.assert_(pstacks is not None)
-        self.assert_(pstacks.getStackContent())
+        self.assert_(pstacks.getStackContent(context=content))
         self.assertEqual({0:['user:toto', 'user:tata', 'user:manager']},
-                         pstacks.getStackContent())
+                         pstacks.getStackContent(context=content))
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
@@ -961,9 +964,9 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         # Check stack status
         self.assert_(pstacks is not None)
-        self.assert_(pstacks.getStackContent())
+        self.assert_(pstacks.getStackContent(context=content))
         self.assertEqual({0:['user:tata', 'user:manager']},
-                         pstacks.getStackContent())
+                         pstacks.getStackContent(context=content))
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
@@ -1016,9 +1019,9 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         # Check stack status
         self.assert_(pstacks is not None)
-        self.assert_(pstacks.getStackContent())
+        self.assert_(pstacks.getStackContent(context=content))
         self.assertEqual({0:['user:manager']},
-                         pstacks.getStackContent())
+                         pstacks.getStackContent(context=content))
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
@@ -1064,9 +1067,9 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         # Check stack status
         self.assert_(pstacks is not None)
-        self.assert_(not pstacks.getStackContent())
+        self.assert_(not pstacks.getStackContent(context=content))
         self.assertEqual({},
-                         pstacks.getStackContent())
+                         pstacks.getStackContent(context=content))
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
@@ -1134,7 +1137,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Check stack status
         self.assert_(pstacks is not None)
         self.assertEqual(['user:manager'],
-                         pstacks.getStackContent())
+                         pstacks.getStackContent(context=content))
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Associates')
@@ -1171,7 +1174,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Check stack status
         self.assert_(pstacks is not None)
         self.assertEqual(['user:toto'],
-                         pstacks.getStackContent())
+                         pstacks.getStackContent(context=content))
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Associates')
@@ -1208,7 +1211,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Check stack status
         self.assert_(pstacks is not None)
         self.assertEqual(['group:nuxeo'],
-                         pstacks.getStackContent())
+                         pstacks.getStackContent(context=content))
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Associates')
@@ -1248,7 +1251,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Check stack status
         self.assert_(pstacks is not None)
         self.assertEqual(['user:manager',],
-                         pstacks.getStackContent())
+                         pstacks.getStackContent(context=content))
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Associates')
@@ -1312,7 +1315,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Check stack status
         self.assert_(pstacks is not None)
         self.assertEqual(['user:manager'],
-                         pstacks.getStackContent()[0])
+                         pstacks.getStackContent(context=content)[0])
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
@@ -1349,7 +1352,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Check stack status
         self.assert_(pstacks is not None)
         self.assertEqual(['user:toto'],
-                         pstacks.getStackContent()[0])
+                         pstacks.getStackContent(context=content)[0])
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
@@ -1386,7 +1389,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Check stack status
         self.assert_(pstacks is not None)
         self.assertEqual(['group:nuxeo'],
-                         pstacks.getStackContent()[0])
+                         pstacks.getStackContent(context=content)[0])
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
@@ -1426,7 +1429,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Check stack status
         self.assert_(pstacks is not None)
         self.assertEqual(['user:manager',],
-                         pstacks.getStackContent()[0])
+                         pstacks.getStackContent(context=content)[0])
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
@@ -1490,7 +1493,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Check stack status
         self.assert_(pstacks is not None)
         self.assertEqual(['user:manager'],
-                         pstacks.getStackContent()[0])
+                         pstacks.getStackContent(context=content)[0])
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
@@ -1531,7 +1534,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Check stack status
         self.assert_(pstacks is not None)
         self.assertEqual(['user:toto'],
-                         pstacks.getStackContent()[0])
+                         pstacks.getStackContent(context=content)[0])
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
@@ -1596,7 +1599,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Check stack status
         self.assert_(pstacks is not None)
         self.assertEqual(['user:manager'],
-                         pstacks.getStackContent())
+                         pstacks.getStackContent(context=content))
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Associates')
@@ -1637,7 +1640,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Check stack status
         self.assert_(pstacks is not None)
         self.assertEqual(['user:toto'],
-                         pstacks.getStackContent())
+                         pstacks.getStackContent(context=content))
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Associates')
@@ -1705,7 +1708,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         pstacks = wftool.getStackFor(content, 'Associates')
 
         # Without security checks
-        scontent = pstacks.getStackContent(type='object')
+        scontent = pstacks.getStackContent(type='object', context=content)
         elt = scontent[0]
         self.assertEqual(str(elt), 'user:manager')
 
@@ -1743,7 +1746,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         self.logout()
 
         ###############################################################
-        # Ovverride the default guard with a guard on the element
+        # Override the default guard with a guard on the element
         ###############################################################
 
         self.login('manager')
@@ -1762,6 +1765,121 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         elt = scontent[0]
         self.assertEqual(elt.meta_type, 'Hidden User Stack Element')
         self.logout()
+
+    def test_update_roles_with_stack_element_security(self):
+
+        wftool = self.wftool
+        content = getattr(self.portal.f, 'dummy')
+
+        #
+        # push people on hstack
+        #
+        kw = {'push_ids': ('user:manager',),
+              'levels':(0,),
+              'current_wf_var_id' : 'Pilots'}
+        wftool.doActionFor(content,'delegate', **kw)
+
+        hstack = wftool.getStackFor(content, 'Pilots')
+
+        # Check stack status
+        self.assert_(hstack is not None)
+        self.assertEqual({0: ['user:manager']},
+                         hstack.getStackContent(context=content))
+
+        # Check local roles mapping
+        hstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
+        self.assertEqual(hstackdef._getLocalRolesMapping(hstack),
+                         {'manager' : ('WorkspaceManager',)})
+
+        # Check the former local role mapping
+        hsflrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Pilots')
+
+        # It's been updated for next time
+        self.assertEqual(hsflrm, {})
+
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+        self.assert_('user:manager' in lc.keys())
+        self.assert_('WorkspaceManager' in lc['user:manager'])
+
+        # push toto too, so that he getsthe same role than the one he already
+        # has thanks too the Associates stack
+        self.login('manager')
+        self.assert_( wftool.canManageStack(content, 'Pilots'))
+
+        kw = {'push_ids': ('user:toto',),
+              'levels':(1,),
+              'current_wf_var_id' : 'Pilots'}
+        wftool.doActionFor(content,'delegate', **kw)
+
+        hstack = wftool.getStackFor(content, 'Pilots')
+
+        self.assertEqual({0: ['user:manager'],
+                          1: ['user:toto']},
+                         hstack.getStackContent(context=content))
+
+        # Check local roles mapping
+        hstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
+        self.assertEqual(hstackdef._getLocalRolesMapping(hstack),
+                         {'manager': ('WorkspaceManager',),
+                          'toto' : ('WorkspaceReader',)})
+
+        # Check the former local role mapping
+        hsflrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                        'Pilots')
+
+        # It's been updated for next time
+        self.assertEqual(hsflrm, {'manager':('WorkspaceManager',)})
+
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        self.assert_('user:manager' in lc.keys())
+        self.assert_('WorkspaceManager' in lc['user:manager'])
+        self.assert_('user:toto' in lc.keys())
+        self.assert_('WorkspaceReader' in lc['user:toto'])
+
+        # hide manager from toto by changing default guard on stack elements
+        # guard: manager cannot see toto anymore
+        scontent = hstack.getStackContent(type='object', context=content)
+        elt = scontent[1][0]
+        guard_expr = "python:user.getId() != 'manager'"
+        elt.setViewGuard(guard_expr=guard_expr)
+        elt.setEditGuard(guard_expr=guard_expr)
+
+        # move level up
+        kw = {'current_wf_var_id' : 'Pilots'}
+        hstack = wftool.getStackFor(content, 'Pilots')
+        self.assertEqual(hstack.getCurrentLevel(), 0)
+        wftool.doActionFor(content, 'validate', **kw)
+        hstack = wftool.getStackFor(content, 'Pilots')
+        self.assertEqual(hstack.getCurrentLevel(), 1)
+
+        # Check local roles mapping
+        hstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
+        hstack = wftool.getStackFor(content, 'Pilots')
+        self.assertEqual(hstackdef._getLocalRolesMapping(hstack),
+                         {'manager': ('WorkspaceMember',),
+                          'toto' : ('WorkspaceManager',)})
+
+        # Check the former local role mapping
+        hsflrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
+                                                          'Pilots')
+        self.assertEqual(hsflrm, {'manager': ('WorkspaceManager',),
+                                  'toto': ('WorkspaceReader',)})
+
+        # Check local roles on the content
+        mtool = getToolByName(self.portal, 'portal_membership')
+        lc = mtool.getMergedLocalRoles(content)
+
+        self.assert_('user:manager' in lc.keys())
+        self.assert_('WorkspaceMember' in lc['user:manager'])
+        self.assert_('user:toto' in lc.keys())
+        self.assert_('WorkspaceManager' in lc['user:toto'])
+
 
     def test_moveUpMoveDownWithHierarchical(self):
         # Test move up and move down with a hierarchical stack
@@ -1803,11 +1921,11 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Check stack status
         self.assert_(pstacks is not None)
         self.assertEqual(['user:manager'],
-                         pstacks.getLevelContent(level=0))
+                         pstacks.getLevelContent(level=0, context=content))
         self.assertEqual(['user:toto'],
-                         pstacks.getLevelContent(level=1))
+                         pstacks.getLevelContent(level=1, context=content))
         self.assertEqual(['user:tata'],
-                         pstacks.getLevelContent(level=2))
+                         pstacks.getLevelContent(level=2, context=content))
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
@@ -1845,23 +1963,26 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         self.logout()
 
         #########################################################
-        # MOVE DOWN
+        # MOVE UP
         #########################################################
 
         self.login('manager')
         kw = {'current_wf_var_id' : 'Pilots'}
+        pstacks = wftool.getStackFor(content, 'Pilots')
+        self.assertEqual(pstacks.getCurrentLevel(), 0)
         wftool.doActionFor(content, 'validate', **kw)
+        self.assertEqual(pstacks.getCurrentLevel(), 1)
 
         pstacks = wftool.getStackFor(content, 'Pilots')
 
         # Check stack status
         self.assert_(pstacks is not None)
         self.assertEqual(['user:manager'],
-                         pstacks.getLevelContent(level=0))
+                         pstacks.getLevelContent(level=0, context=content))
         self.assertEqual(['user:toto'],
-                         pstacks.getLevelContent(level=1))
+                         pstacks.getLevelContent(level=1, context=content))
         self.assertEqual(['user:tata'],
-                         pstacks.getLevelContent(level=2))
+                         pstacks.getLevelContent(level=2, context=content))
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
@@ -1891,23 +2012,27 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         self.logout()
 
         #########################################################
-        # MOVE DOWN AGAIN
+        # MOVE UP AGAIN
         #########################################################
 
         self.login('manager')
         kw = {'current_wf_var_id' : 'Pilots'}
+        pstacks = wftool.getStackFor(content, 'Pilots')
+        self.assertEqual(pstacks.getCurrentLevel(), 1)
+
         wftool.doActionFor(content, 'validate', **kw)
 
         pstacks = wftool.getStackFor(content, 'Pilots')
+        self.assertEqual(pstacks.getCurrentLevel(), 2)
 
         # Check stack status
         self.assert_(pstacks is not None)
         self.assertEqual(['user:manager'],
-                         pstacks.getLevelContent(level=0))
+                         pstacks.getLevelContent(level=0, context=content))
         self.assertEqual(['user:toto'],
-                         pstacks.getLevelContent(level=1))
+                         pstacks.getLevelContent(level=1, context=content))
         self.assertEqual(['user:tata'],
-                         pstacks.getLevelContent(level=2))
+                         pstacks.getLevelContent(level=2, context=content))
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
@@ -1957,7 +2082,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Check stack status
         self.assert_(sstack is not None)
         self.assertEqual(['user:manager'],
-                         sstack.getStackContent())
+                         sstack.getStackContent(context=content))
 
         # Check local roles mapping
         sstackdef = wftool.getStackDefinitionFor(content, 'Associates')
@@ -1988,7 +2113,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         sstack = wftool.getStackFor(content, 'Associates')
 
         self.assertEqual(['user:manager', 'user:toto'],
-                         sstack.getStackContent())
+                         sstack.getStackContent(context=content))
 
         # Check local roles mapping
         sstackdef = wftool.getStackDefinitionFor(content, 'Associates')
@@ -2025,7 +2150,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Check stack status
         self.assert_(hstack is not None)
         self.assertEqual({0: ['user:manager']},
-                         hstack.getStackContent())
+                         hstack.getStackContent(context=content))
 
         # Check local roles mapping
         hstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
@@ -2058,7 +2183,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         self.assertEqual({0: ['user:manager'],
                           -1: ['user:toto']},
-                         hstack.getStackContent())
+                         hstack.getStackContent(context=content))
 
         # Check local roles mapping
         hstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
@@ -2099,7 +2224,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         mtool = getToolByName(self.portal, 'portal_membership')
         lc = mtool.getMergedLocalRoles(content)
         self.assertEqual(['user:manager', 'user:toto'],
-                         sstack.getStackContent())
+                         sstack.getStackContent(context=content))
         # Check local roles mapping
         sstackdef = wftool.getStackDefinitionFor(content, 'Associates')
         self.assertEqual(sstackdef._getLocalRolesMapping(sstack),
@@ -2118,7 +2243,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         mtool = getToolByName(self.portal, 'portal_membership')
         lc = mtool.getMergedLocalRoles(content)
         self.assertEqual({0: ['user:manager']},
-                         hstack.getStackContent())
+                         hstack.getStackContent(context=content))
         # Check local roles mapping
         hstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
         self.assertEqual(hstackdef._getLocalRolesMapping(hstack),

@@ -131,12 +131,14 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         self.assertEqual(sstack.isEmpty(), 0)
         self.assertEqual(sstack.isFull(), 0)
 
-        self.assertEqual(sstack.getStackContent(), ['elt1'])
+        self.assertEqual(sstack.getStackContent(context=self),
+                         ['elt1'])
 
         # Adding another element.
         res = sstack.push(push_ids=['elt2'])
 
-        self.assertEqual(sstack.getStackContent(), ['elt1','elt2'])
+        self.assertEqual(sstack.getStackContent(context=self),
+                         ['elt1','elt2'])
 
         self.assertEqual(sstack.getSize(), 2)
         self.assertEqual(sstack.isEmpty(), 0)
@@ -183,21 +185,24 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         sstack = SimpleStack()
 
         # Test the pop() method
-        self.assertEqual(sstack.getStackContent(), [])
+        self.assertEqual(sstack.getStackContent(context=self), [])
         self.assertEqual(sstack.pop(pop_ids=['elt1']), 0)
         sstack.push(push_ids=['elt1'])
         self.assertEqual(sstack.pop(pop_ids=['elt1']), 1)
         sstack.push(push_ids=['elt1'])
         sstack.push(push_ids=['elt2'])
-        self.assertEqual(sstack.getStackContent(), ['elt1', 'elt2'])
+        self.assertEqual(sstack.getStackContent(context=self),
+                         ['elt1', 'elt2'])
         sstack.push(push_ids=['elt3'])
-        self.assertEqual(sstack.getStackContent(), ['elt1', 'elt2', 'elt3'])
+        self.assertEqual(sstack.getStackContent(context=self),
+                         ['elt1', 'elt2', 'elt3'])
         self.assertEqual(sstack.pop(pop_ids=('elt2',)), 1)
-        self.assertEqual(sstack.getStackContent(), ['elt1', 'elt3'])
+        self.assertEqual(sstack.getStackContent(context=self),
+                         ['elt1', 'elt3'])
 
         sstack.pop(pop_ids=['elt3'])
         sstack.pop(pop_ids=['elt1'])
-        self.assertEqual(sstack.getStackContent(), [])
+        self.assertEqual(sstack.getStackContent(context=self), [])
 
     def test_simpleHierarchicalStackNoMaxSize(self):
 
@@ -394,13 +399,13 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         self.assertEqual(hstack.getSize(level=1), 3)
 
         # Check level 0 (current level)
-        self.assertEqual(hstack.getLevelContent(level=0),
+        self.assertEqual(hstack.getLevelContent(level=0, context=self),
                          ['elt1','elt-1','elt11'])
-        self.assertEqual(hstack.getLevelContent(level=0),
+        self.assertEqual(hstack.getLevelContent(level=0, context=self),
                          ['elt1','elt-1','elt11'])
-        self.assertEqual(hstack.getLevelContent(level=-1),
+        self.assertEqual(hstack.getLevelContent(level=-1, context=self),
                          ['elt-1','elt1','elt11'])
-        self.assertEqual(hstack.getLevelContent(level=1),
+        self.assertEqual(hstack.getLevelContent(level=1, context=self),
                          ['elt11','elt-1','elt1'])
 
         # Dec Level
@@ -409,20 +414,20 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         self.assertEqual(clevel, hstack.getCurrentLevel())
 
         # Check the level content
-        self.assertEqual(hstack.getLevelContent(),
+        self.assertEqual(hstack.getLevelContent(context=self),
                          hstack.getLevelContent(
-            level=hstack.getCurrentLevel()))
-        self.assertEqual(hstack.getLevelContent(),
-                         hstack.getLevelContent(level=-1))
-        self.assertEqual(hstack.getLevelContent(),
+            level=hstack.getCurrentLevel(), context=self))
+        self.assertEqual(hstack.getLevelContent(context=self),
+                         hstack.getLevelContent(level=-1, context=self))
+        self.assertEqual(hstack.getLevelContent(context=self),
                          ['elt-1','elt1','elt11'])
 
         # Check the consistency of the rest
-        self.assertEqual(hstack.getLevelContent(level=0),
+        self.assertEqual(hstack.getLevelContent(level=0, context=self),
                          ['elt1','elt-1','elt11'])
-        self.assertEqual(hstack.getLevelContent(level=-1),
+        self.assertEqual(hstack.getLevelContent(level=-1, context=self),
                          ['elt-1','elt1','elt11'])
-        self.assertEqual(hstack.getLevelContent(level=1),
+        self.assertEqual(hstack.getLevelContent(level=1, context=self),
                          ['elt11','elt-1','elt1'])
 
         # Increment now
@@ -430,13 +435,13 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         self.assertEqual(clevel, 0)
         self.assertEqual(clevel, hstack.getCurrentLevel())
 
-        self.assertEqual(hstack.getLevelContent(),
+        self.assertEqual(hstack.getLevelContent(context=self),
                          ['elt1','elt-1','elt11'])
-        self.assertEqual(hstack.getLevelContent(level=0),
+        self.assertEqual(hstack.getLevelContent(level=0, context=self),
                          ['elt1','elt-1','elt11'])
-        self.assertEqual(hstack.getLevelContent(level=-1),
+        self.assertEqual(hstack.getLevelContent(level=-1, context=self),
                          ['elt-1','elt1','elt11'])
-        self.assertEqual(hstack.getLevelContent(level=1),
+        self.assertEqual(hstack.getLevelContent(level=1, context=self),
                          ['elt11','elt-1','elt1'])
 
         # Increment again
@@ -445,11 +450,12 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         self.assertEqual(clevel, hstack.getCurrentLevel())
 
         # Check the level content
-        self.assertEqual(hstack.getLevelContent(),
-                         hstack.getLevelContent(level=hstack.getCurrentLevel()))
-        self.assertEqual(hstack.getLevelContent(),
-                         hstack.getLevelContent(level=1))
-        self.assertEqual(hstack.getLevelContent(),
+        self.assertEqual(hstack.getLevelContent(context=self),
+                         hstack.getLevelContent(level=hstack.getCurrentLevel(),
+                                                context=self))
+        self.assertEqual(hstack.getLevelContent(context=self),
+                         hstack.getLevelContent(level=1, context=self))
+        self.assertEqual(hstack.getLevelContent(context=self),
                          ['elt11','elt-1','elt1'])
 
         # Check levels
@@ -593,13 +599,13 @@ class TestCPSWorkflowStacks(ZopeTestCase):
 
         # Check the status of the stack now
         self.assertEqual(hstack.getAllLevels(), [])
-        self.assertEqual(hstack.getLevelContent(), [])
-        self.assertEqual(hstack.getLevelContent(level=-1), [])
-        self.assertEqual(hstack.getLevelContent(level=0), [])
-        self.assertEqual(hstack.getLevelContent(level=1), [])
+        self.assertEqual(hstack.getLevelContent(context=self), [])
+        self.assertEqual(hstack.getLevelContent(level=-1, context=self), [])
+        self.assertEqual(hstack.getLevelContent(level=0, context=self), [])
+        self.assertEqual(hstack.getLevelContent(level=1, context=self), [])
 
         # Check wiered stuffs
-        self.assertEqual(hstack.getLevelContent(level=90000), [])
+        self.assertEqual(hstack.getLevelContent(level=90000, context=self), [])
         self.assertEqual(hstack.pop(pop_ids=('wiered',), level=90000), 0)
 
     def test_simpleHierarchicalStackWithMaxSize(self):
@@ -631,14 +637,14 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         self.assertEqual(hstack.isEmpty(), 0)
         self.assertEqual(hstack.isFull(), 0)
 
-        self.assertEqual(hstack.getStackContent(),
+        self.assertEqual(hstack.getStackContent(context=self),
                          {0:['elt1']})
 
         # Adding another element.
         res = hstack.push('elt2')
         self.assertEqual(res, 1)
-
-        self.assertEqual(hstack.getStackContent(), {0:['elt1','elt2']})
+        self.assertEqual(hstack.getStackContent(context=self),
+                         {0:['elt1','elt2']})
 
         self.assertEqual(hstack.getSize(), 2)
         self.assertEqual(hstack.isEmpty(), 0)
@@ -685,24 +691,24 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         hstack = HierarchicalStack()
 
         # Test the pop() method
-        self.assertEqual(hstack.getStackContent(), {})
+        self.assertEqual(hstack.getStackContent(context=self), {})
         self.assertEqual(hstack.pop(pop_ids=['elt1']), 0)
         hstack.push(push_ids=['elt1'], levels=[0])
         self.assertEqual(hstack.pop(pop_ids=['elt1']), 1)
         hstack.push(push_ids=['elt1'], levels=[0])
         hstack.push(push_ids=['elt2'], levels=[0])
-        self.assertEqual(hstack.getStackContent(),
+        self.assertEqual(hstack.getStackContent(context=self),
                          {0:['elt1', 'elt2']})
         hstack.push(push_ids=['elt3'], levels=[0])
-        self.assertEqual(hstack.getStackContent(),
+        self.assertEqual(hstack.getStackContent(context=self),
                          {0:['elt1', 'elt2', 'elt3']})
         self.assertEqual(hstack.pop(pop_ids=['elt2']), 1)
-        self.assertEqual(hstack.getStackContent(),
+        self.assertEqual(hstack.getStackContent(context=self),
                          {0:['elt1', 'elt3']})
 
         hstack.pop(pop_ids=['0,elt3'])
         hstack.pop(pop_ids=['0,elt1'])
-        self.assertEqual(hstack.getStackContent(), {})
+        self.assertEqual(hstack.getStackContent(context=self), {})
 
     def test_SimpleStackCopy(self):
         # Test getCopy()
@@ -715,21 +721,22 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         self.assertNotEqual(sstack2, None)
         self.assertNotEqual(sstack1, sstack2)
 
-        self.assertEqual(sstack1.getStackContent(), [])
-        self.assertEqual(sstack2.getStackContent(), [])
+        self.assertEqual(sstack1.getStackContent(context=self), [])
+        self.assertEqual(sstack2.getStackContent(context=self), [])
 
-        self.assertEqual(sstack1.getStackContent(), sstack2.getStackContent())
+        self.assertEqual(sstack1.getStackContent(context=self),
+                         sstack2.getStackContent(context=self))
         self.assertEqual(sstack1.isFull(), sstack2.isFull())
         self.assertEqual(sstack1.isEmpty(), sstack2.isEmpty())
         self.assertEqual(sstack1.getSize(), sstack2.getSize())
 
         sstack1.push('elt1')
         sstack2.push('elt2')
-        self.assertEqual(sstack1.getStackContent(), ['elt1'])
-        self.assertEqual(sstack2.getStackContent(), ['elt2'])
+        self.assertEqual(sstack1.getStackContent(context=self), ['elt1'])
+        self.assertEqual(sstack2.getStackContent(context=self), ['elt2'])
 
-        self.assertNotEqual(sstack1.getStackContent(),
-                            sstack2.getStackContent())
+        self.assertNotEqual(sstack1.getStackContent(context=self),
+                            sstack2.getStackContent(context=self))
 
     def test_HierarchicalStackCopy(self):
 
@@ -746,21 +753,22 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         self.assertNotEqual(hstack2, None)
         self.assertNotEqual(hstack1, hstack2)
 
-        self.assertEqual(hstack1.getStackContent(), {})
-        self.assertEqual(hstack2.getStackContent(), {})
+        self.assertEqual(hstack1.getStackContent(context=self), {})
+        self.assertEqual(hstack2.getStackContent(context=self), {})
 
-        self.assertEqual(hstack1.getStackContent(), hstack2.getStackContent())
+        self.assertEqual(hstack1.getStackContent(context=self),
+                         hstack2.getStackContent(context=self))
         self.assertEqual(hstack1.isFull(), hstack2.isFull())
         self.assertEqual(hstack1.isEmpty(), hstack2.isEmpty())
         self.assertEqual(hstack1.getSize(), hstack2.getSize())
 
         hstack1.push('elt1')
         hstack2.push('elt2')
-        self.assertEqual(hstack1.getLevelContent(), ['elt1'])
-        self.assertEqual(hstack2.getLevelContent(), ['elt2'])
+        self.assertEqual(hstack1.getLevelContent(context=self), ['elt1'])
+        self.assertEqual(hstack2.getLevelContent(context=self), ['elt2'])
 
-        self.assertNotEqual(hstack1.getStackContent(),
-                            hstack2.getStackContent())
+        self.assertNotEqual(hstack1.getStackContent(context=self),
+                            hstack2.getStackContent(context=self))
 
     def test_reset_simple_wf_stack(self):
 
@@ -772,18 +780,18 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         self.assertEqual(simple.getMetaType(),
                          'Simple Stack')
         simple.push(push_ids=['elt1'])
-        self.assertEqual(simple.getStackContent(),
+        self.assertEqual(simple.getStackContent(context=self),
                          ['elt1'])
         simple.reset()
         self.assertEqual(simple.getMetaType(),
                          'Simple Stack')
-        self.assertNotEqual(simple.getStackContent(),
+        self.assertNotEqual(simple.getStackContent(context=self),
                             ['elt1'])
-        self.assertEqual(simple.getStackContent(),
+        self.assertEqual(simple.getStackContent(context=self),
                          [])
 
         simple.push(push_ids=['elt1'])
-        self.assertEqual(simple.getStackContent(),
+        self.assertEqual(simple.getStackContent(context=self),
                          ['elt1'])
 
     def test_reset_hierarchical_wf_stack(self):
@@ -795,25 +803,25 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         hierarchical = HierarchicalStack()
         self.assertEqual(hierarchical.getMetaType(),
                          'Hierarchical Stack')
-        self.assertEqual(hierarchical.getStackContent(),
+        self.assertEqual(hierarchical.getStackContent(context=self),
                          {})
         hierarchical.push(push_ids=['elt1'], levels=[0])
-        self.assertNotEqual(hierarchical.getStackContent(),
+        self.assertNotEqual(hierarchical.getStackContent(context=self),
                             {})
-        self.assertEqual(hierarchical.getLevelContent(),
+        self.assertEqual(hierarchical.getLevelContent(context=self),
                          ['elt1'])
         hierarchical.reset()
-        self.assertEqual(hierarchical.getStackContent(),
+        self.assertEqual(hierarchical.getStackContent(context=self),
                          {})
         self.assertEqual(hierarchical.getMetaType(),
                          'Hierarchical Stack')
-        self.assertNotEqual(hierarchical.getLevelContent(),
+        self.assertNotEqual(hierarchical.getLevelContent(context=self),
                             ['elt1'])
-        self.assertEqual(hierarchical.getLevelContent(),
+        self.assertEqual(hierarchical.getLevelContent(context=self),
                          [])
 
         hierarchical.push(push_ids=['elt1'], levels=[0])
-        self.assertEqual(hierarchical.getLevelContent(),
+        self.assertEqual(hierarchical.getLevelContent(context=self),
                          ['elt1'])
 
     #def test_bstack_elements(self):
@@ -1069,9 +1077,9 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         stack = SimpleStack()
         stack.push(push_ids=['elt1'])
         stack.push(push_ids=['elt2'])
-        self.assertEqual(stack.getStackContent(), ['elt1', 'elt2'])
+        self.assertEqual(stack.getStackContent(context=self), ['elt1', 'elt2'])
         stack.replace('elt2', 'elt4')
-        self.assertEqual(stack.getStackContent(), ['elt1', 'elt4'])
+        self.assertEqual(stack.getStackContent(context=self), ['elt1', 'elt4'])
 
         #
         # Test with elements objects
@@ -1079,7 +1087,7 @@ class TestCPSWorkflowStacks(ZopeTestCase):
 
         oelt = UserStackElement('string_elt')
         stack.replace('elt4', oelt)
-        self.assertEqual(stack.getStackContent(), ['elt1', 'string_elt'])
+        self.assertEqual(stack.getStackContent(context=self), ['elt1', 'string_elt'])
 
     def test_replaceOnSHierarchicalStack(self):
 
@@ -1090,9 +1098,9 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         stack = HierarchicalStack()
         stack.push(push_ids=['elt1'], levels=[0])
         stack.push(push_ids=['elt2'], levels=[0])
-        self.assertEqual(stack.getLevelContent(), ['elt1', 'elt2'])
+        self.assertEqual(stack.getLevelContent(context=self), ['elt1', 'elt2'])
         stack.replace('elt2', 'elt4')
-        self.assertEqual(stack.getLevelContent(), ['elt1', 'elt4'])
+        self.assertEqual(stack.getLevelContent(context=self), ['elt1', 'elt4'])
 
         #
         # Test with elements objects
@@ -1100,7 +1108,8 @@ class TestCPSWorkflowStacks(ZopeTestCase):
 
         oelt = UserStackElement('string_elt')
         stack.replace('elt4', oelt)
-        self.assertEqual(stack.getLevelContent(), ['elt1', 'string_elt'])
+        self.assertEqual(stack.getLevelContent(context=self),
+                         ['elt1', 'string_elt'])
 
         #
         # Test with different levels
@@ -1108,27 +1117,36 @@ class TestCPSWorkflowStacks(ZopeTestCase):
 
         stack.push('string_elt', level=1)
         stack.push('string_elt', level=-1)
-        self.assertEqual(stack.getLevelContent(), ['elt1', 'string_elt'])
-        self.assertEqual(stack.getLevelContent(level=1), ['string_elt'])
-        self.assertEqual(stack.getLevelContent(level=-1), ['string_elt'])
+        self.assertEqual(stack.getLevelContent(context=self),
+                         ['elt1', 'string_elt'])
+        self.assertEqual(stack.getLevelContent(level=1, context=self),
+                         ['string_elt'])
+        self.assertEqual(stack.getLevelContent(level=-1, context=self),
+                         ['string_elt'])
 
         stack.push('elt1', level=1)
-        self.assertEqual(stack.getLevelContent(), ['elt1', 'string_elt'])
-        self.assertEqual(stack.getLevelContent(level=1), ['string_elt',
-                                                          'elt1'])
-        self.assertEqual(stack.getLevelContent(level=-1), ['string_elt'])
+        self.assertEqual(stack.getLevelContent(context=self),
+                         ['elt1', 'string_elt'])
+        self.assertEqual(stack.getLevelContent(level=1, context=self),
+                         ['string_elt', 'elt1'])
+        self.assertEqual(stack.getLevelContent(level=-1, context=self),
+                         ['string_elt'])
 
         stack.replace('string_elt', 'string_elt2')
-        self.assertEqual(stack.getLevelContent(), ['elt1', 'string_elt2'])
-        self.assertEqual(stack.getLevelContent(level=1), ['string_elt2',
-                                                          'elt1'])
-        self.assertEqual(stack.getLevelContent(level=-1), ['string_elt2'])
+        self.assertEqual(stack.getLevelContent(context=self),
+                         ['elt1', 'string_elt2'])
+        self.assertEqual(stack.getLevelContent(level=1, context=self),
+                         ['string_elt2', 'elt1'])
+        self.assertEqual(stack.getLevelContent(level=-1, context=self),
+                         ['string_elt2'])
 
         stack.replace('elt1', 'elt2')
-        self.assertEqual(stack.getLevelContent(), ['elt2', 'string_elt2'])
-        self.assertEqual(stack.getLevelContent(level=1), ['string_elt2',
-                                                          'elt2'])
-        self.assertEqual(stack.getLevelContent(level=-1), ['string_elt2'])
+        self.assertEqual(stack.getLevelContent(context=self),
+                         ['elt2', 'string_elt2'])
+        self.assertEqual(stack.getLevelContent(level=1, context=self),
+                         ['string_elt2', 'elt2'])
+        self.assertEqual(stack.getLevelContent(level=-1, context=self),
+                         ['string_elt2'])
 
     def test_insertInBetweenLevelsWithHierarchical(self):
 
@@ -1138,58 +1156,64 @@ class TestCPSWorkflowStacks(ZopeTestCase):
         # Normal
         hstack.push(push_ids=['elt1'], levels=[0])
         hstack.push(push_ids=['elt3'], levels=[1])
-        self.assertEqual(hstack.getStackContent(), {0:['elt1'],
-                                                    1:['elt3']})
+        self.assertEqual(hstack.getStackContent(context=self),
+                         {0:['elt1'], 1:['elt3']})
 
         # Insert in between 0 and 1
         # current_level is 0
         self.assertEqual(hstack.getCurrentLevel(), 0)
         hstack.push('elt2', low_level=0, high_level=1)
-        self.assertEqual(hstack.getStackContent(), {0:['elt1'],
-                                                    1:['elt2'],
-                                                    2:['elt3'],
-                                                    })
+        self.assertEqual(hstack.getStackContent(context=self),
+                         {0:['elt1'],
+                          1:['elt2'],
+                          2:['elt3'],
+                          })
         # Change current level and try to insert
         # 0 is the edge level where we need to test
         hstack.doIncLevel()
         self.assertEqual(hstack.getCurrentLevel(), 1)
         hstack.push('elt4', low_level=0, high_level=1)
-        self.assertEqual(hstack.getStackContent(), {-1:['elt1'],
-                                                    0:['elt4'],
-                                                    1:['elt2'],
-                                                    2:['elt3'],
-                                                    })
+        self.assertEqual(hstack.getStackContent(context=self),
+                         {-1:['elt1'],
+                          0:['elt4'],
+                          1:['elt2'],
+                          2:['elt3'],
+                          })
         hstack.push('elt5', low_level=2, high_level=3)
-        self.assertEqual(hstack.getStackContent(), {-1:['elt1'],
-                                                    0:['elt4'],
-                                                    1:['elt2'],
-                                                    2:['elt3'],
-                                                    3:['elt5'],
-                                                    })
+        self.assertEqual(hstack.getStackContent(context=self),
+                         {-1:['elt1'],
+                          0:['elt4'],
+                          1:['elt2'],
+                          2:['elt3'],
+                          3:['elt5'],
+                          })
         hstack.push('elt6', low_level=-2, high_level=-1)
-        self.assertEqual(hstack.getStackContent(), {-2:['elt6'],
-                                                    -1:['elt1'],
-                                                    0:['elt4'],
-                                                    1:['elt2'],
-                                                    2:['elt3'],
-                                                    3:['elt5'],
-                                                    })
+        self.assertEqual(hstack.getStackContent(context=self),
+                         {-2:['elt6'],
+                          -1:['elt1'],
+                          0:['elt4'],
+                          1:['elt2'],
+                          2:['elt3'],
+                          3:['elt5'],
+                          })
         hstack.push('elt7', low_level=-4, high_level=-3)
-        self.assertEqual(hstack.getStackContent(), {-2:['elt6'],
-                                                    -1:['elt1'],
-                                                    0:['elt4'],
-                                                    1:['elt2'],
-                                                    2:['elt3'],
-                                                    3:['elt5'],
-                                                    })
+        self.assertEqual(hstack.getStackContent(context=self),
+                         {-2:['elt6'],
+                          -1:['elt1'],
+                          0:['elt4'],
+                          1:['elt2'],
+                          2:['elt3'],
+                          3:['elt5'],
+                          })
         hstack.push('elt7', low_level=4, high_level=5)
-        self.assertEqual(hstack.getStackContent(), {-2:['elt6'],
-                                                    -1:['elt1'],
-                                                    0:['elt4'],
-                                                    1:['elt2'],
-                                                    2:['elt3'],
-                                                    3:['elt5'],
-                                                    })
+        self.assertEqual(hstack.getStackContent(context=self),
+                         {-2:['elt6'],
+                          -1:['elt1'],
+                          0:['elt4'],
+                          1:['elt2'],
+                          2:['elt3'],
+                          3:['elt5'],
+                          })
 
 
 def test_suite():
