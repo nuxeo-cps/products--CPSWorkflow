@@ -209,7 +209,7 @@ class WorkflowTool(BaseWorkflowTool):
         Returns a sequence of transition names.
         """
         container = self._container_maybe_rpath(container)
-        LOG('CPSWFT', DEBUG,
+        LOG('CPSWFT', TRACE,
             "getInitialTransitions container=%s type_name=%s behavior=%s "
             % ('/'.join(container.getPhysicalPath()), type_name, behavior))
         d = {}
@@ -227,7 +227,7 @@ class WorkflowTool(BaseWorkflowTool):
 
         transitions = d.keys()
         transitions.sort()
-        LOG('CPSWFT', DEBUG, "  Transitions are %s" % `transitions`)
+        LOG('CPSWFT', TRACE, "  Transitions are %s" % `transitions`)
         return transitions
 
     def _container_maybe_rpath(self, container):
