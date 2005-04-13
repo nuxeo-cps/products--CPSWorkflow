@@ -1,4 +1,21 @@
 *******************************************
+** CPSWorkflow V0.4.0 [R1 build 2005/04/13-08:31 by ben]
+
+Requires:
+~~~~~~~~~
+-
+New features:
+~~~~~~~~~~~~~
+-
+Bug fixes:
+~~~~~~~~~~
+-
+New internal features:
+~~~~~~~~~~~~~~~~~~~~~~
+- #555: Use standardized return value for invokeFactory and constructContent.
+- Moved many logs to TRACE level instead of DEBUG.
+
+*******************************************
 ** CPSWorkflow V0.3.1 [R1 build 2005/04/11-08:32 by ben]
 
 Requires:
