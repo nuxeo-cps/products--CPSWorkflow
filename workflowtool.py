@@ -400,6 +400,7 @@ class WorkflowTool(BaseWorkflowTool):
                 # XXX constructContent doesn't exist everywhere !
                 # XXX especially when creating at the root of the portal.
                 id = container.constructContent(type_name, id, **kwargs)
+                # constructContent indexed the object (CMF contract)
                 ob = getattr(container, id)
             else:
                 # Create a proxy and a document in the repository.
@@ -411,9 +412,10 @@ class WorkflowTool(BaseWorkflowTool):
                     dm = kwargs['datamodel']
                     dm._setObject(None, proxy=proxy)
 
-                pxtool.createRevision(proxy, language, **kwargs)
                 # Set the first language as default language.
                 proxy.setDefaultLanguage(language)
+                pxtool.createRevision(proxy, language, **kwargs)
+                # createRevision indexed the proxy
                 ob = proxy
             ob.manage_afterCMFAdd(ob, container)
             # XXX at this point we still don't have a workflow state...
