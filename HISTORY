@@ -1,4 +1,20 @@
 *******************************************
+** CPSWorkflow V0.4.2 [R1 build 2005/04/15-07:53 by ben]
+
+Requires:
+~~~~~~~~~
+-
+New features:
+~~~~~~~~~~~~~
+-
+Bug fixes:
+~~~~~~~~~~
+- Set default language before indexing.
+New internal features:
+~~~~~~~~~~~~~~~~~~~~~~
+-
+
+*******************************************
 ** CPSWorkflow V0.4.1 [R1 build 2005/04/13-17:51 by fguillaume]
 
 Requires:
