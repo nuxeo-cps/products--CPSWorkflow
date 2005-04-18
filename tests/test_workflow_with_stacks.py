@@ -36,6 +36,7 @@ ZopeTestCase.installProduct('CMFCore')
 ZopeTestCase.installProduct('CMFDefault')
 ZopeTestCase.installProduct('MailHost')
 ZopeTestCase.installProduct('CPSWorkflow')
+ZopeTestCase.installProduct('ZCTextIndex')
 
 # XXX Break those dependencies
 ZopeTestCase.installProduct('CPSCore')
