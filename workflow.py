@@ -341,14 +341,14 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
         return 0
 
-    def _checkTransitionGuard(self, t, ob):
+    def _checkTransitionGuard(self, t, ob, **kw):
         """Check the transition guard
 
         DC workflow + stack def checks
         """
         guard = t.guard
         return (guard is None or
-                guard.check(getSecurityManager(), self, ob) and
+                guard.check(getSecurityManager(), self, ob, **kw) and
                 self._checkStackGuards(t, ob))
 
     def _changeStateOf(self, ob, tdef=None, kwargs=None):
@@ -1108,7 +1108,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
                                     (self.getId(), initial_transition,
                                      initial_behavior))
         container = aq_parent(aq_inner(ob))
-        if not self._checkTransitionGuard(tdef, container):
+        if not self._checkTransitionGuard(tdef, container, **kwargs):
             raise WorkflowException("Unauthorized transition %s"
                                     % initial_transition)
         self._changeStateOf(ob, tdef, kwargs)

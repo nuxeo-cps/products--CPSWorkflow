@@ -37,7 +37,7 @@ from expression import createExprContext
 
 class StackDefinitionGuard(Guard):
 
-    def check(self, sm, wf_def, ob):
+    def check(self, sm, wf_def, ob, **kw):
         """Checks conditions in this guard.
         """
         u_roles = None
@@ -80,7 +80,8 @@ class StackDefinitionGuard(Guard):
         expr = self.expr
         if expr is not None:
             if wf_def is not None:
-                econtext = createExprContext(CPSStateChangeInfo(ob, wf_def))
+                econtext = createExprContext(
+                    CPSStateChangeInfo(ob, wf_def, kwargs=kw))
                 res = expr(econtext)
                 if not res:
                     return 0

@@ -658,7 +658,7 @@ class WorkflowTool(BaseWorkflowTool):
             found = 0
             for wf in wfs:
                 LOG('_doActionFor', TRACE, ' testing wf %s' % wf.getId())
-                if wf.isActionSupported(ob, action):
+                if wf.isActionSupported(ob, action, **kw):
                     LOG('_doActionFor', TRACE, ' found!')
                     found = 1
                     break
