@@ -1,6 +1,6 @@
 Requires:
 ~~~~~~~~~
--
+- CPSCompat > 0.2.0
 New features:
 ~~~~~~~~~~~~~
 -
@@ -9,4 +9,4 @@ Bug fixes:
 -
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
--
+- Update guard checks according to latest changes within CMF-1.5
