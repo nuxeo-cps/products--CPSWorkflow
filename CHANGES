@@ -6,7 +6,7 @@ New features:
 -
 Bug fixes:
 ~~~~~~~~~~
--
+- notify in case of object deletion
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
 - Update guard checks according to latest changes within CMF-1.5
