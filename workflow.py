@@ -391,6 +391,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
         moved_exc = None
         utool = getToolByName(self, 'portal_url') # CPS
         wftool = aq_parent(aq_inner(self))
+        evtool = getEventService(self)
 
         # Get the stack ds defined for this object in this current state
         # If it's the creation time no stacks are defined
@@ -1019,6 +1020,9 @@ class WorkflowDefinition(DCWorkflowDefinition):
         ### CPS: Delete. Done after setting status, to keep history.
         #
         if delete_ob is not None:
+            # XXX refactoring.
+            evtool.notify('workflow_%s' % tdef.getId(),
+                          delete_ob, {'kwargs': kwargs})
             container = aq_parent(aq_inner(delete_ob))
             container._delObject(delete_ob.getId())
             if moved_exc is not None:
@@ -1043,7 +1047,6 @@ class WorkflowDefinition(DCWorkflowDefinition):
         ### CPS: Event notification. This has to be done after all the
         # potential transition scripts.
         #
-        evtool = getEventService(self)
         # XXX pass a whole sci ?
         evtool.notify('workflow_%s' % tdef.getId(), ob, {'kwargs': kwargs})
         #
