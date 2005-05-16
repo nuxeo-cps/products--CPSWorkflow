@@ -1,4 +1,20 @@
 *******************************************
+** CPSWorkflow V0.4.3 [R1 build 2005/05/16-12:57 by anahide]
+** SVN URL: https://svn.nuxeo.org/pub/CPSWorkflow/trunk Revision: 21583
+Requires:
+~~~~~~~~~
+- CPSCompat > 0.2.0
+New features:
+~~~~~~~~~~~~~
+-
+Bug fixes:
+~~~~~~~~~~
+- notify in case of object deletion
+New internal features:
+~~~~~~~~~~~~~~~~~~~~~~
+- Update guard checks according to latest changes within CMF-1.5
+
+*******************************************
 ** CPSWorkflow V0.4.2 [R1 build 2005/04/15-07:53 by ben]
 
 Requires:
