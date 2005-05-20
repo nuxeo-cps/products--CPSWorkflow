@@ -29,6 +29,7 @@ from types import StringType
 from Acquisition import aq_base, aq_parent, aq_inner
 from Globals import InitializeClass, DTMLFile
 from AccessControl import ClassSecurityInfo, Unauthorized
+from OFS.Folder import Folder
 
 from Products.CMFCore.utils import _checkPermission, getToolByName
 from Products.CMFCore.permissions import View, ModifyPortalContent
@@ -106,6 +107,13 @@ class WorkflowTool(BaseWorkflowTool):
     id = 'portal_workflow'
     meta_type = 'CPS Workflow Tool'
     title = 'CPS Workflow Tool'
+
+    manage_options = ( Folder.manage_options[0], 
+                       { 'label' : 'Workflows', 
+                         'action' : 'manage_selectWorkflows'
+                       },
+                       { 'label' : 'Overview', 'action' : 'manage_overview' }
+                     ) + Folder.manage_options[1:]
 
     security = ClassSecurityInfo()
 
