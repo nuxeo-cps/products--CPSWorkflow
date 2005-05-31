@@ -943,21 +943,16 @@ class WorkflowTool(BaseWorkflowTool):
                               'updateFormerLocalRoleMappingForStack')
     def updateFormerLocalRoleMappingForStack(self, ob, wf_id, stack_id,
                                              mapping):
+        """Set the former local role mapping
 
-        """Set the former local role mapping for a given stack on a given given
-        content object for a given workflow
-
-        The former local role mapping is defined within the status of the
-        object.
+        Sets the mapping for a given stack on a given given content
+        object for a given workflow. The former local role mapping is
+        defined within the status of the object.
         """
-
-        # XXX code sucks
-
-        self._p_changed = 1
-        _status = self[wf_id]._getStatusOf(ob)
-        _sflrm = _status.get('sflrm', {})
-        _sflrm[stack_id] = mapping
-        ob.workflow_history[wf_id][-1]['sflrm']  = _sflrm
+        status = self[wf_id]._getStatusOf(ob)
+        sflrm = status.setdefault('sflrm', {})
+        sflrm[stack_id] = mapping
+        ob.workflow_history._p_changed = 1
 
     security.declareProtected(ManagePortal,
                                'getFormerLocalRoleMappingForStack')

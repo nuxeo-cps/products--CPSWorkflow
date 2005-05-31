@@ -6,7 +6,7 @@ New features:
 -
 Bug fixes:
 ~~~~~~~~~~
--
+- Fixed persistence problem when updating former local role mapping in stacks.
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
 -
