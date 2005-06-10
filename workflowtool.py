@@ -251,8 +251,8 @@ class WorkflowTool(BaseWorkflowTool):
     def getDefaultLanguage(self):
         """Get the default language for a new object."""
         portal = aq_parent(aq_inner(self))
-        if hasattr(portal, 'Localizer'):
-            return portal.Localizer.get_default_language()
+        if hasattr(portal, 'translation_service'):
+            return portal.translation_service.getDefaultLanguage()
         else:
             return 'en'
 
