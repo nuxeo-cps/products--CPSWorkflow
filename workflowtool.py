@@ -401,7 +401,6 @@ class WorkflowTool(BaseWorkflowTool):
         if initial_behavior == TRANSITION_INITIAL_PUBLISHING:
             # XXX should not notify cmfadd
             ob = container.copyContent(old_ob, id)
-            ob
             # XXX later! the object is not finished yet !
             ob.manage_afterCMFAdd(ob, container)
             self._insertWorkflowRecursive(ob, initial_transition,
