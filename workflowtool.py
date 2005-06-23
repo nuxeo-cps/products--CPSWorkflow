@@ -108,8 +108,8 @@ class WorkflowTool(BaseWorkflowTool):
     meta_type = 'CPS Workflow Tool'
     title = 'CPS Workflow Tool'
 
-    manage_options = ( Folder.manage_options[0], 
-                       { 'label' : 'Workflows', 
+    manage_options = ( Folder.manage_options[0],
+                       { 'label' : 'Workflows',
                          'action' : 'manage_selectWorkflows'
                        },
                        { 'label' : 'Overview', 'action' : 'manage_overview' }
@@ -399,8 +399,11 @@ class WorkflowTool(BaseWorkflowTool):
             break
 
         if initial_behavior == TRANSITION_INITIAL_PUBLISHING:
-            ob = container.copyContent(old_ob, id) # XXX should not notify cmfadd
-            ob.manage_afterCMFAdd(ob, container) # XXX later! the object is not finished yet !
+            # XXX should not notify cmfadd
+            ob = container.copyContent(old_ob, id)
+            ob
+            # XXX later! the object is not finished yet !
+            ob.manage_afterCMFAdd(ob, container)
             self._insertWorkflowRecursive(ob, initial_transition,
                                           initial_behavior, kwargs)
         elif initial_behavior == TRANSITION_INITIAL_CREATE:
