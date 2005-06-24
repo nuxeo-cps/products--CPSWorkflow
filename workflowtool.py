@@ -1,5 +1,5 @@
 # -*- coding: iso-8859-15 -*-
-# (C) Copyright 2002, 2003, 2004 Nuxeo SARL <http://nuxeo.com>
+# (C) Copyright 2002-2005 Nuxeo SARL <http://nuxeo.com>
 # Author: Florent Guillaume <fg@nuxeo.com>
 # Contributor: Julien Anguenot <ja@nuxeo.com>
 #              - Stack workflow API
@@ -30,6 +30,7 @@ from Acquisition import aq_base, aq_parent, aq_inner
 from Globals import InitializeClass, DTMLFile
 from AccessControl import ClassSecurityInfo, Unauthorized
 from OFS.Folder import Folder
+from webdav.WriteLockInterface import WriteLockInterface
 
 from Products.CMFCore.utils import _checkPermission, getToolByName
 from Products.CMFCore.permissions import View, ModifyPortalContent
@@ -401,13 +402,18 @@ class WorkflowTool(BaseWorkflowTool):
         if initial_behavior == TRANSITION_INITIAL_PUBLISHING:
             # XXX should not notify cmfadd
             ob = container.copyContent(old_ob, id)
-            # XXX later! the object is not finished yet !
+            # Removing any possible WebDAV locks on the checked-out object
+            # because the copyContent method also copy locks (which might or
+            # might not be considered a bug).
+            if WriteLockInterface.isImplementedBy(ob):
+                ob.wl_clearLocks()
+            # XXX later! the object is not finished yet!
             ob.manage_afterCMFAdd(ob, container)
             self._insertWorkflowRecursive(ob, initial_transition,
                                           initial_behavior, kwargs)
         elif initial_behavior == TRANSITION_INITIAL_CREATE:
             if not proxy_type:
-                # XXX constructContent doesn't exist everywhere !
+                # XXX constructContent doesn't exist everywhere!
                 # XXX especially when creating at the root of the portal.
                 id = container.constructContent(type_name, id, **kwargs)
                 # constructContent indexed the object (CMF contract)

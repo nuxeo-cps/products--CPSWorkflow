@@ -6,7 +6,8 @@ New features:
 -
 Bug fixes:
 ~~~~~~~~~~
--
+- Added code to removing any possible WebDAV locks on checked-out document
+  proxies, locks which might come from the submitted document proxies.
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
 -
