@@ -56,6 +56,7 @@ from Products.CMFSetup.utils import _coalesceTextNodeChildren
 from Products.CMFSetup.utils import _extractDescriptionNode
 from Products.CMFSetup.utils import _getNodeAttribute
 from Products.CMFSetup.utils import _getNodeAttributeBoolean
+
 from Products.CMFSetup.workflow import WorkflowToolConfigurator
 from Products.CMFSetup.workflow import WorkflowDefinitionConfigurator
 from Products.CMFSetup.workflow import _getWorkflowFilename
@@ -294,7 +295,7 @@ class CPSWorkflowToolConfigurator(WorkflowToolConfigurator):
         for wf in val:
             if wf['meta_type'] in WF_META_TYPES:
                 if wf['filename'] == wf['workflow_id']:
-                    wf['filename'] = _getTypeFilename(wf['filename'])
+                    wf['filename'] = _getWorkflowFilename(wf['filename'])
             else:
                 wf['filename'] = None
 
@@ -520,9 +521,6 @@ class CPSWorkflowDefinitionConfigurator(WorkflowDefinitionConfigurator):
         for k, v in items:
 
             filename = _getScriptFilename( workflow.getId(), k, v.meta_type )
-            wf_dir = workflow_id.replace( ' ', '_' )
-            suffix = _METATYPE_SUFFIXES[ meta_type ]
-            filename = 'workflows/%s/scripts/%s.%s' % ( wf_dir, script_id, suffix )
 
             info = { 'id'                   : k
                    , 'meta_type'            : v.meta_type
@@ -816,3 +814,11 @@ def _extractTransitionNodes(root, encoding=None):
         result.append(info)
 
     return result
+
+def _getScriptFilename( workflow_id, script_id, meta_type ):
+
+    """ Return the name of the file which holds the script.
+    """
+    wf_dir = workflow_id.replace( ' ', '_' )
+    suffix = _METATYPE_SUFFIXES[ meta_type ]
+    return 'workflows/%s/scripts/%s.%s' % ( wf_dir, script_id, suffix )
