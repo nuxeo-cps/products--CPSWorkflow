@@ -64,14 +64,19 @@ from Products.CMFSetup.workflow import TRIGGER_TYPES
 from Products.CMFSetup.workflow import _METATYPE_SUFFIXES
 
 # overloaded
-#from Products.CMFSetup.workflow import _extractStateNodes
-#from Products.CMFSetup.workflow import _extractTransitionNodes
+from Products.CMFSetup.workflow import _extractStateNodes
+# overloaded
+from Products.CMFSetup.workflow import _extractTransitionNodes
+
 from Products.CMFSetup.workflow import _extractVariableNodes
 from Products.CMFSetup.workflow import _extractWorklistNodes
 from Products.CMFSetup.workflow import _extractPermissionNodes
 from Products.CMFSetup.workflow import _extractScriptNodes
+from Products.CMFSetup.workflow import _extractPermissionNodes
 from Products.CMFSetup.workflow import _extractActionNode
 from Products.CMFSetup.workflow import _extractGuardNode
+from Products.CMFSetup.workflow import _extractDefaultNode
+from Products.CMFSetup.workflow import _extractMatchNode
 
 #overloaded
 #from Products.CMFSetup.workflow import _initDCWorkflowStates
@@ -79,18 +84,6 @@ from Products.CMFSetup.workflow import _extractGuardNode
 from Products.CMFSetup.workflow import _initDCWorkflowVariables
 from Products.CMFSetup.workflow import _initDCWorkflowWorklists
 from Products.CMFSetup.workflow import _initDCWorkflowScripts
-
-#overloaded
-#from Products.CMFSetup.workflow import _extractStateNodes
-#from Products.CMFSetup.workflow import _extractTransitionNodes
-from Products.CMFSetup.workflow import _extractVariableNodes
-from Products.CMFSetup.workflow import _extractWorklistNodes
-from Products.CMFSetup.workflow import _extractScriptNodes
-from Products.CMFSetup.workflow import _extractPermissionNodes
-from Products.CMFSetup.workflow import _extractActionNode
-from Products.CMFSetup.workflow import _extractGuardNode
-from Products.CMFSetup.workflow import _extractDefaultNode
-from Products.CMFSetup.workflow import _extractMatchNode
 
 WF_META_TYPES = [
     DCWorkflowDefinition.meta_type,
@@ -128,6 +121,10 @@ TRANSITION_BEHAVIORS = {
     48: 'TRANSITION_BEHAVIOR_WORKFLOW_RESET',
     }
 
+TRANSITION_BEHAVIORS_INVERSE = {}
+for key, value in TRANSITION_BEHAVIORS.items():
+    TRANSITION_BEHAVIORS_INVERSE[value] = key
+
 STATE_BEHAVIORS = {
     101: 'STATE_BEHAVIOR_PUSH_DELEGATEES',
     102: 'STATE_BEHAVIOR_POP_DELEGATEES',
@@ -135,6 +132,10 @@ STATE_BEHAVIORS = {
     104: 'STATE_BEHAVIOR_WORKFLOW_DOWN',
     108: 'STATE_BEHAVIOR_WORKFLOW_RESET',
     }
+
+STATE_BEHAVIORS_INVERSE = {}
+for key, value in STATE_BEHAVIORS.items():
+    STATE_BEHAVIORS_INVERSE[value] = key
 
 _pkgdir = package_home(globals())
 _xmldir = os.path.join(_pkgdir, 'xml')
@@ -183,7 +184,8 @@ def importWorkflowTool( context ):
     Take care of CPSWorkflow specifics
     """
     site = context.getSite()
-    encoding = context.getEncoding()
+    #encoding = context.getEncoding()
+    encoding = 'iso-8859-15'
     tool = getToolByName( site, 'portal_workflow' )
 
     if context.shouldPurge():
@@ -539,7 +541,11 @@ class CPSWorkflowDefinitionConfigurator(WorkflowDefinitionConfigurator):
     def parseWorkflowXML(self, xml, encoding=None):
         """ Pseudo API.
         """
-        dom = domParseString(xml)
+        from xml.parsers.expat import ExpatError
+        try:
+            dom = domParseString(xml)
+        except ExpatError, err:
+            raise ExpatError("%s: %s"%(err, xml))
 
         # XXX
         root = dom.getElementsByTagName('cps-workflow')[ 0 ]
@@ -553,12 +559,12 @@ class CPSWorkflowDefinitionConfigurator(WorkflowDefinitionConfigurator):
             # no initial state
             initial_state = None
 
-        states = _extractStateNodes(root)
-        transitions = _extractTransitionNodes(root)
-        variables = _extractVariableNodes(root)
-        worklists = _extractWorklistNodes(root)
-        permissions = _extractPermissionNodes(root)
-        scripts = _extractScriptNodes(root)
+        states = _extractCPSStateNodes(root, encoding)
+        transitions = _extractCPSTransitionNodes(root, encoding)
+        variables = _extractVariableNodes(root, encoding)
+        worklists = _extractWorklistNodes(root, encoding)
+        permissions = _extractPermissionNodes(root, encoding)
+        scripts = _extractScriptNodes(root, encoding)
 
         return (workflow_id
                , title
@@ -627,6 +633,15 @@ def _initWorkflowStates( workflow, states ):
         s.setProperties( title = s_info[ 'title' ]
                        , description = s_info[ 'description' ]
                        , transitions = s_info[ 'transitions' ]
+                       # CPS/
+                       , state_behaviors=[STATE_BEHAVIORS_INVERSE[x] for x in s_info['state_behaviors']]
+                       , push_on_workflow_variable=s_info['push_on_workflow_variable']
+                       , pop_on_workflow_variable=s_info['pop_on_workflow_variable']
+                       , workflow_up_on_workflow_variable=s_info['workflow_up_on_workflow_variable']
+                       , workflow_down_on_workflow_variable=s_info['workflow_down_on_workflow_variable']
+                       , workflow_reset_on_workflow_variable=s_info['workflow_reset_on_workflow_variable']
+                       , stackdefs=s_info['stackdefs'],
+                       # /CPS
                        )
 
         for k, v in s_info[ 'permissions' ].items():
@@ -684,12 +699,23 @@ def _initWorkflowTransitions( workflow, transitions ):
                        , actbox_url = action[ 'url' ]
                        , actbox_category = action[ 'category' ]
                        , props = props
-                       )
+                       # CPS/
+                       , transition_behavior=[TRANSITION_BEHAVIORS_INVERSE[x] for x in t_info['transition_behavior']]
+                       , clone_allowed_transitions=t_info['clone_allowed_transitions']
+                       , checkout_allowed_initial_transitions=t_info['checkout_allowed_initial_transitions']
+                       , checkin_allowed_transitions=t_info['checkin_allowed_transitions']
+                       , push_on_workflow_variable=t_info['push_on_workflow_variable']
+                       , pop_on_workflow_variable=t_info['pop_on_workflow_variable']
+                       , workflow_up_on_workflow_variable=t_info['workflow_up_on_workflow_variable']
+                       , workflow_down_on_workflow_variable=t_info['workflow_down_on_workflow_variable']
+                       , workflow_reset_on_workflow_variable=t_info['workflow_reset_on_workflow_variable']
+                       # /CPS
+                      )
 
         t.var_exprs = PersistentMapping( t_info[ 'variables' ].items() )
 
 
-def _extractStateNodes( root, encoding=None ):
+def _extractCPSStateNodes( root, encoding=None ):
 
     result = []
 
@@ -746,12 +772,41 @@ def _extractStateNodes( root, encoding=None ):
                               , 'value' : value
                               }
 
+        # CPS/
+        # state behaviours
+        behavior_elements = s_node.getElementsByTagName('state-behavior')
+        info['state_behaviors'] = [_getNodeAttribute(x,
+                                                    'behavior_id',
+                                                    encoding)
+                                  for x in behavior_elements]
+
+        # Stack workflow state flags
+        elements = {
+            'push-on-workflow-variable': 'push_on_workflow_variable',
+            'pop-on-workflow-variable': 'pop_on_workflow_variable',
+            'workflow-up-on-workflow-variable': 'workflow_up_on_workflow_variable',
+            'workflow-down-on-workflow-variable': 'workflow_down_on_workflow_variable',
+            'workflow-reset-on-workflow-variable': 'workflow_reset_on_workflow_variable',
+            }
+        for elt, value in elements.items():
+            stack_vars = s_node.getElementsByTagName(elt)
+            info[value] = [_getNodeAttribute(x,
+                                             'variable_id',
+                                             encoding)
+                           for x in stack_vars]
+
+        # Stack definitions
+        info['stackdefs'] = _extractStackDefinitionNodes(s_node, encoding)
+        #LOG("_initWorkflowStates", DEBUG, "state=%s"%(info,))
+
+        # /CPS
+
         result.append( info )
 
     return result
 
 
-def _extractTransitionNodes(root, encoding=None):
+def _extractCPSTransitionNodes(root, encoding=None):
 
     result = []
 
@@ -770,36 +825,6 @@ def _extractTransitionNodes(root, encoding=None):
                                                encoding),
             'action' : _extractActionNode(t_node, encoding),
             'guard' : _extractGuardNode(t_node, encoding),
-            ## transition behaviours
-            #'transition_behavior': _getNodeAttribute(t_node,
-            #                                         'transition_behavior',
-            #                                         encoding),
-            ## Transitions allowed at destination
-            #'clone_allowed_transitions': _getNodeAttribute(t_node,
-            #                                               'clone_allowed_transitions',
-            #                                               encoding),
-            #'checkout_allowed_initial_transitions': _getNodeAttribute(t_node,
-            #                                                          'checkout_allowed_initial_transitions',
-            #                                                          encoding),
-            #'checkin_allowed_transitions': _getNodeAttribute(t_node,
-            #                                                 'checkin_allowed_transitions',
-            #                                                 encoding),
-            ## Stack workflow transition flags
-            #'push_on_workflow_variable': _getNodeAttribute(t_node,
-            #                                               'push_on_workflow_variable',
-            #                                               encoding),
-            #'pop_on_workflow_variable': _getNodeAttribute(t_node,
-            #                                              'pop_on_workflow_variable',
-            #                                              encoding),
-            #'workflow_up_on_workflow_variable': _getNodeAttribute(t_node,
-            #                                                      'workflow_up_on_workflow_variable',
-            #                                                      encoding),
-            #'workflow_down_on_workflow_variable': _getNodeAttribute(t_node,
-            #                                                        'workflow_down_on_workflow_variable',
-            #                                                        encoding),
-            #'workflow_reset_on_workflow_variable': _getNodeAttribute(t_node,
-            #                                                         'workflow_reset_on_workflow_variable',
-            #                                                         encoding),
             }
 
         info['variables'] = var_map = {}
@@ -810,10 +835,133 @@ def _extractTransitionNodes(root, encoding=None):
             expr = _coalesceTextNodeChildren(assignment, encoding)
             var_map[name] = expr
 
-        LOG("_extractTransitionNodes", DEBUG, "info=%s"%(info,))
+
+        # CPS/
+
+        # transition behaviours
+        behavior_elements = t_node.getElementsByTagName('transition-behavior')
+        info['transition_behavior'] = [_getNodeAttribute(x,
+                                                         'behavior_id',
+                                                         encoding)
+                                       for x in behavior_elements]
+
+        # Transitions allowed at destination
+        elements = {
+            'clone-allowed-transition': 'clone_allowed_transitions',
+            'checkout-allowed-initial-transition': 'checkout_allowed_initial_transitions',
+            'checkin-allowed-transition': 'checkin_allowed_transitions',
+            }
+        for elt, value in elements.items():
+            dest_trans = t_node.getElementsByTagName(elt)
+            info[value] = [_getNodeAttribute(x,
+                                             'transition_id',
+                                             encoding)
+                           for x in dest_trans]
+
+        # Stack workflow transition flags
+        elements = {
+            'push-on-workflow-variable': 'push_on_workflow_variable',
+            'pop-on-workflow-variable': 'pop_on_workflow_variable',
+            'workflow-up-on-workflow-variable': 'workflow_up_on_workflow_variable',
+            'workflow-down-on-workflow-variable': 'workflow_down_on_workflow_variable',
+            'workflow-reset-on-workflow-variable': 'workflow_reset_on_workflow_variable',
+            }
+        for elt, value in elements.items():
+            stack_vars = t_node.getElementsByTagName(elt)
+            info[value] = [_getNodeAttribute(x,
+                                             'variable_id',
+                                             encoding)
+                           for x in stack_vars]
+        # /CPS
+
+        #LOG("_extractTransitionNodes", DEBUG, "info=%s"%(info,))
+
         result.append(info)
 
     return result
+
+
+def _extractStackDefinitionNodes( root, encoding=None ):
+
+    result = {}
+    nodes = root.getElementsByTagName( 'stack-definition' )
+    for node in nodes:
+
+        # attributes
+        stackdef_id = _getNodeAttribute(node, 'stackdef_id', encoding)
+        stackdef_id = str( stackdef_id ) # no unicode!
+        var_id = _getNodeAttribute(node, 'variable_id', encoding)
+        var_id = str( var_id ) # no unicode !
+
+        info = {
+            'stackdef_type': _getNodeAttribute(node, 'meta_type', encoding),
+            'stack_type': _getNodeAttribute(node, 'stack_type', encoding),
+            'var_id': var_id,
+            'manager_stack_ids': [_getNodeAttribute(x, 'stack_id', encoding)
+                                  for x in node.getElementsByTagName('manager-stack-id')
+                                  ],
+            'managed_role_exprs': _extractCPSManagedRolesNode(node, encoding),
+            'empty_stack_manage_guard': _extractCPSGuardNode(node, 'empty-stack-manage-guard', encoding),
+            'edit_stack_element_guard': _extractCPSGuardNode(node, 'edit-stack-element-guard', encoding),
+            'view_stack_element_guard': _extractCPSGuardNode(node, 'view-stack-element-guard', encoding),
+            }
+
+        result[stackdef_id] = info
+
+    return result
+
+
+def _extractCPSGuardNode( parent, guard_name, encoding=None ):
+    """
+    Extract a guard node, possible to specify the guard name in parameters
+    """
+
+    nodes = parent.getElementsByTagName( guard_name )
+    assert len( nodes ) <= 1, nodes
+
+    if len( nodes ) < 1:
+        return { 'permissions' : (), 'roles' : (), 'groups' : (), 'expr' : '' }
+
+    node = nodes[ 0 ]
+
+    expr_nodes = node.getElementsByTagName( 'guard-expression' )
+    assert( len( expr_nodes ) <= 1 )
+
+    expr_text = expr_nodes and _coalesceTextNodeChildren( expr_nodes[ 0 ]
+                                                        , encoding
+                                                        ) or ''
+
+    return { 'guard_permissions' : ';'.join([ _coalesceTextNodeChildren( x, encoding )
+                                     for x in node.getElementsByTagName(
+                                                    'guard-permission' ) ])
+           , 'guard_roles' : ';'.join([ _coalesceTextNodeChildren( x, encoding )
+                          for x in node.getElementsByTagName( 'guard-role' ) ])
+           , 'guard_groups' : ';'.join([ _coalesceTextNodeChildren( x, encoding )
+                          for x in node.getElementsByTagName( 'guard-group' ) ])
+           , 'guard_expr' : expr_text
+           }
+
+def _extractCPSManagedRolesNode( parent, encoding ):
+    """
+    Extract managed roles expressions in stack definitions
+    """
+
+    nodes = parent.getElementsByTagName('managed-roles')
+    assert len(nodes) <= 1, nodes
+
+    if len(nodes) < 1:
+        return {}
+
+    roles_node = nodes[0]
+
+    res = {}
+    nodes = roles_node.getElementsByTagName('managed-role')
+    for node in nodes:
+        name = _getNodeAttribute(node, 'name', encoding)
+        expression = _getNodeAttribute(node, 'expression', encoding)
+        res[name] = expression
+
+    return res
 
 def _getScriptFilename( workflow_id, script_id, meta_type ):
 
