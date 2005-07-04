@@ -185,7 +185,7 @@ def importWorkflowTool( context ):
     """
     site = context.getSite()
     #encoding = context.getEncoding()
-    encoding = 'iso-8859-15'
+    encoding = 'utf-8'
     tool = getToolByName( site, 'portal_workflow' )
 
     if context.shouldPurge():
@@ -346,7 +346,7 @@ class CPSWorkflowDefinitionConfigurator(WorkflowDefinitionConfigurator):
         """
         info = self.getWorkflowInfo(workflow_id)
 
-        if info['meta_type'] != CPSWorkflowDefinition.meta_type:
+        if info['meta_type'] not in WF_META_TYPES:
             return None
 
         return self._workflowConfig(workflow_id=workflow_id)
