@@ -28,7 +28,6 @@ if __name__ == '__main__':
 from Testing import ZopeTestCase
 ZopeTestCase.installProduct('CPSWorkflow')
 
-import Zope
 import unittest
 
 from Products.CMFCore.tests.base.testcase import SecurityRequestTest
