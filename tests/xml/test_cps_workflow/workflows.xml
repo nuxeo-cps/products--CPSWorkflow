@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<workflow-tool>
+ <workflow workflow_id="test_cps_workflow"
+           meta_type="CPS Workflow"
+           filename="workflows/test_cps_workflow/definition.xml"/>
+ <bindings>
+  <default>
+  </default>
+ </bindings>
+</workflow-tool>
