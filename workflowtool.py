@@ -766,6 +766,8 @@ class WorkflowTool(BaseWorkflowTool):
         if provided.
         """
 ##         import traceback
+##         from zExceptions.ExceptionFormatter import format_exception
+##         traceback.format_exception = format_exception
 ##         from StringIO import StringIO
 ##         s = StringIO()
 ##         traceback.print_stack(file=s)
