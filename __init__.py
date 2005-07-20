@@ -58,6 +58,5 @@ def initialize(registrar):
     ToolInit(
         'CPS Workflow Tools',
         tools=tools,
-        product_name='CPSWorkflow',
         icon='tool.png',
         ).initialize(registrar)
