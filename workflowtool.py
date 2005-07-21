@@ -275,7 +275,8 @@ class WorkflowTool(BaseWorkflowTool):
         LOG('invokeFactoryFor', DEBUG,
             "Called with container=%s type_name=%s id=%s "
             "language=%s initial_transition=%s" %
-            (container.getId(), type_name, id, language, initial_transition))
+            ('/'.join(container.getPhysicalPath()), type_name, id,
+             language, initial_transition))
         if language is None:
             language = self.getDefaultLanguage()
         if initial_transition is None:
