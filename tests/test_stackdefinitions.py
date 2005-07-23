@@ -20,7 +20,6 @@
 #
 # $Id$
 
-import Zope
 import unittest
 from OFS.Folder import Folder
 from Interface.Verify import verifyClass
