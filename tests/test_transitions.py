@@ -18,7 +18,6 @@
 #
 # $Id$
 
-import Zope
 import unittest
 from OFS.Folder import Folder
 

@@ -43,7 +43,6 @@ ZopeTestCase.installProduct('CPSCore')
 ZopeTestCase.installProduct('CPSDefault')
 ZopeTestCase.installProduct('CPSUserFolder')
 
-import Zope
 import unittest
 
 from Acquisition import aq_parent, aq_inner
