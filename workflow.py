@@ -1212,7 +1212,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
     def _objectMaybeFromRpath(self, ob):
         if isinstance(ob, StringType):
             rpath = ob
-            if not rpath or rpath.find('..') >= 0 or rpath.startswith('/'):
+            if not rpath or rpath.find('../') >= 0 or rpath.startswith('/'):
                 raise WorkflowException("Unauthorized rpath %s" % rpath)
             portal = getToolByName(self, 'portal_url').getPortalObject()
             ob = portal.unrestrictedTraverse(rpath) # XXX unrestricted ?
