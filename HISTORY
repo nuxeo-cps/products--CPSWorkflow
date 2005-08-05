@@ -1,4 +1,21 @@
 *******************************************
+** CPSWorkflow V0.4.5 [R1 build 2005/08/05-14:00 by ben]
+** SVN URL: https://svn.nuxeo.org/pub/CPSWorkflow/trunk Revision: 25426
+Requires:
+~~~~~~~~~
+-
+New features:
+~~~~~~~~~~~~~
+-
+Bug fixes:
+~~~~~~~~~~
+- Added code to removing any possible WebDAV locks on checked-out document
+  proxies, locks which might come from the submitted document proxies.
+New internal features:
+~~~~~~~~~~~~~~~~~~~~~~
+-
+
+*******************************************
 ** CPSWorkflow V0.4.4 [R1 build 2005/06/02-09:36 by fguillaume]
 ** SVN URL: https://svn.nuxeo.org/pub/CPSWorkflow/trunk Revision: 22058
 Requires:
