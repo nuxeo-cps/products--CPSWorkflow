@@ -1020,8 +1020,10 @@ class WorkflowDefinition(DCWorkflowDefinition):
         # Execute the "after" script.
         if tdef is not None and tdef.after_script_name:
             script = self.scripts[tdef.after_script_name]
-            # Taking care of the case of an "after" script for a deleted object
-            if delete_ob is not None:
+            # Taking care of the case of an "after" script for a deleted object.
+            # The condition delete_ob == ob is here to make sure we don't reset
+            # ob in case of a TRANSITION_BEHAVIOR_MERGE.
+            if delete_ob is not None and delete_ob == ob:
                 ob = None
             # Pass lots of info to the script in a single parameter.
             sci = StateChangeInfo(
