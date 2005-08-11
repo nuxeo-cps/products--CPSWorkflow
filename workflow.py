@@ -1017,6 +1017,17 @@ class WorkflowDefinition(DCWorkflowDefinition):
         tool = aq_parent(aq_inner(self))
         tool.setStatusOf(self.id, ob, status)
 
+        # Execute the "after" script.
+        if tdef is not None and tdef.after_script_name:
+            script = self.scripts[tdef.after_script_name]
+            # Taking care of the case of an "after" script for a deleted object
+            if delete_ob is not None:
+                ob = None
+            # Pass lots of info to the script in a single parameter.
+            sci = StateChangeInfo(
+                ob, self, status, tdef, old_sdef, new_sdef, stacks, kwargs)
+            script(sci)  # May throw an exception.
+
         ### CPS: Delete. Done after setting status, to keep history.
         #
         if delete_ob is not None:
@@ -1035,14 +1046,6 @@ class WorkflowDefinition(DCWorkflowDefinition):
         kw['current_wf_var_id'] = kwargs.get('current_wf_var_id', '')
         kw['tdef'] = tdef
         self.updateRoleMappingsFor(ob, **kw)
-
-        # Execute the "after" script.
-        if tdef is not None and tdef.after_script_name:
-            script = self.scripts[tdef.after_script_name]
-            # Pass lots of info to the script in a single parameter.
-            sci = StateChangeInfo(
-                ob, self, status, tdef, old_sdef, new_sdef, stacks, kwargs)
-            script(sci)  # May throw an exception.
 
         ### CPS: Event notification. This has to be done after all the
         # potential transition scripts.
