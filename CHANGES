@@ -6,7 +6,7 @@ New features:
 -
 Bug fixes:
 ~~~~~~~~~~
-- Made workflows' "after" scripts be executed for deleted objects too.
+-
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
 -
