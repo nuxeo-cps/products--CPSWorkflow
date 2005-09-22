@@ -421,7 +421,9 @@ class WorkflowDefinition(DCWorkflowDefinition):
         new_sdef = self.states.get(new_state, None)
         if new_sdef is None:
             raise WorkflowException, (
-                'Destination state undefined: ' + new_state)
+                "Destination state '%s' undefined for "
+                "transition '%s' in workflow '%s'" %(
+                new_state, tdef.getId(), self.getId()))
 
 
         ### CPS: Behavior sanity checks.
@@ -1107,8 +1109,9 @@ class WorkflowDefinition(DCWorkflowDefinition):
         """
         tdef = self.transitions.get(initial_transition, None)
         if tdef is None:
-            raise WorkflowException("No initial transition '%s'" %
-                                    initial_transition)
+            raise WorkflowException("No initial transition '%s' "
+                                    "in workflow '%s'" %
+                                    (initial_transition, self.getId()))
         # Check it's really an initial transition.
         if initial_behavior not in tdef.transition_behavior:
             raise WorkflowException("workflow=%s transition=%s"
