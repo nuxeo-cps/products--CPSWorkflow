@@ -886,7 +886,7 @@ class WorkflowTool(BaseWorkflowTool):
         return self.getStacks(ob).get(stack_id)
 
     security.declarePublic('canManageStack')
-    def canManageStack(self, ob, stack_id):
+    def canManageStack(self, ob, stack_id, **kw):
         """Can the authenticated use or the user given it's member_id
         manage the stack given its id.
 
@@ -899,7 +899,7 @@ class WorkflowTool(BaseWorkflowTool):
             mtool = getToolByName(self, 'portal_membership')
             aclu = self.acl_users
             ds = self.getStackFor(ob, stack_id)
-            canManage = stackdef._canManageStack(ds, aclu, mtool, ob)
+            canManage = stackdef._canManageStack(ds, aclu, mtool, ob, **kw)
             if canManage:
                 return 1
             else:
@@ -913,7 +913,7 @@ class WorkflowTool(BaseWorkflowTool):
                 for stackdef_id in stackdefs.keys():
                     ostack_def = stackdefs[stackdef_id]
                     canManage = ostack_def._canManageStack(None, aclu, mtool,
-                                                           ob)
+                                                           ob, **kw)
                     manager_stack_ids = ostack_def.getManagerStackIds()
                     if (canManage and
                         stack_id in manager_stack_ids):

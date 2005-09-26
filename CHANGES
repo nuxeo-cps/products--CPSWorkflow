@@ -6,7 +6,9 @@ New features:
 -
 Bug fixes:
 ~~~~~~~~~~
--
+- transition kws were not propagated to the stack definition _canManageStack
+  method ; problem is not visible in CPSWorkflow as basic stack definitions do
+  not use it.
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
 - Made some workflow exceptions more verbose

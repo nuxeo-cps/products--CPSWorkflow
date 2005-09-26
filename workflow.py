@@ -293,7 +293,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
         return (changed and stackdefs_changed)
 
-    def _checkStackGuards(self, t, ob):
+    def _checkStackGuards(self, t, ob, **kw):
         """Check the stack workflow transition guards on the transition for ob
 
         If one of them allowed the user to manage the stack it means the user
@@ -317,7 +317,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
             var_ids = t.getStackWorkflowVariablesForBehavior(behavior)
             for var_id in var_ids:
 
-                if wftool.canManageStack(ob, var_id):
+                if wftool.canManageStack(ob, var_id, **kw):
 
 
                     #
@@ -349,7 +349,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
         guard = t.guard
         return (guard is None or
                 guard.check(getSecurityManager(), self, ob, **kw) and
-                self._checkStackGuards(t, ob))
+                self._checkStackGuards(t, ob, **kw))
 
     def _changeStateOf(self, ob, tdef=None, kwargs=None):
         """
