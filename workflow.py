@@ -1019,6 +1019,12 @@ class WorkflowDefinition(DCWorkflowDefinition):
         tool = aq_parent(aq_inner(self))
         tool.setStatusOf(self.id, ob, status)
 
+        # Update role to permission assignments.
+        kw = {}
+        kw['current_wf_var_id'] = kwargs.get('current_wf_var_id', '')
+        kw['tdef'] = tdef
+        self.updateRoleMappingsFor(ob, **kw)
+
         # Execute the "after" script.
         if tdef is not None and tdef.after_script_name:
             script = self.scripts[tdef.after_script_name]
@@ -1044,12 +1050,6 @@ class WorkflowDefinition(DCWorkflowDefinition):
                 raise moved_exc
             else:
                 raise ObjectDeleted
-
-        # Update role to permission assignments.
-        kw = {}
-        kw['current_wf_var_id'] = kwargs.get('current_wf_var_id', '')
-        kw['tdef'] = tdef
-        self.updateRoleMappingsFor(ob, **kw)
 
         ### CPS: Event notification. This has to be done after all the
         # potential transition scripts.
