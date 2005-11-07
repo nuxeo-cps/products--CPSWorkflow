@@ -1,4 +1,26 @@
 *******************************************
+** CPSWorkflow V0.5.0 [R1 build 2005/11/07-15:34 by fguillaume]
+** SVN URL: https://svn.nuxeo.org/pub/CPSWorkflow/trunk Revision: 29059
+Requires:
+~~~~~~~~~
+-
+New features:
+~~~~~~~~~~~~~
+-
+Bug fixes:
+~~~~~~~~~~
+- transition kws were not propagated to the stack definition _canManageStack
+  method ; problem is not visible in CPSWorkflow as basic stack definitions do
+  not use it.
+- Fix for subtle 'Unauthorized' workflow bug triggered when trying to access
+  object in 'after' script in destination(read 'sections') workflow,
+  for example, for 'publish' action. The problem was that
+  `updateRoleMappingsFor` method was called _after_ after_script.
+New internal features:
+~~~~~~~~~~~~~~~~~~~~~~
+- Made some workflow exceptions more verbose
+
+*******************************************
 ** CPSWorkflow V0.4.6 [R1 build 2005/09/21-15:30 by fguillaume]
 ** SVN URL: https://svn.nuxeo.org/pub/CPSWorkflow/trunk Revision: 27306
 Requires:

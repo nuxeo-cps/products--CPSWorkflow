@@ -6,13 +6,7 @@ New features:
 -
 Bug fixes:
 ~~~~~~~~~~
-- transition kws were not propagated to the stack definition _canManageStack
-  method ; problem is not visible in CPSWorkflow as basic stack definitions do
-  not use it.
-- Fix for subtle 'Unauthorized' workflow bug triggered when trying to access
-  object in 'after' script in destination(read 'sections') workflow,
-  for example, for 'publish' action. The problem was that
-  `updateRoleMappingsFor` method was called _after_ after_script.
+-
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
-- Made some workflow exceptions more verbose
+-
