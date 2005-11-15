@@ -37,6 +37,7 @@ import basicstackdefinitions
 import basicstackelements
 
 import stackregistries
+import util
 
 from configuration import Configuration
 from configuration import addConfiguration
