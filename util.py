@@ -35,10 +35,11 @@ def updateEffectiveDate(proxy):
     transitions.
     """
     did_update = False
+    now = DateTime()
     for lang in proxy.getLanguageRevisions():
         doc = proxy.getContent(lang=lang)
         if getattr(doc, 'effective_date', None) is None:
-            doc.effective_date = DateTime()
+            doc.effective_date = now
             did_update = True
     if did_update:
         proxy.proxyChanged()
