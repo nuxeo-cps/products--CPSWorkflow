@@ -546,24 +546,58 @@ class WorkflowTool(BaseWorkflowTool):
 
         (Called by CPSWorkflow during merge transition.)
         """
+        pxtool = getToolByName(self, 'portal_proxies')
         dest_ob = self._checkObjectMergeable(ob, dest_container,
                                              state_var, new_state)[0]
         if dest_ob is not None:
-            pxtool = getToolByName(self, 'portal_proxies')
             pxtool.checkinRevisions(ob, dest_ob)
 
         # For folderish documents, copy subobjects into new container.
-        if isinstance(dest_ob, ProxyFolderishDocument) or \
-               isinstance(dest_ob, ProxyBTreeFolderishDocument):
-            # Erase old
-            ids = [id for id in dest_ob.objectIds() if not id.startswith('.')]
-            dest_ob.manage_delObjects(ids)
+        if (isinstance(dest_ob, ProxyFolderishDocument) or
+            isinstance(dest_ob, ProxyBTreeFolderishDocument)):
+            for id_ in [id_ for id_ in ob.objectIds()
+                        if not id_.startswith('.')]:
+                # Merge objects
+                if id_ in dest_ob.objectIds():
+                    subob = ob._getOb(id_)
+                    dest_subob = self._checkObjectMergeable(
+                        subob, dest_ob, state_var, new_state)[0]
+                    if subob is not None:
+                        pxtool.checkinRevisions(subob, dest_subob)
+                # Insert into the container with workflow
+                else:
+                    subob = ob._getOb(id_)
+                    dest_ob.copyContent(subob, id_)
+                    subob = dest_ob._getOb(id_)
 
-            # Copy new
-            ids = [id for id in ob.objectIds() if not id.startswith('.')]
-            for id in ids:
-                subob = ob._getOb(id)
-                dest_ob.copyContent(subob, id)
+                    type_name = subob.getTypeInfo().getId()
+                    inserted = False
+                    # XXX enough ??
+                    for behavior in (TRANSITION_INITIAL_CREATE,
+                                     TRANSITION_INITIAL_PUBLISHING):
+                        if inserted:
+                            break
+                        crtrans = self.getInitialTransitions(subob, type_name,
+                                                             behavior)
+                        for initial_transition in crtrans:
+                            initial_behavior = behavior
+                            try:
+                                self._insertWorkflowRecursive(
+                                    subob, initial_transition,
+                                    initial_behavior, {})
+                                inserted = True
+                                break
+                            except (WorkflowException, Unauthorized):
+                                # Let's try other transitions
+                                pass
+                    if not inserted:
+                        raise WorkflowException(
+                            "You are not allowed to copy / paste here !")
+
+            # Now erase the ones that are not part of the new revision anymore
+            ids = [id_ for id_ in dest_ob.objectIds()
+                   if not id_.startswith('.') and id_ not in ob.objectIds()]
+            dest_ob.manage_delObjects(ids)
 
         return dest_ob
 
