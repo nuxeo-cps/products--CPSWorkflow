@@ -555,8 +555,9 @@ class WorkflowTool(BaseWorkflowTool):
         # For folderish documents, copy subobjects into new container.
         if (isinstance(dest_ob, ProxyFolderishDocument) or
             isinstance(dest_ob, ProxyBTreeFolderishDocument)):
-            for id_ in [id_ for id_ in ob.objectIds()
-                        if not id_.startswith('.')]:
+            for id_ in ob.objectIds():
+                if id_.startswith('.'):
+                    continue
                 # Merge objects
                 if id_ in dest_ob.objectIds():
                     subob = ob._getOb(id_)
