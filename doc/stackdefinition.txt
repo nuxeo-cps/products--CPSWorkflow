@@ -1,40 +1,50 @@
-$Id$
+================
+Stack Definition
+================
 
--------------------
-Stack Definition :
--------------------
+:Revision: $Id$
 
-A stack definition is an object stored within a state definition object
-implementing an abstraction layer on a stack object instance.
+.. sectnum::    :depth: 4
+.. contents::   :depth: 4
 
-A stack definition :
 
-  - defines high level accessors and mutators on the stack object.
+Stack Definition Introduction
+=============================
 
-  - defines the policy of roles distributions for the stack elements stored
-    within the stack using managed roles expressions. It includes as well a
-    specific guard while the stack object doesn't contain elements yet.
+A stack definition is an object stored within a state definition
+object implementing an abstraction layer on a stack object
+instance.
 
-  - defines the default policy for editing and viewing stack elements using
-    guards. (note that a stack element do have its own guard that may
-    override the default behavior from the stack definition).
+A stack definition:
 
-It may be used as well without any roles policy if the purpose of the stack
-is not to distribute local roles. (for instace : addind a stack of tasks
-hooked on a given state)
+- defines high level accessors and mutators on the stack object.
 
----------------------------
+- defines the policy of roles distributions for the stack elements
+  stored within the stack using managed roles expressions. It
+  includes as well a specific guard while the stack object doesn't
+  contain elements yet.
+
+- defines the default policy for editing and viewing stack
+  elements using guards. (Note that a stack element has its own
+  guard that may override the default behavior from the stack
+  definition).
+
+It may be used as well without any roles policy if the purpose of
+the stack is not to distribute local roles. (for instance: adding
+a stack of tasks hooked on a given state)
+
+
 Stack Definition Registry
----------------------------
+=========================
 
-If you need to implement a specific behavior you may register your own stack
-definition.
+If you need to implement a specific behavior, you may register
+your own stack definition.
 
-You must implement the IWorkflowStackDefinition interface and usually you
-will inherit from the base StackDefinition class in your child class which
-is already implementing this interface.
+You must implement the IWorkflowStackDefinition interface and
+usually you will inherit from the base StackDefinition class in
+your child class which is already implementing this interface.
 
-You may use it like this :
+You may use it like this::
 
   >>> from stackregistries import WorkflowStackDefRegsitry
   >>> from stackdefinition import StackDefinition
@@ -46,4 +56,13 @@ You may use it like this :
   >>> WorkflowStackDefRegistry.register(MyStackDefinition)
   >>>
 
-Check API in the doc/api sub-folder.
+Check the API in the ``doc/api/`` sub-folder.
+
+
+.. Emacs
+.. Local Variables:
+.. mode: rst
+.. End:
+.. Vim
+.. vim: set filetype=rst:
+
