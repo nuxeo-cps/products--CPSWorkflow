@@ -44,25 +44,9 @@ from Products.DCWorkflow.States import States as DCWFStates
 from stackdefinition import StackDefinition
 from stackregistries import WorkflowStackDefRegistry
 
-#
-# State behaviors Use for workflow stacks right now.  It permits to allow a
-# behavior on the state. You might have shared transitions doing the same job
-# on several states.
-#
+# For old code that doesn't import directly from constants
+from Products.CPSWorkflow.constants import *
 
-STATE_BEHAVIOR_PUSH_DELEGATEES = 101
-STATE_BEHAVIOR_POP_DELEGATEES = 102
-STATE_BEHAVIOR_WORKFLOW_UP = 103
-STATE_BEHAVIOR_WORKFLOW_DOWN = 104
-STATE_BEHAVIOR_WORKFLOW_RESET = 108
-
-state_behavior_export_dict = {
-    STATE_BEHAVIOR_PUSH_DELEGATEES : 'Push Delegatees',
-    STATE_BEHAVIOR_POP_DELEGATEES  : 'Pop Delegatees',
-    STATE_BEHAVIOR_WORKFLOW_UP     : 'Workflow Up',
-    STATE_BEHAVIOR_WORKFLOW_DOWN   : 'Workflow Down',
-    STATE_BEHAVIOR_WORKFLOW_RESET : 'Workflow Reset',
-    }
 
 class StateDefinition(DCWFStateDefinition, ObjectManager):
     """ CPS State Definition
@@ -90,7 +74,7 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
         )
 
     state_behaviors = ()
-    stackdefs = {}
+    stackdefs = {} # XXX mutable class default!
 
     # State Behaviors depend on a workflow variables
     push_on_workflow_variable = []
@@ -330,14 +314,6 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
             return self.manage_advanced_properties(
                 REQUEST, 'Stack definition updated !')
 
-    #
-    # Misc
-    #
-
-    def getAvailableStateBehaviors(self):
-        """Get the possible bahavior for the state
-        """
-        return state_behavior_export_dict
 
 class States(DCWFStates):
     meta_type = 'CPS Workflow States'

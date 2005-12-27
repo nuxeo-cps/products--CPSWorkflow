@@ -33,11 +33,11 @@ from Products.CPSWorkflow.basicstackelements import \
      UserStackElement, GroupStackElement, UserSubstituteStackElement, \
      GroupSubstituteStackElement
 
+from zope.interface.verify import DoesNotImplement
 from Products.CPSWorkflow.interfaces import IWorkflowStackRegistry
 from Products.CPSWorkflow.interfaces import IWorkflowStackDefRegistry
 from Products.CPSWorkflow.interfaces import IWorkflowStackElementRegistry
 
-from Interface.Verify import verifyClass, DoesNotImplement
 
 class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
     """Workflow Stack Registry test case
@@ -49,6 +49,8 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
         return self.app[portal_name]
 
     def test_interfaces(self):
+        from zope.interface.verify import verifyClass
+
         verifyClass(IWorkflowStackRegistry, WorkflowStackRegistryCls)
         verifyClass(IWorkflowStackDefRegistry, WorkflowStackDefRegistryCls)
         verifyClass(IWorkflowStackElementRegistry,

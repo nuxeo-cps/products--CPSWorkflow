@@ -64,11 +64,7 @@ from Products.CPSWorkflow.configuration import addConfiguration
 
 from Products.CPSWorkflow.workflowtool import Config_id
 
-from Products.CPSWorkflow.transitions import *
-from Products.CPSWorkflow.states import *
-
-from Products.CPSWorkflow.transitions import \
-     transition_behavior_export_dict as tbdict
+from Products.CPSWorkflow.constants import *
 
 from Products.CPSWorkflow.basicstackdefinitions import SimpleStackDefinition
 from Products.CPSWorkflow.basicstackdefinitions import \
@@ -539,8 +535,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         t.setProperties('title',
                         'create',
                         trigger_type=TRIGGER_USER_ACTION,
-                        transition_behavior=(tbdict[TRANSITION_INITIAL_CREATE],
-                                             ))
+                        transition_behavior=(TRANSITION_INITIAL_CREATE,))
 
         # Allow sub-content creation
         wf2.transitions.addTransition('create_content')
@@ -548,8 +543,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         t.setProperties('title',
                         'create',
                         trigger_type=TRIGGER_USER_ACTION,
-                        transition_behavior=(tbdict[TRANSITION_ALLOWSUB_CREATE],
-                                             ))
+                        transition_behavior=(TRANSITION_ALLOWSUB_CREATE,))
 
     ###################################################################
     # TESTS STARTS HERE

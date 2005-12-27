@@ -24,7 +24,7 @@
 import os
 
 from Testing import ZopeTestCase
-from Products.CMFSetup.tests.common import BaseRegistryTests
+from Products.GenericSetup.tests.common import BaseRegistryTests
 from OFS.Folder import Folder
 
 from Products.PythonScripts.PythonScript import PythonScript
@@ -51,8 +51,6 @@ class SetupWorkflowTestCase(BaseRegistryTests):
     def setUp(self):
         BaseRegistryTests.setUp(self)
 
-        self.root = DummyRoot('root')
-
         from Products.CPSWorkflow.workflowtool import addWorkflowTool
         addWorkflowTool(self.root)
 
@@ -70,7 +68,36 @@ class SetupWorkflowTestCase(BaseRegistryTests):
         _removeWorkflowFactory(DCWorkflowDefinition, id='dc_workflow')
         _removeWorkflowFactory(CPSWorkflowDefinition, id='cps_workflow')
 
+        self.app.REQUEST.close() # should be done by BaseRegistryTests
         BaseRegistryTests.tearDown(self)
+
+    def _setupAdapters(self):
+        from zope.app.testing import ztapi
+        from zope.interface import classImplements
+        from Products.GenericSetup.interfaces import ISetupEnviron
+        from Products.GenericSetup.interfaces import IBody
+
+        from Products.CMFCore.interfaces import IWorkflowTool
+        from Products.CMFCore.exportimport.workflow import (
+            WorkflowToolXMLAdapter)
+        ztapi.provideAdapter((IWorkflowTool, ISetupEnviron), IBody,
+                             WorkflowToolXMLAdapter)
+
+        from Products.PythonScripts.PythonScript import PythonScript
+        from Products.GenericSetup.PythonScripts.interfaces import (
+            IPythonScript)
+        from Products.GenericSetup.PythonScripts.exportimport import (
+            PythonScriptBodyAdapter)
+        ztapi.provideAdapter((IPythonScript, ISetupEnviron), IBody,
+                             PythonScriptBodyAdapter)
+        classImplements(PythonScript, IPythonScript)
+
+        from Products.CPSWorkflow.interfaces import ICPSWorkflowDefinition
+        from Products.CPSWorkflow.exportimport import (
+            CPSWorkflowDefinitionBodyAdapter)
+        ztapi.provideAdapter((ICPSWorkflowDefinition, ISetupEnviron), IBody,
+                             CPSWorkflowDefinitionBodyAdapter)
+
 
     #
     # Helper methods

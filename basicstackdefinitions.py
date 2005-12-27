@@ -33,18 +33,21 @@ from AccessControl import ClassSecurityInfo, getSecurityManager
 from stackdefinition import StackDefinition
 from stackregistries import WorkflowStackDefRegistry
 
-from interfaces import IWorkflowStackDefinition
+from zope.interface import implements
+from zope.interface.verify import verifyClass, DoesNotImplement
+from Products.CPSWorkflow.interfaces import IWorkflowStackDefinition
+
 
 class SimpleStackDefinition(StackDefinition):
     """Simple Stack Definition
     """
 
+    implements(IWorkflowStackDefinition)
+
     meta_type = 'Simple Stack Definition'
 
     security = ClassSecurityInfo()
     security.declareObjectPublic()
-
-    __implements__ = (IWorkflowStackDefinition,)
 
     #
     # PRIVATE API
@@ -157,9 +160,9 @@ class HierarchicalStackDefinition(StackDefinition):
     """Hierarchical Stack Definition
     """
 
-    meta_type = 'Hierarchical Stack Definition'
+    implements(IWorkflowStackDefinition)
 
-    __implements__ = (IWorkflowStackDefinition,)
+    meta_type = 'Hierarchical Stack Definition'
 
     security = ClassSecurityInfo()
     security.declareObjectPublic()

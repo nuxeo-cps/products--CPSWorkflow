@@ -35,19 +35,21 @@ from Products.CMFCore.utils import getToolByName
 from stackregistries import WorkflowStackElementRegistry as ElementRegistry
 from stackdefinitionguard import StackDefinitionGuard as Guard
 
-from interfaces import IStackElement
+from zope.interface import implements
+from Products.CPSWorkflow.interfaces import IStackElement
+
 
 class StackElement(SimpleItem):
     """Stack Element
     """
+
+    implements(IStackElement)
 
     meta_type = 'Stack Element'
     prefix = ''
     id = ''
 
     hidden_meta_type = ''
-
-    __implements__ = (IStackElement,)
 
     security = ClassSecurityInfo()
 

@@ -57,6 +57,10 @@ from expression import createExprContext
 
 from stackregistries import WorkflowStackRegistry as StackReg
 
+from zope.interface import implements
+from Products.CPSWorkflow.interfaces import ICPSWorkflowDefinition
+
+
 #
 # CPSCore is optional now.
 # Check DEPENDENCIES.txt
@@ -102,6 +106,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
     - Extended transition description,
     - Knowledge of proxies.
     """
+
+    implements(ICPSWorkflowDefinition)
 
     meta_type = 'CPS Workflow'
     title = 'CPS Workflow Definition'
@@ -1261,110 +1267,6 @@ class WorkflowDefinition(DCWorkflowDefinition):
                     LOG('listObjectActions', TRACE, '  No user-visible action')
         res.sort()
         return map((lambda (id, val): val), res)
-
-    #
-    # XML Serialization
-    #
-
-    def toXML(self, indent=''):
-        """Serialize the workflow to XML.
-
-        Returns an XML string, without header.
-        """
-        nindent = indent + '  '
-        contents = '\n' + self._transitionsToXML(indent=nindent) + '\n' + indent
-        return _renderXMLTag('workflow', id=self.getId(),
-                             title=self.title, contents=contents)
-
-    def _varExprsToXML(self, var_exprs, indent=''):
-        nindent = indent + '  '
-        if var_exprs is None:
-            return indent + '<variables></variables>'
-        contents = 'XXXTODO'
-        return indent + _renderXMLTag('variables', contents=contents)
-
-    def _permissionsToXML(self, permissions, indent=''):
-        nindent = indent + '  '
-        res = ['']
-        for permission in permissions:
-            res.append(nindent + _renderXMLTag('permission',
-                                               contents=permission))
-        res.append(indent)
-        contents = '\n'.join(res)
-        return indent + _renderXMLTag('permissions', contents=contents)
-
-    def _rolesToXML(self, roles, indent=''):
-        nindent = indent+'  '
-        res = ['']
-        for role in roles:
-            res.append(nindent + _renderXMLTag('role', contents=role))
-        res.append(indent)
-        contents = '\n'.join(res)
-        return indent + _renderXMLTag('roles', contents=contents)
-
-    def _guardToXML(self, guard, indent=''):
-        if guard is None:
-            return indent + '<guard></guard>'
-        nindent = indent + '  '
-        res = ['']
-        res.append(self._permissionsToXML(guard.permissions, indent=nindent))
-        res.append(self._rolesToXML(guard.roles, indent=nindent))
-        res.append(indent)
-        contents = '\n'.join(res)
-        return indent + _renderXMLTag('guard', contents=contents)
-
-    def _behaviorsToXML(self, tdef, indent=''):
-        nindent = indent+'  '
-        res = ['']
-        for behavior in tdef.transition_behavior:
-            type = transition_behavior_export_dict.get(behavior, behavior)
-            kwargs = {'type': type}
-            if behavior == TRANSITION_BEHAVIOR_PUBLISHING:
-                kwargs['transitions'] = ' '.join(
-                    tdef.clone_allowed_transitions)
-            elif behavior == TRANSITION_BEHAVIOR_CHECKOUT:
-                kwargs['transitions'] = ' '.join(
-                    tdef.checkout_allowed_initial_transitions)
-            elif behavior == TRANSITION_BEHAVIOR_CHECKIN:
-                kwargs['transitions'] = ' '.join(
-                    tdef.checkin_allowed_transitions)
-            res.append(nindent + _renderXMLTag('behavior', **kwargs))
-        res.append(indent)
-        behaviors = '\n'.join(res)
-        return indent + _renderXMLTag('behaviors', contents=behaviors)
-
-    def _transitionToXML(self, tid, indent=''):
-        nindent = indent+'  '
-        LOG('_transitionToXML', DEBUG, 'tid=%s' % `tid`)
-        tdef = self.transitions.get(tid)
-        trigger = trigger_export_dict.get(tdef.trigger_type,
-                                          tdef.trigger_type)
-        behaviors = self._behaviorsToXML(tdef, indent=nindent)
-        guard = self._guardToXML(tdef.guard, indent=nindent)
-        var_exprs = self._varExprsToXML(tdef.var_exprs, indent=nindent)
-        contents = '\n'+behaviors+'\n'+guard+'\n'+var_exprs+'\n'+indent
-        return indent + _renderXMLTag(
-            'transition',
-            id=tid,
-            title=tdef.title,
-            description=tdef.description,
-            destination=tdef.new_state_id,
-            trigger=trigger,
-            actionName=tdef.actbox_name,
-            actionUrl=tdef.actbox_url,
-            actionCategory=tdef.actbox_category,
-            beforeScript=tdef.script_name,
-            afterScript=tdef.after_script_name,
-            contents=contents)
-
-    def _transitionsToXML(self, indent=''):
-        nindent = indent+'  '
-        res = ['']
-        for tid in self.transitions.keys():
-            res.append(self._transitionToXML(tid, indent=nindent))
-        res.append(indent)
-        contents = '\n'.join(res)
-        return indent + _renderXMLTag('transitions', contents=contents)
 
     #
     # ZMI

@@ -3,8 +3,8 @@
               title="CPS Workflow Definition"
               state_variable="review_state"
               meta_type="CPS Workflow">
- <permission>View</permission>
  <permission>Modify portal content</permission>
+ <permission>View</permission>
  <state state_id="pending" title="Waiting for reviewer">
   <exit-transition transition_id="accept"/>
   <exit-transition transition_id="reject"/>
@@ -45,10 +45,10 @@
    <view-stack-element-guard>
    </view-stack-element-guard>
   </stack-definition>
-  <state-behavior behavior_id="STATE_BEHAVIOR_PUSH_DELEGATEES"/>
-  <state-behavior behavior_id="STATE_BEHAVIOR_POP_DELEGATEES"/>
-  <state-behavior behavior_id="STATE_BEHAVIOR_WORKFLOW_DOWN"/>
-  <state-behavior behavior_id="STATE_BEHAVIOR_WORKFLOW_UP"/>
+  <state-behavior behavior_id="push-delegatees"/>
+  <state-behavior behavior_id="pop-delegatees"/>
+  <state-behavior behavior_id="workflow-down"/>
+  <state-behavior behavior_id="workflow-up"/>
   <push-on-workflow-variable variable_id="Reviewers"/>
   <pop-on-workflow-variable variable_id="Reviewers"/>
   <workflow-up-on-workflow-variable variable_id="Reviewers"/>
@@ -80,7 +80,7 @@
    <guard-role>SectionManager</guard-role>
    <guard-role>SectionReviewer</guard-role>
   </guard>
-  <transition-behavior behavior_id="TRANSITION_BEHAVIOR_MERGE"/>
+  <transition-behavior behavior_id="merge"/>
  </transition>
  <transition transition_id="manage_delegatees"
              title="Manage delegatees and add strange characters in title :)"
@@ -94,8 +94,8 @@
    <guard-role>SectionReviewer</guard-role>
    <guard-role>SectionIntermediateReviewer</guard-role>
   </guard>
-  <transition-behavior behavior_id="TRANSITION_BEHAVIOR_PUSH_DELEGATEES"/>
-  <transition-behavior behavior_id="TRANSITION_BEHAVIOR_POP_DELEGATEES"/>
+  <transition-behavior behavior_id="push-delegatees"/>
+  <transition-behavior behavior_id="pop-delegatees"/>
   <push-on-workflow-variable variable_id="Reviewers"/>
   <pop-on-workflow-variable variable_id="Reviewers"/>
  </transition>
@@ -110,7 +110,7 @@
    <guard-role>SectionReviewer</guard-role>
    <guard-role>SectionIntermediateReviewer</guard-role>
   </guard>
-  <transition-behavior behavior_id="TRANSITION_BEHAVIOR_WORKFLOW_DOWN"/>
+  <transition-behavior behavior_id="workflow-down"/>
   <workflow-down-on-workflow-variable
     variable_id="Reviewers"/>
  </transition>
@@ -125,7 +125,7 @@
    <guard-role>SectionReviewer</guard-role>
    <guard-role>SectionIntermediateReviewer</guard-role>
   </guard>
-  <transition-behavior behavior_id="TRANSITION_BEHAVIOR_WORKFLOW_UP"/>
+  <transition-behavior behavior_id="workflow-up"/>
   <workflow-up-on-workflow-variable variable_id="Reviewers"/>
  </transition>
  <transition transition_id="publish"
@@ -138,9 +138,9 @@
    <guard-role>SectionManager</guard-role>
    <guard-role>SectionReviewer</guard-role>
   </guard>
-  <transition-behavior behavior_id="TRANSITION_INITIAL_PUBLISHING"/>
-  <transition-behavior behavior_id="TRANSITION_BEHAVIOR_FREEZE"/>
-  <transition-behavior behavior_id="TRANSITION_BEHAVIOR_MERGE"/>
+  <transition-behavior behavior_id="initial-clone"/>
+  <transition-behavior behavior_id="freeze"/>
+  <transition-behavior behavior_id="merge"/>
  </transition>
  <transition transition_id="reject"
              title="Reviewer rejects publishing"
@@ -155,7 +155,7 @@
    <guard-role>SectionIntermediateReviewer</guard-role>
    <guard-expression>python:user.has_role(('Manager', 'SectionManager', 'SectionReviewer'), here) or user.has_role(('SectionIntermediateReviewer',), here) and here.portal_workflow.canManageStack(here, 'Reviewers')</guard-expression>
   </guard>
-  <transition-behavior behavior_id="TRANSITION_BEHAVIOR_DELETE"/>
+  <transition-behavior behavior_id="delete"/>
  </transition>
  <transition transition_id="submit"
              title="Member requests publishing"
@@ -166,8 +166,8 @@
    <guard-role>Manager</guard-role>
    <guard-role>Member</guard-role>
   </guard>
-  <transition-behavior behavior_id="TRANSITION_INITIAL_PUBLISHING"/>
-  <transition-behavior behavior_id="TRANSITION_BEHAVIOR_FREEZE"/>
+  <transition-behavior behavior_id="initial-clone"/>
+  <transition-behavior behavior_id="freeze"/>
  </transition>
  <transition transition_id="unpublish"
              title="Reviewer removes content from publication"
@@ -180,7 +180,7 @@
    <guard-role>SectionManager</guard-role>
    <guard-role>SectionReviewer</guard-role>
   </guard>
-  <transition-behavior behavior_id="TRANSITION_BEHAVIOR_DELETE"/>
+  <transition-behavior behavior_id="delete"/>
  </transition>
  <variable variable_id="Reviewers" for_catalog="False"
            for_status="True" update_always="False">

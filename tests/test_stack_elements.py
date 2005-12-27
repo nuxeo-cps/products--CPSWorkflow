@@ -23,7 +23,6 @@
 import unittest
 from Testing.ZopeTestCase import ZopeTestCase
 from Products.PageTemplates.TALES import CompilerError
-from Interface.Verify import verifyClass
 
 from Products.CPSWorkflow.stackelement import StackElement
 
@@ -44,6 +43,7 @@ from Products.CPSWorkflow.interfaces import IStackElement
 class TestStackElements(ZopeTestCase):
 
     def test_interface(self):
+        from zope.interface.verify import verifyClass
         verifyClass(IStackElement, StackElement)
 
     def test_stack_element_viewguard(self):

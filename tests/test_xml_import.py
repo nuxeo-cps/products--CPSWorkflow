@@ -24,7 +24,7 @@
 import unittest
 
 from Products.CPSWorkflow.tests.SetupWorkflowTestCase import SetupWorkflowTestCase
-from Products.CMFSetup.tests.common import DummyImportContext
+from Products.GenericSetup.tests.common import DummyImportContext
 
 # workflow classes
 from Products.DCWorkflow.DCWorkflow import DCWorkflowDefinition
@@ -76,10 +76,15 @@ class TestFullCPSWorkflowImport(SetupWorkflowTestCase):
         script_export = self._getFileData(filepath)
         context._files[filepath] = script_export
 
-        from Products.CPSWorkflow.setup.handlers import importWorkflowTool
-        importWorkflowTool(context)
+        self._setupAdapters()
 
-        self.wf = self.wftool.test_cps_workflow
+        from Products.CMFCore.exportimport.workflow import importWorkflowTool
+        try:
+            importWorkflowTool(context)
+            self.wf = self.wftool.test_cps_workflow
+        except:
+            self.tearDown()
+            raise
 
     #
     # Helper methods

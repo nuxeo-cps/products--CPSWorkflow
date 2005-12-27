@@ -25,11 +25,13 @@ stack workflows support.
 
 from zLOG import LOG, ERROR, DEBUG, TRACE, INFO
 
+import sys
 from types import StringType
 from Acquisition import aq_base, aq_parent, aq_inner
 from Globals import InitializeClass, DTMLFile
 from AccessControl import ClassSecurityInfo, Unauthorized
 from OFS.Folder import Folder
+from OFS.ObjectManager import IFAwareObjectManager
 from webdav.WriteLockInterface import WriteLockInterface
 
 from Products.CMFCore.utils import _checkPermission, getToolByName
@@ -56,6 +58,10 @@ from transitions import TRANSITION_INITIAL_CHECKOUT
 from transitions import TRANSITION_ALLOW_CHECKIN
 from transitions import TRANSITION_BEHAVIOR_PUBLISHING
 
+from zope.interface import implements, implementedBy
+from Products.CPSWorkflow.interfaces import ICPSWorkflowTool
+from Products.CMFCore.interfaces import IWorkflowDefinition
+
 #
 # CPSCore is optional now.
 # Check DEPENDENCIES.txt
@@ -65,11 +71,8 @@ try:
     from Products.CPSCore.ProxyBase import ProxyBase, ProxyFolderishDocument
     from Products.CPSCore.ProxyBase import ProxyBTreeFolderishDocument
     from Products.CPSCore.EventServiceTool import getEventService
-except ImportError, e:
-    if str(e) not in ('No module named CPSCore.EventServiceTool'
-                      'No module named CPSCore.ProxyBase'):
-        raise
-
+except ImportError:
+    if sys.exc_info()[2].tb_next is not None: raise
     LOG("Optional Dependencies missing", INFO,
         "CPSCore.EventServiceTool and CPSCore.ProxyBase")
 
@@ -93,6 +96,7 @@ except ImportError, e:
     class ProxyBTreeFolderishDocument:
         pass
 
+
 # id of the cps workflow configuration objects
 Config_id = '.cps_workflow_configuration'
 
@@ -104,6 +108,9 @@ class WorkflowTool(BaseWorkflowTool):
     - Placefulness
     - Delegates storage of workflow history for proxies to repository tool
     """
+
+    implements(ICPSWorkflowTool)
+    _product_interfaces = (IWorkflowDefinition,)
 
     id = 'portal_workflow'
     meta_type = 'CPS Workflow Tool'
@@ -1018,14 +1025,14 @@ class WorkflowTool(BaseWorkflowTool):
 
     manage_overview = DTMLFile('zmi/explainCPSWorkflowTool', globals())
 
-    def all_meta_types(self):
-        return ({'name': 'CPS Workflow',
-                 'action': 'manage_addWorkflowForm',
-                 'permission': ManagePortal},
-                {'name': 'Workflow',
-                 'action': 'manage_addWorkflowForm',
-                 'permission': ManagePortal},
-                )
+    #def all_meta_types(self):
+    #    return ({'name': 'CPS Workflow',
+    #             'action': 'manage_addWorkflowForm',
+    #             'permission': ManagePortal},
+    #            {'name': 'Workflow',
+    #             'action': 'manage_addWorkflowForm',
+    #             'permission': ManagePortal},
+    #            )
 
 
 InitializeClass(WorkflowTool)

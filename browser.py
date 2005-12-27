@@ -1,6 +1,5 @@
-# -*- coding: iso-8859-15 -*-
-# (C) Copyright 2004 Nuxeo SARL <http://nuxeo.com>
-# Author: Julien Anguenot <ja@nuxeo.com>
+# (C) Copyright 2005 Nuxeo SAS <http://nuxeo.com>
+# Author: Florent Guillaume <fg@nuxeo.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as published
@@ -17,28 +16,20 @@
 # 02111-1307, USA.
 #
 # $Id$
-
-"""Simple Workflow Stack interface
-
-This module contains the interface for the SimpleWorkflowStack class
+"""CPSWorkflow browser views.
 """
 
-import Interface
+from Products.CPSUtil.browser import BaseAddView
+from Products.CPSWorkflow.workflow import WorkflowDefinition
 
-class ISimpleWorkflowStack(Interface.Base):
-    """API for the Workflow Stack
+class CPSWorkflowDefinitionAddView(BaseAddView):
+    """Add view for a CPSWorkflow.
     """
+    _dir_name = 'workflows'
+    description = u"A CPS Workflow."
+    klass = WorkflowDefinition
 
-    def __deepcopy__(ob):
-        """Deep copy. Just to call a clean API while calling getCopy()
-        """
+    _id_attr = 'workflow_id'
 
-    def getStackContent():
-        """Return the stack content
-        """
-
-    def getCopy():
-        """Duplicate self
-
-        Return a new object instance of the same type
-        """
+    def _getFileName(self, file_id):
+        return 'workflows/%s/definition.xml' % file_id

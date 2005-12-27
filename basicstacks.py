@@ -32,9 +32,10 @@ from stack import Stack
 from stackregistries import WorkflowStackRegistry
 from stackregistries import WorkflowStackElementRegistry as ElementReg
 
-from interfaces import IWorkflowStack
-from interfaces import ISimpleWorkflowStack
-from interfaces import IHierarchicalWorkflowStack
+from zope.interface import implements
+from Products.CPSWorkflow.interfaces import IWorkflowStack
+from Products.CPSWorkflow.interfaces import ISimpleWorkflowStack
+from Products.CPSWorkflow.interfaces import IHierarchicalWorkflowStack
 
 class SimpleStack(Stack):
     """Simple Stack
@@ -47,12 +48,12 @@ class SimpleStack(Stack):
     The container is a simple list with acessors.
     """
 
+    implements(IWorkflowStack, ISimpleWorkflowStack)
+
     security = ClassSecurityInfo()
     security.declareObjectPublic()
 
     meta_type = 'Simple Stack'
-
-    __implements__ = (IWorkflowStack, ISimpleWorkflowStack,)
 
     render_method = 'stack_simple_method'
 
@@ -255,14 +256,13 @@ class HierarchicalStack(SimpleStack):
     """Stack where the level (index) within the stack matters
     """
 
+    implements(IWorkflowStack, ISimpleWorkflowStack,
+               IHierarchicalWorkflowStack)
+
     meta_type = 'Hierarchical Stack'
 
     security = ClassSecurityInfo()
     security.declareObjectPublic()
-
-    __implements__ = (IWorkflowStack,
-                      ISimpleWorkflowStack,
-                      IHierarchicalWorkflowStack,)
 
     render_method = 'stack_hierarchical_method'
 

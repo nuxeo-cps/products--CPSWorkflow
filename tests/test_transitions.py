@@ -30,7 +30,6 @@ from Products.CPSWorkflow.configuration import addConfiguration
 from Products.CPSWorkflow.workflowtool import Config_id
 
 from Products.CPSWorkflow.states import StateDefinition
-from Products.CPSWorkflow.states import state_behavior_export_dict
 
 from Products.CPSWorkflow.stack import Stack
 from Products.CPSWorkflow.basicstacks import SimpleStack, HierarchicalStack
@@ -43,8 +42,6 @@ class TestCPSWorkflowTransitions(SecurityRequestTest):
     def setUp(self):
         SecurityRequestTest.setUp(self)
 
-        self.root = Folder()
-        self.root.id = 'root'
         root = self.root
 
         from Products.CMFCore.WorkflowTool import addWorkflowFactory

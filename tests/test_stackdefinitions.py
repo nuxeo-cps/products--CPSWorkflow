@@ -22,7 +22,6 @@
 
 import unittest
 from OFS.Folder import Folder
-from Interface.Verify import verifyClass
 
 from AccessControl.SecurityManagement import newSecurityManager
 
@@ -102,6 +101,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         newSecurityManager(None, self.acl_users.getUser(member_id))
 
     def test_interface(self):
+        from zope.interface.verify import verifyClass
         verifyClass(IWorkflowStackDefinition, StackDefinition)
         verifyClass(IWorkflowStackDefinition, SimpleStackDefinition)
         verifyClass(IWorkflowStackDefinition, HierarchicalStackDefinition)

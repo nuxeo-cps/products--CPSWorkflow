@@ -22,7 +22,6 @@
 
 import unittest
 from Testing.ZopeTestCase import ZopeTestCase
-from Interface.Verify import verifyClass
 
 from Products.CPSWorkflow.stack import Stack
 from Products.CPSWorkflow.basicstacks import SimpleStack
@@ -38,7 +37,7 @@ from Products.CPSWorkflow.interfaces import IHierarchicalWorkflowStack
 class TestCPSWorkflowStacks(ZopeTestCase):
 
     def test_interface(self):
-
+        from zope.interface.verify import verifyClass
         verifyClass(IWorkflowStack, Stack)
         verifyClass(IWorkflowStack, SimpleStack)
         verifyClass(IWorkflowStack, HierarchicalStack)

@@ -1,0 +1,33 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    xmlns:five="http://namespaces.zope.org/five">
+
+  <adapter
+      factory=".exportimport.CPSWorkflowDefinitionBodyAdapter"
+      provides="Products.GenericSetup.interfaces.IBody"
+      for=".interfaces.ICPSWorkflowDefinition
+           Products.GenericSetup.interfaces.ISetupEnviron"
+      />
+
+  <five:registerClass
+      class=".workflow.WorkflowDefinition"
+      meta_type="CPS Workflow"
+      addview="addCPSWorkflowDefinition.html"
+      permission="cmf.ManagePortal"
+      global="False"
+      />
+
+  <configure package="Products.GenericSetup.browser">
+
+    <browser:page
+        for="zope.app.container.interfaces.IAdding"
+        name="addCPSWorkflowDefinition.html"
+        template="addWithPresettings.pt"
+        class="Products.CPSWorkflow.browser.CPSWorkflowDefinitionAddView"
+        permission="cmf.ManagePortal"
+        />
+
+  </configure>
+
+</configure>

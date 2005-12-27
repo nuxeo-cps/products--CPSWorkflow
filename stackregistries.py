@@ -25,22 +25,24 @@ from zLOG import LOG, INFO
 
 from Globals import InitializeClass, DTMLFile
 from AccessControl import ClassSecurityInfo
-from Interface.Verify import verifyClass, DoesNotImplement
 
 from Products.CMFCore.permissions import ManagePortal
 
-from interfaces import IStackElement
-from interfaces import IWorkflowStack
-from interfaces import IWorkflowStackDefinition
-from interfaces import IWorkflowStackRegistry
-from interfaces import IWorkflowStackDefRegistry
-from interfaces import IWorkflowStackElementRegistry
+from zope.interface import implements
+from zope.interface.verify import verifyClass, DoesNotImplement
+from Products.CPSWorkflow.interfaces import IStackElement
+from Products.CPSWorkflow.interfaces import IWorkflowStack
+from Products.CPSWorkflow.interfaces import IWorkflowStackDefinition
+from Products.CPSWorkflow.interfaces import IWorkflowStackRegistry
+from Products.CPSWorkflow.interfaces import IWorkflowStackDefRegistry
+from Products.CPSWorkflow.interfaces import IWorkflowStackElementRegistry
+
 
 class WorkflowStackRegistryCls:
     """Registry of the available stack types
     """
 
-    __implements__ = (IWorkflowStackRegistry,)
+    implements(IWorkflowStackRegistry)
 
     def __init__(self):
         self._stack_classes = {}
@@ -91,7 +93,7 @@ class WorkflowStackDefRegistryCls:
     """Registry of the available stack def types
     """
 
-    __implements__ = (IWorkflowStackDefRegistry,)
+    implements(IWorkflowStackDefRegistry)
 
     def __init__(self):
         self._stack_def_classes = {}
@@ -145,7 +147,7 @@ class WorkflowStackElementRegistryCls:
     """Registry of the available stack element types
     """
 
-    __implements__ = (IWorkflowStackElementRegistry,)
+    implements(IWorkflowStackElementRegistry)
 
     def __init__(self):
         self._stack_element_classes = {}

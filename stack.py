@@ -42,18 +42,19 @@ from AccessControl import ClassSecurityInfo
 from stackregistries import WorkflowStackRegistry as StackRegistry
 from stackregistries import WorkflowStackElementRegistry as ElementRegistry
 
-from interfaces import IWorkflowStack
+from zope.interface import implements
+from Products.CPSWorkflow.interfaces import IWorkflowStack
 
 class Stack(SimpleItem):
     """Base Stack Type Definition
     """
 
+    implements(IWorkflowStack)
+
     meta_type = 'Stack'
 
     security = ClassSecurityInfo()
     security.declareObjectPublic()
-
-    __implements__ = (IWorkflowStack,)
 
     _elements_container = None
     render_method = ''

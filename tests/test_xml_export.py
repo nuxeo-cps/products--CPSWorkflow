@@ -24,7 +24,7 @@
 import unittest
 
 from Products.CPSWorkflow.tests.SetupWorkflowTestCase import SetupWorkflowTestCase
-from Products.CMFSetup.tests.common import DummyExportContext
+from Products.GenericSetup.tests.common import DummyExportContext
 
 # Imports for sample workflows
 
@@ -374,10 +374,12 @@ state_change.object.addLanguageToProxy(lang, from_lang)
         wf = self.wftool.test_cps_workflow
         self.assertEqual(wf.meta_type, CPSWorkflowDefinition.meta_type)
 
+        self._setupAdapters()
+
         # export wf
         context = DummyExportContext(self.root)
 
-        from Products.CPSWorkflow.setup.handlers import exportWorkflowTool
+        from Products.CMFCore.exportimport.workflow import exportWorkflowTool
         exportWorkflowTool(context)
 
         # files :

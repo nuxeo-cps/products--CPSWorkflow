@@ -228,11 +228,14 @@ Initiated by WorkflowMethod
           value="<dtml-var "' '.join(checkin_allowed_transitions)" html_quote>" size="25" />
       </td>
     </tr>
-    <tr>
-      <td colspan="2">
-        <strong>Stack workflow transition flags</strong>
-      </td>
-    </tr>
+  </table>
+</td>
+</tr>
+
+<tr>
+<th align="left" valign="top">Stack workflow transition flags</th>
+<td>
+  <table cellspacing="0" cellpadding="2" border="0" width="100%">
     <tr>
       <!-- STACK WORKFLOW TRANSITION FLAGS -->
       <td>

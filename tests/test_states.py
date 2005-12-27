@@ -34,8 +34,8 @@ from Products.CPSWorkflow.workflow import TRIGGER_USER_ACTION
 from Products.CPSWorkflow.configuration import addConfiguration
 from Products.CPSWorkflow.workflowtool import Config_id
 
-from Products.CPSWorkflow.states import StateDefinition, \
-     state_behavior_export_dict
+from Products.CPSWorkflow.states import StateDefinition
+from Products.CPSWorkflow.constants import STATE_FLAGS_EXPORT
 
 from Products.CPSWorkflow.stack import Stack
 from Products.CPSWorkflow.basicstacks import SimpleStack, HierarchicalStack
@@ -49,8 +49,6 @@ class TestCPSWorkflowStates(SecurityRequestTest):
     def setUp(self):
         SecurityRequestTest.setUp(self)
 
-        self.root = Folder()
-        self.root.id = 'root'
         root = self.root
 
         from Products.CMFCore.WorkflowTool import addWorkflowFactory
@@ -68,9 +66,6 @@ class TestCPSWorkflowStates(SecurityRequestTest):
     def test_simple_state_definition(self):
         sdef = StateDefinition('sdef')
 
-        self.assertEqual(sdef.getAvailableStateBehaviors(),
-                         state_behavior_export_dict)
-
         # Test initial properties
         self.assertEqual(sdef.state_behaviors, ())
         self.assertEqual(sdef.transitions, ())
@@ -85,11 +80,11 @@ class TestCPSWorkflowStates(SecurityRequestTest):
         #self.assertEqual(sdef.state_delegatees_vars_info, {})
 
         # Test adding state behaviors
-        sdef.setProperties(state_behaviors=state_behavior_export_dict.keys())
+        sdef.setProperties(state_behaviors=STATE_FLAGS_EXPORT.keys())
 
         # Test property again
         self.assertEqual(sdef.state_behaviors,
-                         tuple(state_behavior_export_dict.keys()))
+                         tuple(STATE_FLAGS_EXPORT.keys()))
         self.assertEqual(sdef.transitions, ())
         #self.assertEqual(sdef.state_delegatees_vars_info, {})
 
@@ -119,9 +114,6 @@ class TestCPSWorkflowStates(SecurityRequestTest):
         wf = self.makeWorkflows()
         sdef = wf.states.get('s1')
 
-        self.assertEqual(sdef.getAvailableStateBehaviors(),
-                         state_behavior_export_dict)
-
         # Test initial properties
         self.assertEqual(sdef.state_behaviors, ())
         self.assertEqual(sdef.transitions, ())
@@ -132,11 +124,11 @@ class TestCPSWorkflowStates(SecurityRequestTest):
         self.assertEqual(sdef.transitions, ())
 
         # Test adding state behaviors
-        sdef.setProperties(state_behaviors=state_behavior_export_dict.keys())
+        sdef.setProperties(state_behaviors=STATE_FLAGS_EXPORT.keys())
 
         # Test property again
         self.assertEqual(sdef.state_behaviors,
-                         tuple(state_behavior_export_dict.keys()))
+                         tuple(STATE_FLAGS_EXPORT.keys()))
         self.assertEqual(sdef.transitions, ())
 
         # Test add delegatees var info
@@ -158,7 +150,7 @@ class TestCPSWorkflowStates(SecurityRequestTest):
 
         # Test property again
         self.assertEqual(sdef.state_behaviors,
-                         tuple(state_behavior_export_dict.keys()))
+                         tuple(STATE_FLAGS_EXPORT.keys()))
         self.assertEqual(sdef.transitions, ())
 
         dinfo = sdef.getStackDefinitionFor('toto')
@@ -179,7 +171,7 @@ class TestCPSWorkflowStates(SecurityRequestTest):
 
         # Test property again
         self.assertEqual(sdef.state_behaviors,
-                         tuple(state_behavior_export_dict.keys()))
+                         tuple(STATE_FLAGS_EXPORT.keys()))
         self.assertEqual(sdef.transitions, ())
 
         dinfo = sdef.getStackDefinitionFor('toto')
@@ -196,7 +188,7 @@ class TestCPSWorkflowStates(SecurityRequestTest):
 
         # Test property again
         self.assertEqual(sdef.state_behaviors,
-                         tuple(state_behavior_export_dict.keys()))
+                         tuple(STATE_FLAGS_EXPORT.keys()))
         self.assertEqual(sdef.transitions, ())
 
         dinfo = sdef.getStackDefinitionFor('tata')
@@ -210,7 +202,7 @@ class TestCPSWorkflowStates(SecurityRequestTest):
 
         # Test property again
         self.assertEqual(sdef.state_behaviors,
-                         tuple(state_behavior_export_dict.keys()))
+                         tuple(STATE_FLAGS_EXPORT.keys()))
         self.assertEqual(sdef.transitions, ())
         #self.assertEqual(sdef.state_delegatees_vars_info, {})
         self.assertEqual(sdef.getStackDefinitionFor('toto'), None)

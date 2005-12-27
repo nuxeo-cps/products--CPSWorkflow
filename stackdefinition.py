@@ -59,15 +59,16 @@ from stackdefinitionguard import StackDefinitionGuard as Guard
 
 from stackregistries import WorkflowStackRegistry
 
-from interfaces import IWorkflowStackDefinition
+from zope.interface import implements
+from Products.CPSWorkflow.interfaces import IWorkflowStackDefinition
 
 class StackDefinition(SimpleItem):
     """Stack Definition base class
     """
 
-    meta_type = 'Stack Definition'
+    implements(IWorkflowStackDefinition)
 
-    __implements__ = (IWorkflowStackDefinition, )
+    meta_type = 'Stack Definition'
 
     security = ClassSecurityInfo()
 
