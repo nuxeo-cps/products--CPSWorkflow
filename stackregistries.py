@@ -23,11 +23,6 @@
 
 from zLOG import LOG, INFO
 
-from Globals import InitializeClass, DTMLFile
-from AccessControl import ClassSecurityInfo
-
-from Products.CMFCore.permissions import ManagePortal
-
 from zope.interface import implements
 from zope.interface.verify import verifyClass, DoesNotImplement
 from Products.CPSWorkflow.interfaces import IStackElement
@@ -38,7 +33,7 @@ from Products.CPSWorkflow.interfaces import IWorkflowStackDefRegistry
 from Products.CPSWorkflow.interfaces import IWorkflowStackElementRegistry
 
 
-class WorkflowStackRegistryCls:
+class WorkflowStackRegistryCls(object):
     """Registry of the available stack types
     """
 
@@ -84,12 +79,9 @@ class WorkflowStackRegistryCls:
         """
         return self._stack_classes.get(stack_type)
 
-InitializeClass(WorkflowStackRegistryCls)
-
-###############################################################
 ###############################################################
 
-class WorkflowStackDefRegistryCls:
+class WorkflowStackDefRegistryCls(object):
     """Registry of the available stack def types
     """
 
@@ -138,12 +130,9 @@ class WorkflowStackDefRegistryCls:
         """
         return self._stack_def_classes.get(stack_def_type)
 
-InitializeClass(WorkflowStackDefRegistryCls)
-
-###############################################################
 ###############################################################
 
-class WorkflowStackElementRegistryCls:
+class WorkflowStackElementRegistryCls(object):
     """Registry of the available stack element types
     """
 
@@ -152,7 +141,7 @@ class WorkflowStackElementRegistryCls:
     def __init__(self):
         self._stack_element_classes = {}
         self._prefix_meta_types = {}
-        
+
     def register(self, cls=None):
         """Register a class for a stack element type
         """
@@ -199,9 +188,6 @@ class WorkflowStackElementRegistryCls:
         if prefix is not None:
             return self._prefix_meta_types.get(prefix)
 
-InitializeClass(WorkflowStackElementRegistryCls)
-
-###############################################################
 ###############################################################
 
 WorkflowStackRegistry = WorkflowStackRegistryCls()
