@@ -77,6 +77,7 @@ class TestFullCPSWorkflowImport(SetupWorkflowTestCase):
         context._files[filepath] = script_export
 
         self._setupAdapters()
+        self._setupRegistrations()
 
         from Products.CMFCore.exportimport.workflow import importWorkflowTool
         try:
@@ -111,7 +112,7 @@ class TestFullCPSWorkflowImport(SetupWorkflowTestCase):
 
     def test_WorkflowPermissions(self):
         permissions = [View, ModifyPortalContent]
-        self.assertEqual(self.wf.permissions, permissions)
+        self.assertEqual(list(self.wf.permissions), permissions)
 
     def test_Variables(self):
         variable_ids = [

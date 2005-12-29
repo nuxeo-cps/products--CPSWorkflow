@@ -98,6 +98,23 @@ class SetupWorkflowTestCase(BaseRegistryTests):
         ztapi.provideAdapter((ICPSWorkflowDefinition, ISetupEnviron), IBody,
                              CPSWorkflowDefinitionBodyAdapter)
 
+    def _setupRegistrations(self):
+        # Five-like registration, will move to ZCML later
+        import Products
+        from Products.CMFCore.permissions import ManagePortal
+        from zope.interface import implementedBy
+        cls = CPSWorkflowDefinition
+        meta_type = cls.meta_type
+        if not [1 for x in Products.meta_types if x['name'] == meta_type]:
+            info = {'name': meta_type,
+                    'action': '',
+                    'product': 'CPSWorkflow',
+                    'permission': ManagePortal, #XXX
+                    'visibility': None,
+                    'interfaces': tuple(implementedBy(cls)),
+                    'instance': cls,
+                    'container_filter': None}
+            Products.meta_types += (info,)
 
     #
     # Helper methods
