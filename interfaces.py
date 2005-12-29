@@ -277,7 +277,8 @@ class IWorkflowStackDefRegistry(Interface):
         """Get the list of workflow stack types.
         """
 
-    def makeWorkflowStackDefTypeInstance(stack_ds_type, wf_var_id, **kw):
+    def makeWorkflowStackDefTypeInstance(stack_def_type, stack_ds_type,
+          wf_var_id, **kw):
         """Factory to make a workflow stack def type instance of the given
         workflow stack type with id = <id>.
         """
