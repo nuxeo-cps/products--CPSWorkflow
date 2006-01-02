@@ -75,6 +75,7 @@ from Products.CPSWorkflow.transitions import (
     TransitionDefinition as CPSTransitionDefinition)
 
 from Products.GenericSetup.utils import BodyAdapterBase
+from Products.GenericSetup.utils import XMLAdapterBase
 
 from Products.CPSWorkflow.constants import TRANSITION_FLAGS_EXPORT
 from Products.CPSWorkflow.constants import TRANSITION_FLAGS_IMPORT
@@ -85,6 +86,7 @@ from Products.CPSWorkflow.constants import STATE_FLAGS_IMPORT
 from zope.component import adapts
 from zope.interface import implements
 from Products.CPSWorkflow.interfaces import ICPSWorkflowDefinition
+from Products.CPSWorkflow.interfaces import ILocalWorkflowConfiguration
 from Products.GenericSetup.interfaces import IBody
 from Products.GenericSetup.interfaces import ISetupEnviron
 
@@ -140,13 +142,6 @@ class CPSWorkflowDefinitionBodyAdapter(BodyAdapterBase):
                          self.environ)
 
     body = property(_exportBody, _importBody)
-
-
-
-
-
-
-
 
 
 class CPSWorkflowDefinitionConfigurator(WorkflowDefinitionConfigurator):
@@ -677,3 +672,70 @@ def _extractCPSManagedRolesNode(parent, encoding):
         res[name] = expression
 
     return res
+
+
+class LocalWorkflowConfigurationXMLAdapter(XMLAdapterBase):
+    """XML importer and export for CPS Local Workflow Configuration.
+    """
+
+    adapts(ILocalWorkflowConfiguration, ISetupEnviron)
+    implements(IBody)
+
+    _LOGGER_ID = 'cpsworkflow'
+
+    def _exportNode(self):
+        """Export the object as a DOM node.
+        """
+        node = self._getObjectNode('object')
+        node.appendChild(self._extractChains())
+        self._logger.info("Local workflow configuration exported.")
+        return node
+
+    def _importNode(self, node):
+        """Import the object from the DOM node.
+        """
+        if self.environ.shouldPurge():
+            self._purgeChains()
+        self._initChains(node)
+        self._logger.info("Local workflow configuration imported.")
+
+    node = property(_exportNode, _importNode)
+
+    def _extractChains(self):
+        conf = self.context
+        fragment = self._doc.createDocumentFragment()
+        local, below = conf.getChains()
+        for mapping, tag in ((local, 'local-workflows'),
+                             (below, 'below-workflows')):
+            if not mapping:
+                continue
+            node = self._doc.createElement(tag)
+            items = mapping.items()
+            items.sort()
+            for portal_type, chain in items:
+                child = self._doc.createElement('type')
+                child.setAttribute('name', portal_type)
+                child.setAttribute('wf', chain)
+                node.appendChild(child)
+        return fragment
+
+    def _purgeChains(self):
+        self.context.clear()
+
+    def _initChains(self, node):
+        conf = self.context
+        local, below = {}, {}
+        for child in node.childNodes:
+            if child.nodeName == 'local-workflows':
+                mapping = local
+            elif child.nodeName == 'below-workflows':
+                mapping = below
+            else:
+                continue
+            for subchild in child.childNodes:
+                if subchild.nodeName != 'type':
+                    continue
+                portal_type = str(subchild.getAttribute('name'))
+                chain = str(subchild.getAttribute('wf'))
+                mapping[portal_type] = chain
+        conf.setChains(local, below)

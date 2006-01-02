@@ -35,6 +35,11 @@ class ICPSWorkflowDefinition(IWorkflowDefinition):
     """
 
 
+class ILocalWorkflowConfiguration(Interface):
+    """Local workflow configuration.
+    """
+
+
 class IWorkflowStackDefinition(Interface):
     """API for the Workflow Stack Definition
     """

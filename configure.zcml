@@ -10,6 +10,13 @@
            Products.GenericSetup.interfaces.ISetupEnviron"
       />
 
+  <adapter
+      factory=".exportimport.LocalWorkflowConfigurationXMLAdapter"
+      provides="Products.GenericSetup.interfaces.IBody"
+      for=".interfaces.ILocalWorkflowConfiguration
+           Products.GenericSetup.interfaces.ISetupEnviron"
+      />
+
   <five:registerClass
       class=".workflow.WorkflowDefinition"
       meta_type="CPS Workflow"

@@ -27,14 +27,14 @@ from zLOG import LOG, ERROR, DEBUG
 from Acquisition import aq_parent, aq_inner
 from Globals import InitializeClass, DTMLFile, PersistentMapping
 from AccessControl import ClassSecurityInfo
-
 from OFS.SimpleItem import SimpleItem
+from zope.interface import implements
 
 from Products.CMFCore.utils import getToolByName
+from Products.CPSWorkflow.permissions import ManageWorkflows
+from Products.CPSWorkflow.workflowtool import LOCAL_WORKFLOW_CONFIG_ID
+from Products.CPSWorkflow.interfaces import ILocalWorkflowConfiguration
 
-from permissions import ManageWorkflows
-
-from Products.CPSWorkflow.workflowtool import Config_id
 
 class Configuration(SimpleItem):
     """Workflow Configuration.
@@ -43,13 +43,19 @@ class Configuration(SimpleItem):
     chain are to be used for what portal_type.
     """
 
-    id = Config_id
+    implements(ILocalWorkflowConfiguration)
+
+    id = LOCAL_WORKFLOW_CONFIG_ID
     meta_type = 'CPS Workflow Configuration'
     portal_type = None
 
     security = ClassSecurityInfo()
 
     def __init__(self):
+        self.clear()
+
+    security.declareProtected(ManageWorkflows, 'clear')
+    def clear(self):
         self._chains_by_type = PersistentMapping()
         self._chains_by_type_under = PersistentMapping()
         # The None value means "use the default chain".
@@ -85,7 +91,7 @@ class Configuration(SimpleItem):
         # Ask above.
         parent = aq_parent(aq_inner(aq_parent(aq_inner(self))))
         try:
-            higher_conf = parent.aq_acquire(Config_id,
+            higher_conf = parent.aq_acquire(LOCAL_WORKFLOW_CONFIG_ID,
                                             containment=1)
         except AttributeError:
             # Nothing placeful found.
@@ -128,6 +134,43 @@ class Configuration(SimpleItem):
     def delChainUnder(self, portal_type):
         """Delete the chain for a portal type."""
         del self._chains_by_type_under[portal_type]
+
+    security.declarePrivate('getChains')
+    def getChains(self):
+        """Get the chains.
+
+        Returns two mappings (local, below) of portal_type -> chain
+        A chain is '(Default)' or '' or a workflow id.
+        """
+        local, below = {}, {}
+        for mapping, source in ((local, self._chains_by_type),
+                                (below, self._chains_by_type_under)):
+            for portal_type, chains in source.items():
+                if chains:
+                    # Only keep one workflow
+                    chain = chains[0]
+                elif chains is None:
+                    chain = '(Default)'
+                else:
+                    chain = ''
+                mapping[portal_type] = chain
+        return (local, below)
+
+    security.declarePrivate('setChains')
+    def setChains(self, local, below):
+        """Set the chains.
+        """
+        for mapping, set in ((local, self.setChain),
+                             (below, self.setChainUnder)):
+            for portal_type, chain in mapping.items():
+                if chain == '(Default)':
+                    chains = None
+                elif chain:
+                    # Only keep one workflow
+                    chains = [chain.strip()]
+                else:
+                    chains = []
+                set(portal_type, chains)
 
     #
     # ZMI
@@ -178,7 +221,6 @@ class Configuration(SimpleItem):
                           sub_save=None, sub_del=None,
                           REQUEST=None):
         """Edit the chains."""
-        # XXX: what if REQUEST = None ?
         kw = REQUEST.form
         ttool = getToolByName(self, 'portal_types')
         if sub_save is not None:
@@ -252,3 +294,5 @@ def addConfiguration(container, REQUEST=None):
     container._setObject(id, ob)
     if REQUEST is not None:
         REQUEST.RESPONSE.redirect(container.absolute_url()+'/manage_main')
+    else:
+        return container._getOb(id)

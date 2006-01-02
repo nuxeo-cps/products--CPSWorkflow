@@ -98,8 +98,9 @@ except ImportError:
 
 
 # id of the cps workflow configuration objects
-Config_id = '.cps_workflow_configuration'
-
+LOCAL_WORKFLOW_CONFIG_ID = '.cps_workflow_configuration'
+# BBB: old name
+Config_id = LOCAL_WORKFLOW_CONFIG_ID
 
 class WorkflowTool(BaseWorkflowTool):
     """A Workflow Tool extending the CMFCore one with CPS features.
@@ -831,10 +832,10 @@ class WorkflowTool(BaseWorkflowTool):
                 'getChainFor: no container for ob %s' % (ob,))
             return ()
         # Find placeful workflow configuration object.
-        wfconf = getattr(container, Config_id, None)
+        wfconf = getattr(container, LOCAL_WORKFLOW_CONFIG_ID, None)
         if wfconf is not None:
             # Was it here or did we acquire?
-            start_here = hasattr(aq_base(container), Config_id)
+            start_here = hasattr(aq_base(container), LOCAL_WORKFLOW_CONFIG_ID)
             chain = wfconf.getPlacefulChainFor(pt, start_here=start_here)
             if chain is not None:
                 return chain
