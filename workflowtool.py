@@ -114,7 +114,7 @@ class WorkflowTool(BaseWorkflowTool):
 
     id = 'portal_workflow'
     meta_type = 'CPS Workflow Tool'
-    title = 'CPS Workflow Tool'
+    title = ''
 
     manage_options = ( Folder.manage_options[0],
                        { 'label' : 'Workflows',
