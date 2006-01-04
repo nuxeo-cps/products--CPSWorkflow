@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <object meta_type="CPS Workflow Tool" name="portal_workflow">
-  <property name="title">CPS Workflow Tool</property>
+  <property name="title"/>
   <object name="test_cps_workflow" meta_type="CPS Workflow"/>
   <bindings>
     <default/>
