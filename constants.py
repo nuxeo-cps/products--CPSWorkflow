@@ -55,7 +55,7 @@ TRANSITION_BEHAVIOR_WORKFLOW_RESET = 48
 TRANSITION_FLAGS_EXPORT = {
     TRANSITION_ALLOWSUB_CREATE:     'allow-sub-create',
     TRANSITION_ALLOWSUB_DELETE:     'allow-sub-delete',
-    TRANSITION_ALLOWSUB_MOVE:       'allow-sub-delete',
+    TRANSITION_ALLOWSUB_MOVE:       'allow-sub-move',
     TRANSITION_ALLOWSUB_COPY:       'allow-sub-copy',
     TRANSITION_ALLOWSUB_PUBLISHING: 'allow-sub-publishing',
     TRANSITION_ALLOWSUB_CHECKOUT:   'allow-sub-checkout',
