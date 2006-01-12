@@ -572,7 +572,9 @@ class WorkflowTool(BaseWorkflowTool):
                     dest_subob = self._checkObjectMergeable(
                         subob, dest_ob, state_var, new_state)[0]
                     if subob is not None:
-                        pxtool.checkinRevisions(subob, dest_subob)
+                        # Recursive mergeObject()
+                        self.mergeObject(subob, dest_ob, state_var,
+                                         new_state)
                 # Insert into the container with workflow
                 else:
                     subob = ob._getOb(id_)

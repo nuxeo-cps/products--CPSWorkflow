@@ -7,7 +7,8 @@ New features:
 Bug fixes:
 ~~~~~~~~~~
 - #1139 documents inside folderish documents lose their workflow state
-when the folderish document is republished
+- #1239 Folderish documents workflows are not enough
+recursivefolderish document is republished
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
 - added util.updateEffectiveDate public function to update empty effective_date
