@@ -31,7 +31,7 @@
         for="zope.app.container.interfaces.IAdding"
         name="addCPSWorkflowDefinition.html"
         template="addWithPresettings.pt"
-        class="Products.CPSWorkflow.browser.CPSWorkflowDefinitionAddView"
+        class=".browser.CPSWorkflowDefinitionAddView"
         permission="cmf.ManagePortal"
         />
 
