@@ -373,7 +373,8 @@ def _initCPSWorkflowStates(workflow, states):
     for s_info in states:
         id = str(s_info['state_id']) # no unicode!
         s = CPSStateDefinition(id)
-        workflow.states._setObject(id, s)
+        if not workflow.states.hasObject(id):
+            workflow.states._setObject(id, s)
         s = workflow.states._getOb(id)
 
         s.setProperties(
@@ -411,7 +412,8 @@ def _initCPSWorkflowTransitions(workflow, transitions):
     for t_info in transitions:
         id = str(t_info['transition_id']) # no unicode!
         t = CPSTransitionDefinition(id)
-        workflow.transitions._setObject(id, t)
+        if not workflow.transitions.hasObject(id):
+            workflow.transitions._setObject(id, t)
         t = workflow.transitions._getOb(id)
 
         trigger_type = list(TRIGGER_TYPES).index(t_info['trigger'])
