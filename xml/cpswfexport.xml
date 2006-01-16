@@ -225,17 +225,17 @@
       />
   <clone-allowed-transition
       transition_id="TRANSITION_ID"
-      tal:repeat="clone transition/clone_allowed_transitions"
+      tal:repeat="clone transition/clone_allowed_transition"
       tal:attributes="transition_id clone"
       />
   <checkout-allowed-initial-transition
       transition_id="TRANSITION_ID"
-      tal:repeat="checkout transition/checkout_allowed_initial_transitions"
+      tal:repeat="checkout transition/checkout_allowed_initial_transition"
       tal:attributes="transition_id checkout"
       />
   <checkin-allowed-transition
       transition_id="TRANSITION_ID"
-      tal:repeat="checkin transition/checkin_allowed_transitions"
+      tal:repeat="checkin transition/checkin_allowed_transition"
       tal:attributes="transition_id checkin"
       />
   <push-on-workflow-variable
