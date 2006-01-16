@@ -375,36 +375,36 @@ def _initCPSWorkflowStates(workflow, states):
         s = CPSStateDefinition(id)
         if not workflow.states.hasObject(id):
             workflow.states._setObject(id, s)
-        s = workflow.states._getOb(id)
+            s = workflow.states._getOb(id)
 
-        s.setProperties(
-            title = s_info['title'],
-            description = s_info['description'],
-            transitions = s_info['transitions'],
-            # CPS:
-            state_behaviors = [STATE_FLAGS_IMPORT[b]
-                               for b in s_info['state_behaviors']],
-            push_on_workflow_variable = s_info['push_on_workflow_variable'],
-            pop_on_workflow_variable = s_info['pop_on_workflow_variable'],
-            workflow_up_on_workflow_variable =
-                s_info['workflow_up_on_workflow_variable'],
-            workflow_down_on_workflow_variable =
-                s_info['workflow_down_on_workflow_variable'],
-            workflow_reset_on_workflow_variable =
-                s_info['workflow_reset_on_workflow_variable'],
-            stackdefs = s_info['stackdefs'],
-            )
+            s.setProperties(
+                title = s_info['title'],
+                description = s_info['description'],
+                transitions = s_info['transitions'],
+                # CPS:
+                state_behaviors = [STATE_FLAGS_IMPORT[b]
+                                   for b in s_info['state_behaviors']],
+                push_on_workflow_variable = s_info['push_on_workflow_variable'],
+                pop_on_workflow_variable = s_info['pop_on_workflow_variable'],
+                workflow_up_on_workflow_variable =
+                    s_info['workflow_up_on_workflow_variable'],
+                workflow_down_on_workflow_variable =
+                    s_info['workflow_down_on_workflow_variable'],
+                workflow_reset_on_workflow_variable =
+                    s_info['workflow_reset_on_workflow_variable'],
+                stackdefs = s_info['stackdefs'],
+                )
 
-        for k, v in s_info['permissions'].items():
-            s.setPermission(k, isinstance(v, list), v)
+            for k, v in s_info['permissions'].items():
+                s.setPermission(k, isinstance(v, list), v)
 
-        s.group_roles = PersistentMapping(s_info['groups'])
+            s.group_roles = PersistentMapping(s_info['groups'])
 
-        s.var_values = PersistentMapping()
-        for name, v_info in s_info['variables'].items():
-            value = _convertVariableValue(v_info['value'],
-                                          v_info['type'])
-            s.var_values[name] = value
+            s.var_values = PersistentMapping()
+            for name, v_info in s_info['variables'].items():
+                value = _convertVariableValue(v_info['value'],
+                                              v_info['type'])
+                s.var_values[name] = value
 
 def _initCPSWorkflowTransitions(workflow, transitions):
     """Initialize CPSWorkflow transitions.
@@ -414,49 +414,49 @@ def _initCPSWorkflowTransitions(workflow, transitions):
         t = CPSTransitionDefinition(id)
         if not workflow.transitions.hasObject(id):
             workflow.transitions._setObject(id, t)
-        t = workflow.transitions._getOb(id)
+            t = workflow.transitions._getOb(id)
 
-        trigger_type = list(TRIGGER_TYPES).index(t_info['trigger'])
+            trigger_type = list(TRIGGER_TYPES).index(t_info['trigger'])
 
-        action = t_info['action']
+            action = t_info['action']
 
-        guard = t_info['guard']
-        props = {'guard_roles': ';'.join(guard['roles']),
-                 'guard_permissions': ';'.join(guard['permissions']),
-                 'guard_groups': ';'.join(guard['groups']),
-                 'guard_expr': guard['expression'],
-                }
+            guard = t_info['guard']
+            props = {'guard_roles': ';'.join(guard['roles']),
+                     'guard_permissions': ';'.join(guard['permissions']),
+                     'guard_groups': ';'.join(guard['groups']),
+                     'guard_expr': guard['expression'],
+                    }
 
-        t.setProperties(
-            title = t_info['title'],
-            description = t_info['description'],
-            new_state_id = t_info['new_state'],
-            trigger_type = trigger_type,
-            script_name = t_info['before_script'],
-            after_script_name = t_info['after_script'],
-            actbox_name = action['name'],
-            actbox_url = action['url'],
-            actbox_category = action['category'],
-            props = props,
-            # CPS:
-            transition_behavior = [TRANSITION_FLAGS_IMPORT[b]
-                                   for b in t_info['transition_behavior']],
-            clone_allowed_transitions = t_info['clone_allowed_transitions'],
-            checkout_allowed_initial_transitions =
-                t_info['checkout_allowed_initial_transitions'],
-            checkin_allowed_transitions =
-                t_info['checkin_allowed_transitions'],
-            push_on_workflow_variable = t_info['push_on_workflow_variable'],
-            pop_on_workflow_variable = t_info['pop_on_workflow_variable'],
-            workflow_up_on_workflow_variable =
-                t_info['workflow_up_on_workflow_variable'],
-            workflow_down_on_workflow_variable =
-                t_info['workflow_down_on_workflow_variable'],
-            workflow_reset_on_workflow_variable =
-                t_info['workflow_reset_on_workflow_variable'],
-            )
+            t.setProperties(
+                title = t_info['title'],
+                description = t_info['description'],
+                new_state_id = t_info['new_state'],
+                trigger_type = trigger_type,
+                script_name = t_info['before_script'],
+                after_script_name = t_info['after_script'],
+                actbox_name = action['name'],
+                actbox_url = action['url'],
+                actbox_category = action['category'],
+                props = props,
+                # CPS:
+                transition_behavior = [TRANSITION_FLAGS_IMPORT[b]
+                                       for b in t_info['transition_behavior']],
+                clone_allowed_transitions = t_info['clone_allowed_transitions'],
+                checkout_allowed_initial_transitions =
+                    t_info['checkout_allowed_initial_transitions'],
+                checkin_allowed_transitions =
+                    t_info['checkin_allowed_transitions'],
+                push_on_workflow_variable = t_info['push_on_workflow_variable'],
+                pop_on_workflow_variable = t_info['pop_on_workflow_variable'],
+                workflow_up_on_workflow_variable =
+                    t_info['workflow_up_on_workflow_variable'],
+                workflow_down_on_workflow_variable =
+                    t_info['workflow_down_on_workflow_variable'],
+                workflow_reset_on_workflow_variable =
+                    t_info['workflow_reset_on_workflow_variable'],
+                )
 
-        t.var_exprs = PersistentMapping(t_info['variables'].items())
+            t.var_exprs = PersistentMapping(t_info['variables'].items())
 
 
 def _extractCPSStateNodes(root, encoding=None):
