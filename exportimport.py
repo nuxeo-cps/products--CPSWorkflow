@@ -201,11 +201,11 @@ class CPSWorkflowDefinitionConfigurator(WorkflowDefinitionConfigurator):
                 'transition_behavior': t_behaviors,
 
                 # Transitions allowed at destination
-                'clone_allowed_transitions':
+                'clone_allowed_transition':
                     v.clone_allowed_transitions,
-                'checkout_allowed_initial_transitions':
+                'checkout_allowed_initial_transition':
                     v.checkout_allowed_initial_transitions,
-                'checkin_allowed_transitions':
+                'checkin_allowed_transition':
                     v.checkin_allowed_transitions,
 
                 # Stack workflow transition flags
@@ -441,11 +441,11 @@ def _initCPSWorkflowTransitions(workflow, transitions):
                 # CPS:
                 transition_behavior = [TRANSITION_FLAGS_IMPORT[b]
                                        for b in t_info['transition_behavior']],
-                clone_allowed_transitions = t_info['clone_allowed_transitions'],
+                clone_allowed_transitions = t_info['clone_allowed_transition'],
                 checkout_allowed_initial_transitions =
-                    t_info['checkout_allowed_initial_transitions'],
+                    t_info['checkout_allowed_initial_transition'],
                 checkin_allowed_transitions =
-                    t_info['checkin_allowed_transitions'],
+                    t_info['checkin_allowed_transition'],
                 push_on_workflow_variable = t_info['push_on_workflow_variable'],
                 pop_on_workflow_variable = t_info['pop_on_workflow_variable'],
                 workflow_up_on_workflow_variable =
@@ -561,9 +561,9 @@ def _extractCPSTransitionNodes(root, encoding=None):
 
         # Transitions allowed at destination
         keylist = [
-            'clone_allowed_transitions',
-            'checkout_allowed_initial_transitions',
-            'checkin_allowed_transitions',
+            'clone_allowed_transition',
+            'checkout_allowed_initial_transition',
+            'checkin_allowed_transition',
             ]
         for key in keylist:
             elt = key.replace('_', '-')
