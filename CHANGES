@@ -6,12 +6,7 @@ New features:
 -
 Bug fixes:
 ~~~~~~~~~~
-- #1139 documents inside folderish documents lose their workflow state
-- #1239 Folderish documents workflows are not enough
-recursivefolderish document is republished
-- don't create states/transitions if they already exist
+-
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
-- added util.updateEffectiveDate public function to update empty effective_date
-  field of published proxies without triggering the creation of a new version.
-  This function should be called by workflow scripts at publishing time.
+-

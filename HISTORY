@@ -1,4 +1,25 @@
 *******************************************
+** CPSWorkflow V0.6.0 [R1 build 2006/01/23-17:32 by fermigier]
+** SVN URL: https://svn.nuxeo.org/pub/CPSWorkflow/trunk Revision: 31976
+Requires:
+~~~~~~~~~
+-
+New features:
+~~~~~~~~~~~~~
+-
+Bug fixes:
+~~~~~~~~~~
+- #1139 documents inside folderish documents lose their workflow state
+- #1239 Folderish documents workflows are not enough
+recursivefolderish document is republished
+- don't create states/transitions if they already exist
+New internal features:
+~~~~~~~~~~~~~~~~~~~~~~
+- added util.updateEffectiveDate public function to update empty effective_date
+  field of published proxies without triggering the creation of a new version.
+  This function should be called by workflow scripts at publishing time.
+
+*******************************************
 ** CPSWorkflow V0.5.0 [R1 build 2005/11/07-15:34 by fguillaume]
 ** SVN URL: https://svn.nuxeo.org/pub/CPSWorkflow/trunk Revision: 29059
 Requires:
