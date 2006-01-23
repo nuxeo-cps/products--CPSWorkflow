@@ -1,5 +1,5 @@
 # -*- coding: iso-8859-15 -*-
-# (C) Copyright 2002-2004 Nuxeo SARL <http://nuxeo.com>
+# (C) Copyright 2002-2006 Nuxeo SAS <http://nuxeo.com>
 # Author: Florent Guillaume <fg@nuxeo.com>
 # Contributor : Julien Anguenot <ja@nuxeo.com>
 #               - Refactoring CPS Workflow
@@ -23,34 +23,31 @@
 #
 # $Id$
 
-"""Workflow extending DCWorklfow with enhanced transitions.
-It adds, as well, a stack workflow support to be able to define dynamic
-delegation / validation chains through dedicated transitions.
+"""CPS Workflow
+
+Workflow extending DCWorklfow with enhanced transitions.  It adds, as
+well, a stack workflow support to be able to define dynamic delegation
+/ validation chains through dedicated transitions.
 """
 
-from zLOG import LOG, ERROR, DEBUG, INFO, TRACE
-from cgi import escape
-from types import StringType
+from zLOG import LOG, TRACE
 
-from Acquisition import aq_parent, aq_inner
-from Globals import InitializeClass, DTMLFile
-from AccessControl import ClassSecurityInfo, getSecurityManager
+from AccessControl import ClassSecurityInfo
+from AccessControl import getSecurityManager
+from Acquisition import aq_parent
+from Acquisition import aq_inner
+from Globals import InitializeClass
+from Globals import DTMLFile
 
-from Products.CMFCore.utils import getToolByName
 from Products.CMFCore.permissions import ManagePortal
-from Products.CMFCore.WorkflowCore import ObjectMoved, ObjectDeleted
+from Products.CMFCore.utils import getToolByName
+from Products.CMFCore.WorkflowCore import ObjectMoved
+from Products.CMFCore.WorkflowCore import ObjectDeleted
 from Products.CMFCore.WorkflowCore import WorkflowException
-from Products.CMFCore.WorkflowTool import addWorkflowFactory
 
 from Products.DCWorkflow.DCWorkflow import DCWorkflowDefinition
-from Products.DCWorkflow.Transitions \
-    import TransitionDefinition as DCWFTransitionDefinition
-from Products.DCWorkflow.Transitions import Transitions as DCWFTransitions
-from Products.DCWorkflow.Transitions import TRIGGER_AUTOMATIC
 from Products.DCWorkflow.Transitions import TRIGGER_USER_ACTION
 from Products.DCWorkflow.Transitions import TRIGGER_WORKFLOW_METHOD
-
-from transitions import TRANSITION_INITIAL_CREATE
 
 from expression import CPSStateChangeInfo as StateChangeInfo
 from expression import createExprContext
@@ -60,36 +57,8 @@ from stackregistries import WorkflowStackRegistry as StackReg
 from zope.interface import implements
 from Products.CPSWorkflow.interfaces import ICPSWorkflowDefinition
 
-
-#
-# CPSCore is optional now.
-# Check DEPENDENCIES.txt
-#
-
-try:
-    from Products.CPSCore.ProxyBase import ProxyBase
-    from Products.CPSCore.EventServiceTool import getEventService
-except ImportError, e:
-    if str(e) not in ('No module named CPSCore.EventServiceTool'
-                      'No module named CPSCore.ProxyBase'):
-        raise
-
-    LOG("Optional Dependencies missing", INFO,
-        "CPSCore.EventServiceTool and CPSCore.ProxyBase")
-
-    #
-    # Here defines optional dependencies on CPSCore elt.
-    #
-
-    class FakeEventService:
-        def notify(self, *args, **kw):
-            pass
-
-    def getEventService(context):
-        return FakeEventService
-
-    class ProxyBase:
-        pass
+from Products.CPSCore.ProxyBase import ProxyBase
+from Products.CPSCore.EventServiceTool import getEventService
 
 #
 # Backwards compatibility with CPS3 <= 3.2.x
@@ -1224,7 +1193,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
         return self.permissions
 
     def _objectMaybeFromRpath(self, ob):
-        if isinstance(ob, StringType):
+        if isinstance(ob, str):
             rpath = ob
             if not rpath or rpath.find('../') >= 0 or rpath.startswith('/'):
                 raise WorkflowException("Unauthorized rpath %s" % rpath)
@@ -1282,31 +1251,6 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
 InitializeClass(WorkflowDefinition)
 
+from Products.CMFCore.WorkflowTool import addWorkflowFactory
 addWorkflowFactory(WorkflowDefinition, id='cps_workflow',
                    title='Web-configurable workflow for CPS')
-
-
-def _renderXMLTag(tagname, **kw):
-    """Render an XML tag."""
-    if kw.get('css_class'):
-        kw['class'] = kw['css_class']
-        del kw['css_class']
-    if kw.has_key('contents'):
-        contents = kw['contents']
-        del kw['contents']
-    else:
-        contents = None
-    attrs = []
-    for key, value in kw.items():
-        if value is None:
-            value = key
-        if value != '':
-            attrs.append('%s="%s"' % (key, escape(str(value))))
-    if attrs:
-        res = '<%s %s>' % (tagname, ' '.join(attrs))
-    else:
-        res = '<%s>' % tagname
-    if contents is not None:
-        res += contents
-    res += '</%s>' % tagname
-    return res
