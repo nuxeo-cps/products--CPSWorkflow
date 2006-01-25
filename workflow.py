@@ -25,9 +25,9 @@
 
 """CPS Workflow
 
-Workflow extending DCWorklfow with enhanced transitions.  It adds, as
-well, a stack workflow support to be able to define dynamic delegation
-/ validation chains through dedicated transitions.
+Workflow extending DCWorkflow with enhanced transitions. It adds, as well, a
+stack workflow support to be able to define dynamic delegation / validation
+chains through dedicated transitions.
 """
 
 from zLOG import LOG, TRACE
