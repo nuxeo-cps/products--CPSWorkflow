@@ -51,7 +51,8 @@ class Configuration(SimpleItem):
 
     security = ClassSecurityInfo()
 
-    def __init__(self):
+    def __init__(self, id=None):
+        # id is ignored
         self.clear()
 
     security.declareProtected(ManageWorkflows, 'clear')

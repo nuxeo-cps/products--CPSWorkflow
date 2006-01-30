@@ -685,6 +685,13 @@ class LocalWorkflowConfigurationXMLAdapter(XMLAdapterBase):
 
     _LOGGER_ID = 'cpsworkflow'
 
+    def __init__(self, context, environ):
+        XMLAdapterBase.__init__(self, context, environ)
+        # Don't keep initial dot in name, which hides it in the filesystem
+        id = context.getId()
+        if id[0] == '.':
+            self.name = id[1:].replace(' ', '_')
+
     def _exportNode(self):
         """Export the object as a DOM node.
         """
