@@ -6,7 +6,8 @@ New features:
 -
 Bug fixes:
 ~~~~~~~~~~
--
+- Fixes to allow proper GenericSetup creation.
+
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
 -
