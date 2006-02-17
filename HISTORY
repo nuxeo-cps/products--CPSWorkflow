@@ -1,4 +1,21 @@
 *******************************************
+** CPSWorkflow V0.6.1 [R1 build 2006/02/17-20:30 by fermigier]
+** SVN URL: https://svn.nuxeo.org/pub/CPSWorkflow/trunk Revision: 33064
+Requires:
+~~~~~~~~~
+-
+New features:
+~~~~~~~~~~~~~
+-
+Bug fixes:
+~~~~~~~~~~
+- Fixes to allow proper GenericSetup creation.
+
+New internal features:
+~~~~~~~~~~~~~~~~~~~~~~
+-
+
+*******************************************
 ** CPSWorkflow V0.6.0 [R1 build 2006/01/23-17:32 by fermigier]
 ** SVN URL: https://svn.nuxeo.org/pub/CPSWorkflow/trunk Revision: 31976
 Requires:
