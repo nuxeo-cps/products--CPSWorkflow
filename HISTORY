@@ -1,4 +1,20 @@
 *******************************************
+** CPSWorkflow V0.7.0 [R1 build 2006/03/03-17:48 by ben]
+** SVN URL: https://svn.nuxeo.org/pub/CPSWorkflow/trunk Revision: 33914
+Requires:
+~~~~~~~~~
+-
+New features:
+~~~~~~~~~~~~~
+-
+Bug fixes:
+~~~~~~~~~~
+-
+New internal features:
+~~~~~~~~~~~~~~~~~~~~~~
+- cosmit
+
+*******************************************
 ** CPSWorkflow V0.6.1 [R1 build 2006/02/17-20:30 by fermigier]
 ** SVN URL: https://svn.nuxeo.org/pub/CPSWorkflow/trunk Revision: 33064
 Requires:
