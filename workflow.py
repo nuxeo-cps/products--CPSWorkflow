@@ -47,7 +47,6 @@ from Products.CMFCore.WorkflowCore import WorkflowException
 
 from Products.DCWorkflow.DCWorkflow import DCWorkflowDefinition
 from Products.DCWorkflow.Transitions import TRIGGER_USER_ACTION
-from Products.DCWorkflow.Transitions import TRIGGER_WORKFLOW_METHOD
 
 from expression import CPSStateChangeInfo as StateChangeInfo
 from expression import createExprContext
