@@ -47,7 +47,6 @@ from Products.DCWorkflow.Transitions \
 from Products.DCWorkflow.Transitions import Transitions as DCWFTransitions
 from Products.DCWorkflow.Transitions import TRIGGER_AUTOMATIC
 from Products.DCWorkflow.Transitions import TRIGGER_USER_ACTION
-from Products.DCWorkflow.Transitions import TRIGGER_WORKFLOW_METHOD
 
 # For old code that doesn't import directly from constants
 from Products.CPSWorkflow.constants import *
