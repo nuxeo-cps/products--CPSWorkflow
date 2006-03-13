@@ -412,7 +412,7 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
                          'User Substitute Stack Element')
         self.assertEqual(reg.getMetaTypeForPrefix('group_substitute'),
                          'Group Substitute Stack Element')
-        
+
 if __name__ == '__main__':
     framework()
 else:

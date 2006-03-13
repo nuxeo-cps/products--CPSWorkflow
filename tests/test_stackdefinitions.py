@@ -766,7 +766,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # XX
         hierarchical.setEmptyStackManageGuard(
             guard_roles='Owner; WorkspaceManager')
-            
+
         # Basics
         self.assertEqual(hierarchical.meta_type,
                          'Hierarchical Stack Definition')

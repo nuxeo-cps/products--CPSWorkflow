@@ -201,7 +201,7 @@ class TestStackElements(ZopeTestCase):
         self.assertEqual(guard.getPermissionsText(), '')
         self.assertEqual(guard.getRolesText(), '')
         self.assertEqual(guard.getExprText(), '')
-    
+
     def test_stack_element_editguard(self):
 
         #
@@ -357,7 +357,7 @@ class TestStackElements(ZopeTestCase):
         self.assertEqual(guard.getPermissionsText(), '')
         self.assertEqual(guard.getRolesText(), '')
         self.assertEqual(guard.getExprText(), '')
-        
+
     def test_UserStackElement(self):
 
         # XXX supported for compatibility
@@ -444,7 +444,7 @@ class TestStackElements(ZopeTestCase):
         # Try changing one attr and check
         copy.id = 'other'
         self.assertNotEqual(elt.getId(), copy.getId())
-        
+
     def test_GroupSubstituteStackElement(self):
         elt = GroupSubstituteStackElement('group_substitute:group:nuxeo')
         self.assertEqual(elt(), 'group_substitute:group:nuxeo')
