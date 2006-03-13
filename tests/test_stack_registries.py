@@ -5,6 +5,7 @@ import os, sys
 if __name__ == '__main__':
     execfile(os.path.join(sys.path[0], 'framework.py'))
 
+import unittest
 from Testing import ZopeTestCase
 
 portal_name = 'test_portal'
@@ -12,8 +13,6 @@ ZopeTestCase.installProduct('CMFCore')
 ZopeTestCase.installProduct('CMFDefault')
 ZopeTestCase.installProduct('MailHost')
 ZopeTestCase.installProduct('CPSWorkflow')
-
-from Products.CMFDefault.Portal import manage_addCMFSite
 
 from Products.CPSWorkflow.stackregistries import \
      WorkflowStackRegistryCls, WorkflowStackRegistry
@@ -38,14 +37,9 @@ from Products.CPSWorkflow.interfaces import IWorkflowStackDefRegistry
 from Products.CPSWorkflow.interfaces import IWorkflowStackElementRegistry
 
 
-class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
+class WorkflowStackRegistryTestCase(unittest.TestCase):
     """Workflow Stack Registry test case
     """
-
-    def getPortal(self):
-        if not hasattr(self.app, portal_name):
-            manage_addCMFSite(self.app, portal_name)
-        return self.app[portal_name]
 
     def test_interfaces(self):
         from zope.interface.verify import verifyClass
@@ -415,8 +409,8 @@ class WorkflowStackRegistryTestCase(ZopeTestCase.PortalTestCase):
 if __name__ == '__main__':
     framework()
 else:
-    from unittest import TestSuite, makeSuite
     def test_suite():
-        suite = TestSuite()
-        suite.addTest(makeSuite(WorkflowStackRegistryTestCase))
-        return suite
+        tests = [
+            unittest.makeSuite(WorkflowStackRegistryTestCase),
+            ]
+        return unittest.TestSuite(tests)
