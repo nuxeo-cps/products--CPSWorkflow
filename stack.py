@@ -30,8 +30,6 @@ Base stack type definition. It does :
 
 import copy
 
-from types import StringType, ListType, DictType
-
 from ZODB.PersistentMapping import PersistentMapping
 from ZODB.PersistentList import PersistentList
 
@@ -89,7 +87,7 @@ class Stack(SimpleItem):
         Check WorkflowStackElementRegistry
         """
         elt = None
-        if isinstance(elt_str, StringType):
+        if isinstance(elt_str, str):
             if ':' in elt_str:
                 prefix = elt_str.split(':')[0]
             else:
@@ -178,9 +176,9 @@ class Stack(SimpleItem):
             new_ref = None
 
             # Check if we need to break the reference for a mutable type
-            if isinstance(value, ListType):
+            if isinstance(value, (list, tuple)):
                 new_ref = []
-            elif isinstance(value, DictType):
+            elif isinstance(value, dict):
                 new_ref = {}
             elif isinstance(value, PersistentList):
                 new_ref = PersistentList()
@@ -189,13 +187,11 @@ class Stack(SimpleItem):
 
             # Now copy the elements if possible.
             if new_ref is not None:
-                if (isinstance(new_ref, ListType) or
-                    isinstance(new_ref, PersistentList)):
+                if isinstance(new_ref, (list, PersistentList)):
                     for each in value:
                         new_ref.append(each.getCopy())
                     _copy.__dict__[attr] = new_ref
-                if (isinstance(new_ref, DictType) or
-                    isinstance(new_ref, PersistentMapping)):
+                if isinstance(new_ref, (dict, PersistentMapping)):
                     for key in value.keys():
                         new_key_value = [x.getCopy() for x in value[key]]
                         new_ref[key] = new_key_value

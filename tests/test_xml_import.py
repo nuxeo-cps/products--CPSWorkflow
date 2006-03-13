@@ -27,7 +27,6 @@ from Products.CPSWorkflow.tests.SetupWorkflowTestCase import SetupWorkflowTestCa
 from Products.GenericSetup.tests.common import DummyImportContext
 
 # workflow classes
-from Products.DCWorkflow.DCWorkflow import DCWorkflowDefinition
 from Products.CPSWorkflow.workflow import WorkflowDefinition as CPSWorkflowDefinition
 # permissions
 from Products.CMFCore.permissions import View, ModifyPortalContent

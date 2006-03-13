@@ -19,23 +19,12 @@
 # $Id$
 
 import unittest
-from OFS.Folder import Folder
 
 from Products.CMFCore.tests.base.testcase import SecurityRequestTest
 
 from Products.CPSWorkflow.workflow import WorkflowDefinition
 from Products.CPSWorkflow.workflow import TRIGGER_USER_ACTION
-
-from Products.CPSWorkflow.configuration import addConfiguration
-from Products.CPSWorkflow.workflowtool import Config_id
-
-from Products.CPSWorkflow.states import StateDefinition
-
-from Products.CPSWorkflow.stack import Stack
-from Products.CPSWorkflow.basicstacks import SimpleStack, HierarchicalStack
-
 from Products.CPSWorkflow.transitions import TransitionDefinition
-from Products.CPSWorkflow.transitions import Transitions
 
 class TestCPSWorkflowTransitions(SecurityRequestTest):
 

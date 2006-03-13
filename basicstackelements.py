@@ -47,7 +47,6 @@ given stack element.
 """
 
 from Globals import InitializeClass
-from AccessControl import ClassSecurityInfo
 
 from stackregistries import WorkflowStackElementRegistry
 

@@ -28,7 +28,6 @@ from Testing import ZopeTestCase
 ZopeTestCase.installProduct('CPSWorkflow')
 
 from Products.CMFDefault.Portal import manage_addCMFSite
-from Products.CMFCore.DirectoryView import createDirectoryView
 
 from Products.CPSWorkflow.stack import Stack
 from Products.CPSWorkflow.basicstacks import SimpleStack

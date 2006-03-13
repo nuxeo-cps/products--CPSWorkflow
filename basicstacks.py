@@ -195,8 +195,7 @@ class SimpleStack(Stack):
                 not each.isVisible(sm=getSecurityManager(), stack=self,
                                    context=context)):
                 each = ElementReg.makeWorkflowStackElementTypeInstance(
-                    each.getHiddenMetaType(), 'hidden'
-                    )
+                    each.getHiddenMetaType(), 'hidden')
             if type == 'id':
                 res.append(each.getId())
             elif type == 'str':
@@ -476,7 +475,7 @@ class HierarchicalStack(SimpleStack):
         If not specified let's return the current level content
         """
         if level is None:
-            level=self.getCurrentLevel()
+            level = self.getCurrentLevel()
         try:
             value = self._getElementsContainer()[level]
         except KeyError:
@@ -492,8 +491,7 @@ class HierarchicalStack(SimpleStack):
                 not each.isVisible(sm=getSecurityManager(), stack=self,
                                    context=context)):
                 each = ElementReg.makeWorkflowStackElementTypeInstance(
-                    each.getHiddenMetaType(), 'hidden'
-                    )
+                    each.getHiddenMetaType(), 'hidden')
             if type == 'id':
                 res.append(each.getId())
             elif type == 'str':

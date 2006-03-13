@@ -22,23 +22,13 @@
 
 import unittest
 
-from OFS.Folder import Folder
-
 from Products.CMFCore.tests.base.testcase import SecurityRequestTest
-
-from Products.CPSWorkflow import basicstacks
-from Products.CPSWorkflow import basicstackdefinitions
 
 from Products.CPSWorkflow.workflow import WorkflowDefinition
 from Products.CPSWorkflow.workflow import TRIGGER_USER_ACTION
-from Products.CPSWorkflow.configuration import addConfiguration
-from Products.CPSWorkflow.workflowtool import Config_id
 
 from Products.CPSWorkflow.states import StateDefinition
 from Products.CPSWorkflow.constants import STATE_FLAGS_EXPORT
-
-from Products.CPSWorkflow.stack import Stack
-from Products.CPSWorkflow.basicstacks import SimpleStack, HierarchicalStack
 
 # XXX default values for sdef.state_delegatees_vars_info is not {} as it should
 # be.  it comes from the fact that test_workflow_with_stacks is dirty and

@@ -27,9 +27,6 @@ from Globals import InitializeClass
 from Acquisition import aq_base
 
 from Products.DCWorkflow.Guard import Guard
-from Products.DCWorkflow.Guard import formatNameUnion
-from Products.DCWorkflow.permissions import ManagePortal
-
 from Products.CMFCore.utils import _checkPermission
 
 from expression import CPSStateChangeInfo
@@ -86,5 +83,5 @@ class StackDefinitionGuard(Guard):
                 if not res:
                     return 0
         return 1
-    
+
 InitializeClass(StackDefinitionGuard)

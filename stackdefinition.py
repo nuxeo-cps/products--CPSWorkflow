@@ -41,8 +41,6 @@ c.f : doc/stackdefinition.txt
 
 """
 
-from types import StringType, DictType
-
 from DateTime import DateTime
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
@@ -96,7 +94,7 @@ class StackDefinition(SimpleItem):
         # Fetch from the kw the argument we are interested in
         for k, v in kw.items():
             if k == 'managed_role_exprs':
-                if isinstance(v, DictType):
+                if isinstance(v, dict):
                     for role, expr in v.items():
                         self.addManagedRole(role, expr)
             if k == 'manager_stack_ids':

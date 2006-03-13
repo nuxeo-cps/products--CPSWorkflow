@@ -32,11 +32,8 @@ Check the documentation within the doc sub-folder
 
 from zLOG import LOG, ERROR, DEBUG
 
-from types import StringType, DictType
-
 from Globals import DTMLFile
 from OFS.ObjectManager import ObjectManager
-from Acquisition import aq_parent, aq_inner, aq_base
 
 from Products.DCWorkflow.States import StateDefinition as DCWFStateDefinition
 from Products.DCWorkflow.States import States as DCWFStates
@@ -70,8 +67,7 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
 
     _stackdefinition_properties_form = DTMLFile(
         'zmi/workflow_state_stackdef_edit',
-        globals()
-        )
+        globals())
 
     state_behaviors = ()
     stackdefs = {} # XXX mutable class default!
@@ -95,8 +91,7 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
                       workflow_down_on_workflow_variable = None,
                       workflow_reset_on_workflow_variable = None,
                       REQUEST=None,
-                      **kw
-                      ):
+                      **kw):
         """Set state properties
 
         DCWorkflow properties / CPS extensions
@@ -108,7 +103,7 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
         self.state_behaviors = tuple(state_behaviors)
 
         # Stack defs
-        if stackdefs and isinstance(stackdefs, DictType):
+        if stackdefs and isinstance(stackdefs, dict):
             for k, stackdef_conf in stackdefs.items():
                 if k in self.getStackDefinitions().keys():
                     self.delStackDefinitionsById(k)
@@ -304,7 +299,7 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
     def delManagedRoleExpressionsFor(self, wf_var_id, role_ids, REQUEST=None):
         """Remove managed role expression to a stack definition
         """
-        if isinstance(role_ids, StringType):
+        if isinstance(role_ids, str):
             role_ids = [role_ids]
         stackdef = self.getStackDefinitionFor(wf_var_id)
         if stackdef is not None:

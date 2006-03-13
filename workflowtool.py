@@ -26,12 +26,10 @@ stack workflows support.
 from zLOG import LOG, ERROR, DEBUG, TRACE, INFO
 
 import sys
-from types import StringType
 from Acquisition import aq_base, aq_parent, aq_inner
 from Globals import InitializeClass, DTMLFile
 from AccessControl import ClassSecurityInfo, Unauthorized
 from OFS.Folder import Folder
-from OFS.ObjectManager import IFAwareObjectManager
 from webdav.WriteLockInterface import WriteLockInterface
 
 from Products.CMFCore.utils import _checkPermission, getToolByName
@@ -58,7 +56,7 @@ from transitions import TRANSITION_INITIAL_CHECKOUT
 from transitions import TRANSITION_ALLOW_CHECKIN
 from transitions import TRANSITION_BEHAVIOR_PUBLISHING
 
-from zope.interface import implements, implementedBy
+from zope.interface import implements
 from Products.CPSWorkflow.interfaces import ICPSWorkflowTool
 from Products.CMFCore.interfaces import IWorkflowDefinition
 
@@ -248,7 +246,7 @@ class WorkflowTool(BaseWorkflowTool):
         return transitions
 
     def _container_maybe_rpath(self, container):
-        if isinstance(container, StringType):
+        if isinstance(container, str):
             rpath = container
             if not rpath or rpath.startswith('/') or '..' in rpath.split('/'):
                 raise ValueError(rpath)
@@ -650,7 +648,7 @@ class WorkflowTool(BaseWorkflowTool):
         pxtool = getToolByName(self, 'portal_proxies')
 
         rpath = utool.getRelativeUrl(ob)
-        if isinstance(dest_container, StringType):
+        if isinstance(dest_container, str):
             container_rpath = dest_container
         else:
             container_rpath = utool.getRelativeUrl(dest_container)
@@ -819,7 +817,7 @@ class WorkflowTool(BaseWorkflowTool):
 ##         traceback.print_stack(file=s)
 ##         LOG('getChainFor', DEBUG, 'comming from tb:\n%s' % s.getvalue())
 
-        if isinstance(ob, StringType):
+        if isinstance(ob, str):
             pt = ob
         elif hasattr(aq_base(ob), '_getPortalTypeName'):
             pt = ob._getPortalTypeName()

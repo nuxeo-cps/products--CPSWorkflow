@@ -21,16 +21,12 @@
 # $Id$
 
 import unittest
-from OFS.Folder import Folder
 
 from AccessControl.SecurityManagement import newSecurityManager
 
 from Testing import ZopeTestCase
 from Products.CMFCore.tests.base.testcase import SecurityRequestTest
 
-from Products.CPSCore.CPSMembershipTool import CPSUnrestrictedUser
-
-from Products.CPSWorkflow.stack import Stack
 from Products.CPSWorkflow.basicstacks import SimpleStack
 from Products.CPSWorkflow.basicstacks import HierarchicalStack
 

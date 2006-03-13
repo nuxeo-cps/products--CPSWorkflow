@@ -26,7 +26,7 @@ the whole stack workflow API.
 """
 
 import os, sys
-from types import DictType
+
 if __name__ == '__main__':
     execfile(os.path.join(sys.path[0], 'framework.py'))
 
@@ -45,31 +45,19 @@ ZopeTestCase.installProduct('CPSUserFolder')
 
 import unittest
 
-from Acquisition import aq_parent, aq_inner
-
-from AccessControl import Unauthorized
-from AccessControl import getSecurityManager
-from AccessControl.SecurityManagement import newSecurityManager
+from Products.CMFCore.utils import getToolByName
+from Products.CMFDefault.Portal import manage_addCMFSite
 
 from Products.CPSCore.CPSBase import CPSBaseFolder as Folder
 
-from Products.CMFDefault.Portal import manage_addCMFSite
-
-from Products.CMFCore.utils import getToolByName
-
 from Products.CPSWorkflow.workflow import WorkflowDefinition
 from Products.CPSWorkflow.workflow import TRIGGER_USER_ACTION
-
 from Products.CPSWorkflow.configuration import addConfiguration
-
 from Products.CPSWorkflow.workflowtool import Config_id
-
 from Products.CPSWorkflow.constants import *
-
 from Products.CPSWorkflow.basicstackdefinitions import SimpleStackDefinition
 from Products.CPSWorkflow.basicstackdefinitions import \
      HierarchicalStackDefinition
-
 from Products.CPSWorkflow.basicstacks import SimpleStack
 from Products.CPSWorkflow.basicstacks import HierarchicalStack
 
@@ -572,7 +560,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         stackdefs = wftool.getStackDefinitionsFor(content)
 
         # Test returned structure
-        self.assert_(isinstance(stackdefs, DictType))
+        self.assert_(isinstance(stackdefs, dict))
         self.assertNotEqual(stackdefs, {})
 
         # Test fixtures of stackdefs
@@ -631,7 +619,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         #
 
         ds = wftool.getStacks(content)
-        self.assert_(isinstance(ds, DictType))
+        self.assert_(isinstance(ds, dict))
         keys = ds.keys()
         keys.sort()
         self.assert_(len(keys) == 3)
@@ -681,7 +669,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         stackdefs = current_state.getStackDefinitions()
         keys = stackdefs.keys()
         keys.sort()
-        self.assert_(isinstance(stackdefs, DictType))
+        self.assert_(isinstance(stackdefs, dict))
         self.assertEqual(keys, ['Associates', 'Observers', 'Pilots'])
         self.assert_(isinstance(stackdefs['Associates'],
                                 SimpleStackDefinition))

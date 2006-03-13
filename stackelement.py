@@ -23,11 +23,8 @@ A Stack ELement is an element stored within a stack type.
 """
 
 import copy
-from types import StringType
 
 from Globals import InitializeClass
-from AccessControl import ClassSecurityInfo, getSecurityManager
-from Acquisition import aq_parent, aq_inner
 from OFS.SimpleItem import SimpleItem
 
 from Products.CMFCore.utils import getToolByName
@@ -51,8 +48,6 @@ class StackElement(SimpleItem):
 
     hidden_meta_type = ''
 
-    security = ClassSecurityInfo()
-
     view_guard = None
     edit_guard = None
 
@@ -66,7 +61,7 @@ class StackElement(SimpleItem):
     def __cmp__(self, other):
         if isinstance(other, StackElement):
             return cmp(self.getId(), other())
-        elif isinstance(other, StringType):
+        elif isinstance(other, str):
             return cmp(self.getId(), other)
         return 0
 

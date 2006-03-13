@@ -14,7 +14,6 @@ ZopeTestCase.installProduct('MailHost')
 ZopeTestCase.installProduct('CPSWorkflow')
 
 from Products.CMFDefault.Portal import manage_addCMFSite
-from Products.CMFCore.utils import getToolByName
 
 from Products.CPSWorkflow.stackregistries import \
      WorkflowStackRegistryCls, WorkflowStackRegistry

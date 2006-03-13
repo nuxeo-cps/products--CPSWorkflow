@@ -34,7 +34,6 @@ from stackdefinition import StackDefinition
 from stackregistries import WorkflowStackDefRegistry
 
 from zope.interface import implements
-from zope.interface.verify import verifyClass, DoesNotImplement
 from Products.CPSWorkflow.interfaces import IWorkflowStackDefinition
 
 
