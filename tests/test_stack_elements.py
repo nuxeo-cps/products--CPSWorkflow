@@ -21,11 +21,11 @@
 # $Id$
 
 import unittest
-from Testing.ZopeTestCase import ZopeTestCase
+
 from Products.PageTemplates.TALES import CompilerError
 
+from Products.CPSWorkflow.interfaces import IStackElement
 from Products.CPSWorkflow.stackelement import StackElement
-
 from Products.CPSWorkflow.basicstackelements import UserStackElement
 from Products.CPSWorkflow.basicstackelements import GroupStackElement
 from Products.CPSWorkflow.basicstackelements import HiddenUserStackElement
@@ -38,9 +38,7 @@ from Products.CPSWorkflow.basicstackelements import \
 from Products.CPSWorkflow.stackdefinitionguard import \
      StackDefinitionGuard as Guard
 
-from Products.CPSWorkflow.interfaces import IStackElement
-
-class TestStackElements(ZopeTestCase):
+class TestStackElement(unittest.TestCase):
 
     def test_interface(self):
         from zope.interface.verify import verifyClass
@@ -358,6 +356,9 @@ class TestStackElements(ZopeTestCase):
         self.assertEqual(guard.getRolesText(), '')
         self.assertEqual(guard.getExprText(), '')
 
+
+class TestBasicStackElements(unittest.TestCase):
+
     def test_UserStackElement(self):
 
         # XXX supported for compatibility
@@ -408,6 +409,9 @@ class TestStackElements(ZopeTestCase):
         self.assertEqual(str(elt),  USER_STACK_ELEMENT_NOT_VISIBLE)
         self.assertEqual(elt.getIdForRoleSettings(), '')
 
+
+class TestHiddenStackElements(unittest.TestCase):
+
     def test_HiddenUserStackElementCopy(self):
         elt = HiddenUserStackElement('user:anguenot')
         copy = elt.getCopy()
@@ -427,6 +431,9 @@ class TestStackElements(ZopeTestCase):
         # Try changing one attr and check
         copy.id = 'other'
         self.assertNotEqual(elt.getId(), copy.getId())
+
+
+class TestSubstituteStackElements(unittest.TestCase):
 
     def test_UserSubstituteStackElement(self):
         elt = UserSubstituteStackElement('user_substitute:anguenot')
@@ -462,9 +469,15 @@ class TestStackElements(ZopeTestCase):
         copy.id = 'other'
         self.assertNotEqual(elt.getId(), copy.getId())
 
+
 def test_suite():
-    loader = unittest.TestLoader()
-    return loader.loadTestsFromTestCase(TestStackElements)
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(TestStackElement))
+    suite.addTest(unittest.makeSuite(TestBasicStackElements))
+    suite.addTest(unittest.makeSuite(TestHiddenStackElements))
+    suite.addTest(unittest.makeSuite(TestSubstituteStackElements))
+    return suite
+
 
 if __name__=='__main__':
     unittest.TextTestRunner().run(test_suite())
