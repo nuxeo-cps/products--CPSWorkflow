@@ -21,6 +21,7 @@
 """ Stack type definitions
 """
 
+from warnings import warn
 
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo, getSecurityManager
@@ -139,6 +140,12 @@ class SimpleStack(Stack):
             return res
         return 0
 
+
+    def _getStackContent(self):
+        """Return stack content, no check on permissions
+        """
+        return list(self._getElementsContainer())
+
     #
     # API
     #
@@ -182,6 +189,7 @@ class SimpleStack(Stack):
             code = code and self._pop(pop_id, **kw)
         return code
 
+
     def getStackContent(self, type='id', level=None,
                         context=None, **kw):
         """Return the stack content
@@ -190,7 +198,7 @@ class SimpleStack(Stack):
         security on the element.
         """
         res = []
-        for each in self._getElementsContainer():
+        for each in self._getStackContent():
             if (context is None or
                 not each.isVisible(sm=getSecurityManager(), stack=self,
                                    context=context)):
@@ -282,21 +290,6 @@ class HierarchicalStack(SimpleStack):
     # PRIVATE API
     #
 
-    def _getStackElementIndex(self, elt, level=None):
-        """Find the index of the given element within the stack at a
-        given level given the elt itself or its id. It supports both
-        since the __cmp__ method of stackelement supports the
-        operation.
-        """
-        if level is None:
-            level = self.getCurrentLevel()
-        i = 0
-        for each in self._getLevelContentValues(level=level):
-            if elt == each:
-                return i
-            i += 1
-        return -1
-
     def _push(self, elt=None, level=0, **kw):
         """Push elt at given level or in between two levels
 
@@ -328,7 +321,7 @@ class HierarchicalStack(SimpleStack):
             index = self._getStackElementIndex(elt, level)
             if index == -1:
                 # element not found in level
-                content_level = self._getLevelContentValues(level)
+                content_level = self._getLevelContent(level)
                 content_level.append(prepared_elt)
                 self._getElementsContainer()[level] = content_level
             else:
@@ -380,7 +373,7 @@ class HierarchicalStack(SimpleStack):
 
         if level is None:
             level = self.getCurrentLevel()
-        levelc = self._getLevelContentValues(level=level)
+        levelc = self._getLevelContent(level=level)
 
         if elt is None:
             return 0
@@ -393,6 +386,50 @@ class HierarchicalStack(SimpleStack):
             except KeyError:
                 pass
         return 0
+
+    def _getLevelContent(self, level=None):
+        """Return content of given level
+
+        If not specified let's return the current level content
+        """
+        if level is None:
+            level = self.getCurrentLevel()
+        try:
+            value = self._getElementsContainer()[level]
+        except KeyError:
+            value = []
+
+        return value
+
+    # BBB
+    def _getLevelContentValues(self, level=None):
+        """Return content of given level
+        """
+        warn("_getLevelContentValues is deprecated, use _getLevelContent instead")
+        return self._getLevelContent(level=level)
+
+    def _getStackContent(self, type='id', context=None, **kw):
+        """Return the stack content, no permissions check
+        """
+        res = {}
+        for level in self.getAllLevels():
+            res[level] = self._getLevelContent(level=level)
+        return res
+
+    def _getStackElementIndex(self, elt, level=None):
+        """Find the index of the given element within the stack at a
+        given level given the elt itself or its id. It supports both
+        since the __cmp__ method of stackelement supports the
+        operation.
+        """
+        if level is None:
+            level = self.getCurrentLevel()
+        i = 0
+        for each in self._getLevelContent(level=level):
+            if elt == each:
+                return i
+            i += 1
+        return -1
 
     #
     # API
@@ -425,19 +462,16 @@ class HierarchicalStack(SimpleStack):
 
     ###################################################
 
-    def getStackContent(self, type='id', context=None, **kw):
-        """Return the stack content
-        """
-        res = {}
-        for clevel in self.getAllLevels():
-            res[clevel] = self.getLevelContent(level=clevel, type=type,
-                                               context=context, **kw)
-        return res
-
     def getCurrentLevel(self):
         """Return the current level
         """
         return self._level
+
+    def setCurrentLevel(self, level):
+        """Set the current level
+        """
+        if level in self.getAllLevels():
+            self._level = level
 
     def hasUpperLevel(self):
         """Has the stack a level upper than current level
@@ -455,9 +489,7 @@ class HierarchicalStack(SimpleStack):
         The level has to exist and host elts
         """
         new_level = self.getCurrentLevel() + 1
-        if new_level in self.getAllLevels():
-            self._level += 1
-        return self._level
+        self.setCurrentLevel(new_level)
 
     def doDecLevel(self):
         """Decrement the level value
@@ -465,26 +497,24 @@ class HierarchicalStack(SimpleStack):
         The level has to exist and host elts
         """
         new_level = self.getCurrentLevel() - 1
-        if new_level in self.getAllLevels():
-            self._level -= 1
-        return self._level
+        self.setCurrentLevel(new_level)
 
-    def _getLevelContentValues(self, level=None):
-        """Return  the content of the level given as parameter
+    def getAllLevels(self):
+        """Return all the existing levels with elts
 
-        If not specified let's return the current level content
+        It's returned sorted
         """
-        if level is None:
-            level = self.getCurrentLevel()
-        try:
-            value = self._getElementsContainer()[level]
-        except KeyError:
-            value = []
-
-        return value
+        returned = []
+        for k, v in self._getElementsContainer().items():
+            if v != []:
+                returned.append(k)
+        returned.sort()
+        return returned
 
     def getLevelContent(self, level=None, type='id', context=None, **kw):
-        content = self._getLevelContentValues(level)
+        """Return content of given level
+        """
+        content = self._getLevelContent(level)
         res = []
         for each in content:
             if (context is None or
@@ -507,17 +537,14 @@ class HierarchicalStack(SimpleStack):
                 raise ValueError, emsg
         return res
 
-    def getAllLevels(self):
-        """Return all the existing levels with elts
-
-        It's returned sorted
+    def getStackContent(self, type='id', context=None, **kw):
+        """Return the stack content
         """
-        returned = []
-        for k, v in self._getElementsContainer().items():
-            if v != []:
-                returned.append(k)
-        returned.sort()
-        return returned
+        res = {}
+        for level in self.getAllLevels():
+            res[level] = self.getLevelContent(level=level, type=type,
+                                              context=context, **kw)
+        return res
 
     ###################################################
 
@@ -568,7 +595,7 @@ class HierarchicalStack(SimpleStack):
         for pop_id in pop_ids:
             # Convention used: 'level,prefix:elt_id'
             # pop_id example: '1,user:toto' or '2,group:titi'
-            # XXX (compatibility): level can be omitted 
+            # XXX (compatibility): level can be omitted
             split = pop_id.split(',')
             if len(split) > 1:
                 level = int(split[0])
@@ -588,11 +615,11 @@ class HierarchicalStack(SimpleStack):
         old_elt = self._prepareElement(old)
         for level in self.getAllLevels():
             try:
-                index_level = self._getLevelContentValues(
-                    level=level).index(old_elt())
+                index_level = self._getStackElementIndex(old_elt, level=level)
                 self._elements_container[level][index_level] = new_elt
             except ValueError:
                 pass
+
 
     def reset(self, **kw):
         """Reset the stack

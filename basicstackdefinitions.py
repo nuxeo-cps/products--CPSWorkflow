@@ -66,21 +66,9 @@ class SimpleStackDefinition(StackDefinition):
         # Prepare the ds
         ds = self._prepareStack(ds)
 
-        #
-        # Build the local role mapping Have to respect the fact that some
-        # stacks might have be able to define different local roles for the
-        # same element in the stack at a given time
-        #
-
-        # XXX AT: access to real StackElement object to update role mappings
-        # even if current user is not supposed to view/edit some stack
-        # elements.
-        # Plus give access to the whole element call result in expression (and
-        # not just user/group id, even if it does not make any difference
-        # here).
-        # Check if this is the wanted behaviour.
-        stack_content = ds._getElementsContainer()
-        for elt in stack_content:
+        # Build local role mapping, define local role for each stack element,
+        # even if it's not visible to current user.
+        for elt in ds._getStackContent():
             elt_id = elt.getIdForRoleSettings()
             for role_id in self.getManagedRoles():
                 if self._getExpressionForRole(role_id, ds, level=None,
@@ -88,6 +76,11 @@ class SimpleStackDefinition(StackDefinition):
                     mapping[elt_id] = mapping.get(elt_id, ()) + (role_id,)
 
         return mapping
+
+    def _getManagerStackElements(self, ds):
+        """Return current level elements
+        """
+        return ds._getStackContent()
 
     def _canManageStack(self, ds, aclu, mtool, context, **kw):
         """Check if the current authenticated member scan manage stack
@@ -118,32 +111,33 @@ class SimpleStackDefinition(StackDefinition):
             member = mtool.getMemberById(member_id)
 
         #
-        # Check first if the member is granted because of irts position within
+        # Check first if the member is granted because of its position within
         # the stack content
         #
-
-        # XXX AT: see if stack content needs to be filtered by rights on elt
-        for each in ds.getStackContent(type='role', context=context):
-            if not each.startswith('group:'):
-                if each == member_id:
-                    return 1
-            else:
+        for each in self._getManagerStackElements(ds):
+            role_setting_id = each.getIdForRoleSettings()
+            if role_setting_id.startswith('group:'):
+                # check if it's current user
+                group_id = role_setting_id[len('group:'):]
                 try:
-                    group_no_prefix = each[len('group:'):]
-                    group = aclu.getGroupById(group_no_prefix)
-                    group_users = group.getUsers()
-                    if member_id in group_users:
-                        return 1
+                    group = aclu.getGroupById(group_id)
                 except KeyError:
                     # Group has probably been removed
                     pass
+                else:
+                    group_users = group.getUsers()
+                    if member_id in group_users:
+                        return 1
+            else:
+                if role_setting_id == member_id:
+                    return 1
 
         #
         # Now let's cope with the first case when the stack is not yet
         # intialized. Call the specific guard for this
         #
 
-        if ds.getStackContent() == []:
+        if ds.isEmpty():
             wf_def = self._getWorkflowDefinition()
             return self.getEmptyStackManageGuard().check(
                 getSecurityManager(), wf_def, context)
@@ -155,7 +149,7 @@ InitializeClass(SimpleStackDefinition)
 ###################################################
 ###################################################
 
-class HierarchicalStackDefinition(StackDefinition):
+class HierarchicalStackDefinition(SimpleStackDefinition):
     """Hierarchical Stack Definition
     """
 
@@ -171,71 +165,6 @@ class HierarchicalStackDefinition(StackDefinition):
     # Overrides the not implemented method of Stack
     #
 
-    def _canManageStack(self, ds, aclu, mtool, context, **kw):
-        """Check if the current authenticated member scan manage stack
-
-        Here, only the people at the current level are allowed to manage the
-        stack. We need the acl_users in use and the member_ship tool since I
-        don't want to explicit acquicition in here
-
-        context is needed when the stack has just been initialized.
-        """
-
-        if mtool.isAnonymousUser():
-            return 0
-
-        # prepare the ds
-        ds = self._prepareStack(ds)
-
-        #
-        # Cope with member id.
-        # It can be passed within the kw (member_id)
-        #
-
-        member_id = kw.get('member_id')
-        if member_id is None:
-            member = mtool.getAuthenticatedMember()
-            member_id = member.getMemberId()
-        else:
-            member = mtool.getMemberById(member_id)
-
-        #
-        # Check first if the member is granted because of its position within
-        # the stack content.
-        # e.g.check that current user, or one of its groups, is at current level
-
-        # XXX AT: see if stack content needs to be filtered by rights on elt
-        for each in ds.getLevelContent(type='role', context=context):
-            if not each.startswith('group:'):
-                if each == member_id:
-                    return 1
-            else:
-                try:
-                    # XXX AT: Maybe we could think that, statistically, there
-                    # are more users in a given group than groups for a given
-                    # user. So maybe could replace this code checking that
-                    # given group is in user's computed groups, instead of
-                    # iterating on each group's content?
-                    group_no_prefix = each[len('group:'):]
-                    group = aclu.getGroupById(group_no_prefix)
-                    group_users = group.getUsers()
-                    if member_id in group_users:
-                        return 1
-                except KeyError:
-                    # Group has probably been removed
-                    pass
-
-        #
-        # Now let's cope with the first case when the stack is not yet
-        # initialized.
-        #
-        if ds.getStackContent() == {}:
-            wf_def = self._getWorkflowDefinition()
-            return self.getEmptyStackManageGuard().check(
-                getSecurityManager(), wf_def, context)
-
-        return 0
-
     def _getLocalRolesMapping(self, ds):
         """Give the local roles mapping for the member / group ids within the
         stack
@@ -249,20 +178,9 @@ class HierarchicalStackDefinition(StackDefinition):
         # Prepare the ds
         ds = self._prepareStack(ds)
 
-        #
-        # Build the local role mapping Have to respect the fact that some
-        # stacks might have be able to define different local roles for the
-        # same element in the stack at a given time
-        #
-
-        # XXX AT: access to real StackElement object to update role mappings
-        # even if current user is not supposed to view/edit some stack
-        # elements.
-        # Plus give access to it in expression (and not just user/group id,
-        # even if it does not make any difference here).
-        stack_content = {}
-        for clevel in ds.getAllLevels():
-            stack_content[clevel] = ds._getLevelContentValues(clevel)
+        # Build local role mapping, define local role for each stack element,
+        # even if it's not visible to current user.
+        stack_content = ds._getStackContent()
         for level, elts in stack_content.items():
             for elt in elts:
                 elt_id = elt.getIdForRoleSettings()
@@ -271,6 +189,11 @@ class HierarchicalStackDefinition(StackDefinition):
                         mapping[elt_id] = mapping.get(elt_id, ()) + (role_id,)
 
         return mapping
+
+    def _getManagerStackElements(self, ds):
+        """Return current level elements
+        """
+        return ds._getLevelContent()
 
     #
     # SPECIFIC PRIVATE API
