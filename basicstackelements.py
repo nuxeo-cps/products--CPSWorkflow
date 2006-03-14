@@ -81,10 +81,10 @@ class UserStackElement(StackElement):
             return self.getIdWithoutPrefix()
         return self.getId()
 
-    def holdsUser(self, member_id, aclu=None):
-        """Return True if given member_id is represented by stack element
+    def holdsUser(self, user_id, aclu=None):
+        """Return True if given user_id is represented by stack element
         """
-        if member_id == self.getIdForRoleSettings():
+        if user_id == self.getIdForRoleSettings():
             return True
         else:
             return False
@@ -120,8 +120,8 @@ class GroupStackElement(UserStackElement):
     def getIdForRoleSettings(self):
         return self.getId()
 
-    def holdsUser(self, member_id, aclu=None):
-        """Return True if given member_id is represented by stack element
+    def holdsUser(self, user_id, aclu=None):
+        """Return True if given user_id is represented by stack element
         """
         group_id = self.getIdWithoutPrefix()
         try:
@@ -131,7 +131,7 @@ class GroupStackElement(UserStackElement):
             pass
         else:
             group_users = group.getUsers()
-            if member_id in group_users:
+            if user_id in group_users:
                 return True
         return False
 
