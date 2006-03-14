@@ -522,8 +522,8 @@ class TestStackElementWithData(unittest.TestCase):
             }
         self.assertEquals(stack_elt.getData(), new_data)
 
-        # set editable attributes, only title will be editable
-        stack_elt._editable_attributes = ['title']
+        # set allowed attributes, only title will be edited
+        stack_elt._allowed_attributes = ['title']
         new_kws = {
             'title': 'New title',
             'element_state': 'other',

@@ -221,7 +221,7 @@ class StackElementWithData(StackElement):
 
     _data = None
     # list of editable attributes - when set to None, no check is done.
-    _editable_attributes = None
+    _allowed_attributes = None
 
     def __init__(self, id, **kw):
         StackElement.__init__(self, id, **kw)
@@ -246,8 +246,8 @@ class StackElementWithData(StackElement):
     def __setitem__(self, key, value):
         if key == 'id':
             return
-        if (self._editable_attributes is None
-            or key in self._editable_attributes):
+        if (self._allowed_attributes is None
+            or key in self._allowed_attributes):
             self._data[key] = value
 
     def __deepcopy__(self, ob):
@@ -272,9 +272,9 @@ class StackElementWithData(StackElement):
         # special key
         if data.has_key('id'):
             del data['id']
-        if self._editable_attributes is not None:
+        if self._allowed_attributes is not None:
             for key, value in data.items():
-                if key not in self._editable_attributes:
+                if key not in self._allowed_attributes:
                     del data[key]
         self._data.update(data)
 
