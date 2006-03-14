@@ -37,10 +37,11 @@ from OFS.SimpleItem import SimpleItem
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
 
+from zope.interface import implements
+
 from stackregistries import WorkflowStackRegistry as StackRegistry
 from stackregistries import WorkflowStackElementRegistry as ElementRegistry
 
-from zope.interface import implements
 from Products.CPSWorkflow.interfaces import IWorkflowStack
 
 class Stack(SimpleItem):

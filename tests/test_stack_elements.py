@@ -44,6 +44,20 @@ class TestStackElement(unittest.TestCase):
         from zope.interface.verify import verifyClass
         verifyClass(IStackElement, StackElement)
 
+    def test_getPrefix(self):
+        stack_elt = StackElement('fake')
+        self.assertEquals(stack_elt.getPrefix(), '')
+
+    def test_getIdWithoutPrefix(self):
+        stack_elt = StackElement('fake')
+        self.assertEquals(stack_elt.getIdWithoutPrefix(), 'fake')
+
+    def test_getHiddenMetaTypem(self):
+        stack_elt = StackElement('fake')
+        self.assertEquals(stack_elt.getHiddenMetaType(), '')
+
+    # XXX TODO: test isVisible, isEditable
+
     def test_stack_element_viewguard(self):
 
         #
@@ -453,17 +467,17 @@ class TestSubstituteStackElements(unittest.TestCase):
         self.assertNotEqual(elt.getId(), copy.getId())
 
     def test_GroupSubstituteStackElement(self):
-        elt = GroupSubstituteStackElement('group_substitute:group:nuxeo')
-        self.assertEqual(elt(), 'group_substitute:group:nuxeo')
-        self.assertEqual(str(elt), 'group_substitute:group:nuxeo')
-        self.assert_('group_substitute:group:nuxeo' == elt)
+        elt = GroupSubstituteStackElement('group_substitute:nuxeo')
+        self.assertEqual(elt(), 'group_substitute:nuxeo')
+        self.assertEqual(str(elt), 'group_substitute:nuxeo')
+        self.assert_('group_substitute:nuxeo' == elt)
         self.assertEqual(elt.getIdForRoleSettings(), 'group:nuxeo')
         self.assertEqual(elt.getPrefix(), 'group_substitute')
 
         self.assertEqual(elt.getHiddenMetaType(), 'Hidden Group Stack Element')
 
     def test_GroupSustituteStackElementCopy(self):
-        elt = GroupSubstituteStackElement('group_substitute:group:nuxeo')
+        elt = GroupSubstituteStackElement('group_substitute:nuxeo')
         copy = elt.getCopy()
         # Try changing one attr and check
         copy.id = 'other'

@@ -43,15 +43,15 @@ compulsory to register you new stack element within the
 WorkflowStackElementRegistry. Furthermore, it is a quite practical way
 to introspect your stack element and to known what's the nature of a
 given stack element.
-
 """
 
 from Globals import InitializeClass
 
-from stackregistries import WorkflowStackElementRegistry
+from zope.interface import implements
 
-from stackelement import StackElement
-from interfaces import IStackElement
+from Products.CPSWorkflow.interfaces import IStackElement
+from Products.CPSWorkflow.stackregistries import WorkflowStackElementRegistry
+from Products.CPSWorkflow.stackelement import StackElement
 
 class UserStackElement(StackElement):
     """User Stack Element
@@ -69,12 +69,11 @@ class UserStackElement(StackElement):
         >>> 'anguenot' == use
         True
     """
+    implements(IStackElement)
+
     meta_type = 'User Stack Element'
     prefix = 'user'
-    id = ''
     hidden_meta_type = 'Hidden User Stack Element'
-
-    __implement__ = (IStackElement,)
 
     def getIdForRoleSettings(self):
         # XXX change this when no empty prefix are given anymore
@@ -104,20 +103,11 @@ class GroupStackElement(UserStackElement):
         >>> gse.getGroupIdWithoutPrefix()
         'nuxeo'
     """
+    implements(IStackElement)
 
     meta_type = 'Group Stack Element'
-
-    __implement__ = (IStackElement,)
-
     prefix = 'group'
-    id = ''
-
     hidden_meta_type = 'Hidden Group Stack Element'
-
-    def __init__(self, group_id, prefix='', **kw):
-        StackElement.__init__(self, group_id)
-        if prefix:
-            self.prefix = 'group'
 
     def getIdForRoleSettings(self):
         return self.getId()
@@ -128,7 +118,6 @@ InitializeClass(GroupStackElement)
 #########################################################################
 
 USER_STACK_ELEMENT_NOT_VISIBLE  = 'label_user_stack_element_not_visible'
-GROUP_STACK_ELEMENT_NOT_VISIBLE = 'label_group_stack_element_not_visible'
 
 class HiddenUserStackElement(UserStackElement):
     """Hidden User Stack Element
@@ -138,10 +127,9 @@ class HiddenUserStackElement(UserStackElement):
 
     Note, this is never stored within a stack element container.
     """
+    implements(IStackElement)
     meta_type = 'Hidden User Stack Element'
     prefix = 'hidden_user'
-
-    __implement__ = (IStackElement,)
 
     def __call__(self):
         return USER_STACK_ELEMENT_NOT_VISIBLE
@@ -154,6 +142,8 @@ class HiddenUserStackElement(UserStackElement):
 
 InitializeClass(HiddenUserStackElement)
 
+GROUP_STACK_ELEMENT_NOT_VISIBLE = 'label_group_stack_element_not_visible'
+
 class HiddenGroupStackElement(GroupStackElement):
     """Hidden Group Stack Element
 
@@ -162,10 +152,9 @@ class HiddenGroupStackElement(GroupStackElement):
 
     Note, this is never stored within a stack element container.
     """
+    implements(IStackElement)
     meta_type = 'Hidden Group Stack Element'
     prefix = 'hidden_group'
-
-    __implement__ = (IStackElement,)
 
     def __call__(self):
         return GROUP_STACK_ELEMENT_NOT_VISIBLE
@@ -173,14 +162,8 @@ class HiddenGroupStackElement(GroupStackElement):
     def __str__(self):
         return GROUP_STACK_ELEMENT_NOT_VISIBLE
 
-    def getGroupIdWithoutPrefix(self):
-        """Return the group id without the 'group:' prefix
-        """
-        return GROUP_STACK_ELEMENT_NOT_VISIBLE
-
     def getIdForRoleSettings(self):
         return ''
-
 
 InitializeClass(HiddenGroupStackElement)
 
@@ -190,14 +173,15 @@ InitializeClass(HiddenGroupStackElement)
 class UserSubstituteStackElement(UserStackElement):
     """User Substitute Stack Element
     """
+    implements(IStackElement)
+
     meta_type = 'User Substitute Stack Element'
     prefix = 'user_substitute'
-
     hidden_meta_type = 'Hidden User Stack Element'
 
-    __implement__ = (IStackElement,)
-
     def getIdForRoleSettings(self):
+        """Get rid of the prefix
+        """
         return self.getIdWithoutPrefix()
 
 InitializeClass(UserSubstituteStackElement)
@@ -205,17 +189,17 @@ InitializeClass(UserSubstituteStackElement)
 class GroupSubstituteStackElement(GroupStackElement):
     """Group Substitute Stack Element
     """
+    implements(IStackElement)
+
     meta_type = 'Group Substitute Stack Element'
     prefix = 'group_substitute'
-
     hidden_meta_type = 'Hidden Group Stack Element'
 
-    __implement__ = (IStackElement,)
-
-    prefix = 'group_substitute'
-
     def getIdForRoleSettings(self):
-        return self.getIdWithoutPrefix()
+        """Get rid of the prefix and add 'group:'
+        """
+        wo_prefix = self.getIdWithoutPrefix()
+        return 'group:' + wo_prefix
 
 
 InitializeClass(GroupSubstituteStackElement)

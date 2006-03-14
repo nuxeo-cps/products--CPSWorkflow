@@ -92,7 +92,12 @@ class StackElement(SimpleItem):
     def getIdWithoutPrefix(self):
         """Return the group id without the 'group:' prefix
         """
-        return self.getId()[len(self.getPrefix())+1:]
+        prefix = self.getPrefix()
+        id = self.getId()
+        if prefix:
+            # ':' is a separator
+            id = id[len(self.getPrefix())+1:]
+        return id
 
     def getHiddenMetaType(self):
         return self.hidden_meta_type
