@@ -46,15 +46,17 @@ your child class which is already implementing this interface.
 
 You may use it like this::
 
-  >>> from stackregistries import WorkflowStackDefRegsitry
-  >>> from stackdefinition import StackDefinition
+  >>> from Products.CPSWorkflow.stackregistries import WorkflowStackDefRegistry
+  >>> from Products.CPSWorkflow.stackdefinition import StackDefinition
   >>>
   >>> class MyStackDefinition(StackDefinition):
-  >>> ....# Here implementation
-  >>> ....
+  ...     # Here implementation
+  ...     pass
   >>>
   >>> WorkflowStackDefRegistry.register(MyStackDefinition)
-  >>>
+  1
+
+
 
 Check the API in the ``doc/api/`` sub-folder.
 
@@ -65,4 +67,3 @@ Check the API in the ``doc/api/`` sub-folder.
 .. End:
 .. Vim
 .. vim: set filetype=rst:
-

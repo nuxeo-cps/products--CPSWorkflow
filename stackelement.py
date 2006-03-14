@@ -26,26 +26,26 @@ import copy
 
 from Globals import InitializeClass
 from OFS.SimpleItem import SimpleItem
+from ZODB.PersistentMapping import PersistentMapping
+from zope.interface import implements
 
 from Products.CMFCore.utils import getToolByName
 
-from stackregistries import WorkflowStackElementRegistry as ElementRegistry
-from stackdefinitionguard import StackDefinitionGuard as Guard
+from Products.CPSWorkflow.stackregistries import \
+     WorkflowStackElementRegistry as ElementRegistry
+from Products.CPSWorkflow.stackdefinitionguard import \
+     StackDefinitionGuard as Guard
 
-from zope.interface import implements
 from Products.CPSWorkflow.interfaces import IStackElement
 
 
 class StackElement(SimpleItem):
     """Stack Element
     """
-
     implements(IStackElement)
 
     meta_type = 'Stack Element'
     prefix = ''
-    id = ''
-
     hidden_meta_type = ''
 
     view_guard = None
@@ -77,7 +77,7 @@ class StackElement(SimpleItem):
         copy = ElementRegistry.makeWorkflowStackElementTypeInstance(
             self.meta_type, self.getId())
         for k, v in self.__dict__.items():
-            setattr(copy, k,v)
+            setattr(copy, k, v)
         return copy
 
     #
@@ -108,11 +108,6 @@ class StackElement(SimpleItem):
         Return a new object instance of the same type
         """
         return copy.deepcopy(self)
-
-    def holdsUser(self, member_id=None, aclu=None, mtool=None, context=None):
-        """Return True if given member_id is represented by stack element
-        """
-        return False
 
     #
     # SECURITY
@@ -216,3 +211,74 @@ class StackElement(SimpleItem):
 
 
 InitializeClass(StackElement)
+
+
+class StackElementWithData(StackElement):
+    """Stack Element With Data
+    """
+    implements(IStackElement)
+    meta_type = 'Stack Element With Data'
+
+    _data = None
+    # list of editable attributes - when set to None, no check is done.
+    _editable_attributes = None
+
+    def __init__(self, id, **kw):
+        StackElement.__init__(self, id, **kw)
+        # consider kw as data information
+        self._data = PersistentMapping()
+        self.update(kw)
+
+    def __call__(self):
+        info = {
+            'id': self.getId(),
+            }
+        info.update(self._data)
+        return info
+
+    def __str__(self):
+        info_str = "<StackElementWithData %s >" %(self(),)
+        return info_str
+
+    def __getitem__(self, key):
+        return self._data[key]
+
+    def __setitem__(self, key, value):
+        if key == 'id':
+            return
+        if (self._editable_attributes is None
+            or key in self._editable_attributes):
+            self._data[key] = value
+
+    def __deepcopy__(self, ob):
+        """Deep copy. Just to call a clean API while calling getCopy()
+        """
+        copy = StackElement.__deepcopy__(self, ob)
+        # dereference persistent mapping
+        copy._data = PersistentMapping()
+        copy.update(self.getData())
+        return copy
+
+    def get(self, key, default=None):
+        if not self._data.has_key(key):
+            return default
+        else:
+            return self[key]
+
+    def set(self, key, value):
+        self[key] = value
+
+    def update(self, data):
+        # special key
+        if data.has_key('id'):
+            del data['id']
+        if self._editable_attributes is not None:
+            for key, value in data.items():
+                if key not in self._editable_attributes:
+                    del data[key]
+        self._data.update(data)
+
+    def getData(self):
+        return dict(self._data)
+
+InitializeClass(StackElementWithData)

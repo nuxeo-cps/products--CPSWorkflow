@@ -21,13 +21,17 @@
 # $Id$
 
 import unittest
+from zope.testing import doctest
 
 from Products.PageTemplates.TALES import CompilerError
 
 from Products.CPSWorkflow.interfaces import IStackElement
 from Products.CPSWorkflow.stackelement import StackElement
+from Products.CPSWorkflow.stackelement import StackElementWithData
 from Products.CPSWorkflow.basicstackelements import UserStackElement
 from Products.CPSWorkflow.basicstackelements import GroupStackElement
+from Products.CPSWorkflow.basicstackelements import UserStackElementWithData
+from Products.CPSWorkflow.basicstackelements import GroupStackElementWithData
 from Products.CPSWorkflow.basicstackelements import HiddenUserStackElement
 from Products.CPSWorkflow.basicstackelements import HiddenGroupStackElement
 from Products.CPSWorkflow.basicstackelements import UserSubstituteStackElement
@@ -76,11 +80,6 @@ class TestStackElement(unittest.TestCase):
     def test_getHiddenMetaType(self):
         stack_elt = StackElement('fake')
         self.assertEquals(stack_elt.getHiddenMetaType(), '')
-
-    def test_holdsUser(self):
-        stack_elt = StackElement('fake')
-        self.assertEquals(stack_elt.holdsUser('toto'), False)
-        self.assertEquals(stack_elt.holdsUser('fake'), False)
 
     # XXX TODO: test isVisible, isEditable
 
@@ -462,6 +461,149 @@ class TestBasicStackElements(unittest.TestCase):
         self.assertEqual(elt.getIdForRoleSettings(), '')
 
 
+class TestStackElementWithData(unittest.TestCase):
+
+    def test_interface(self):
+        from zope.interface.verify import verifyClass
+        verifyClass(IStackElement, StackElementWithData)
+
+    def test_getPrefix(self):
+        stack_elt = StackElementWithData('fake')
+        self.assertEquals(stack_elt.getPrefix(), '')
+
+    def test_getIdWithoutPrefix(self):
+        stack_elt = StackElementWithData('fake')
+        self.assertEquals(stack_elt.getIdWithoutPrefix(), 'fake')
+
+    def test_getHiddenMetaType(self):
+        stack_elt = StackElementWithData('fake')
+        self.assertEquals(stack_elt.getHiddenMetaType(), '')
+
+    def test_creation(self):
+        kw = {
+            'title': 'My fake element',
+            'element_state': 'acknowledged',
+            }
+        stack_elt = StackElementWithData('fake', **kw)
+        # test __call__
+        kw.update({'id': 'fake'})
+        self.assertEquals(stack_elt(), kw)
+
+    def test_data_api(self):
+        kw = {
+            'title': 'My fake element',
+            'element_state': 'acknowledged',
+            }
+        stack_elt = StackElementWithData('fake', **kw)
+        self.assertEquals(stack_elt.getId(), 'fake')
+        self.assertEquals(stack_elt.getData(), kw)
+        self.assertEquals(stack_elt.get('title'), 'My fake element')
+        self.assertEquals(stack_elt.get('titleuh'), None)
+        self.assertEquals(stack_elt['title'], 'My fake element')
+        self.assertRaises(KeyError,
+                          stack_elt.__getitem__,
+                          'titleuh')
+        stack_elt['title'] = 'New title'
+        self.assertEquals(stack_elt.get('title'), 'New title')
+
+        new_kws = {
+            'id': 'hahaha',
+            'title': 'Other title',
+            'element_state': 'new',
+            'new_key': 'new value',
+            }
+        stack_elt.update(new_kws)
+        # id has not changed
+        self.assertEquals(stack_elt.getId(), 'fake')
+        new_data = {
+            'title': 'Other title',
+            'element_state': 'new',
+            'new_key': 'new value',
+            }
+        self.assertEquals(stack_elt.getData(), new_data)
+
+        # set editable attributes, only title will be editable
+        stack_elt._editable_attributes = ['title']
+        new_kws = {
+            'title': 'New title',
+            'element_state': 'other',
+            'foo': 'bar',
+            }
+        stack_elt.update(new_kws)
+        self.assertEquals(stack_elt.getId(), 'fake')
+        new_data = {
+            'title': 'New title',
+            'element_state': 'new',
+            'new_key': 'new value',
+            }
+        self.assertEquals(stack_elt.getData(), new_data)
+
+    def test_UserStackElementWithData(self):
+        kw = {
+            'title': 'User element',
+            'element_state': 'acknowledged',
+            }
+        info = {
+            'id': 'user_wdata:anguenot',
+            'title': 'User element',
+            'element_state': 'acknowledged',
+            }
+        elt = UserStackElementWithData('user_wdata:anguenot', **kw)
+        self.assertEqual(elt(), info)
+        self.assert_('user_wdata:anguenot' == elt)
+        self.assertEqual(elt.getId(), 'user_wdata:anguenot')
+        self.assertEqual(elt.getIdForRoleSettings(), 'anguenot')
+        self.assertEqual(elt.getPrefix(), 'user_wdata')
+        self.assertEqual(elt.getData(), kw)
+
+        self.assertEqual(elt.getHiddenMetaType(), 'Hidden User Stack Element')
+
+        self.assertEqual(elt.holdsUser('anguenot'), True)
+        self.assertEqual(elt.holdsUser('anguenoteuh'), False)
+
+    def test_UserStackElementWithDataCopy(self):
+        # test copy
+        kw = {
+            'title': 'Fake title',
+            'element_state': 'acknowledged',
+            }
+        elt = UserStackElementWithData('fake', **kw)
+        self.assertEquals(elt.get('title'), 'Fake title')
+        copy = elt.getCopy()
+        self.assertEquals(copy.get('title'), 'Fake title')
+        copy['title'] = 'New title'
+        self.assertEquals(elt.get('title'), 'Fake title')
+        self.assertEquals(copy.get('title'), 'New title')
+
+    def test_GroupStackElementWithData(self):
+        kw = {
+            'title': 'Group element',
+            'element_state': 'acknowledged',
+            }
+        info = {
+            'id': 'group_wdata:nuxeo',
+            'title': 'Group element',
+            'element_state': 'acknowledged',
+            }
+        elt = GroupStackElementWithData('group_wdata:nuxeo', **kw)
+        self.assertEqual(elt(), info)
+        self.assert_('group_wdata:nuxeo' == elt)
+        self.assertEqual(elt.getId(), 'group_wdata:nuxeo')
+        self.assertEqual(elt.getIdForRoleSettings(), 'group:nuxeo')
+        self.assertEqual(elt.getPrefix(), 'group_wdata')
+        self.assertEqual(elt.getHiddenMetaType(), 'Hidden Group Stack Element')
+        self.assertEqual(elt.getData(), kw)
+
+        self.assertEqual(elt.holdsUser('anguenot', FakeAclUsers()), True)
+        self.assertEqual(elt.holdsUser('anguenoteuh', FakeAclUsers()), False)
+
+        # test with other groups
+        elt = GroupStackElement('group_wdata:empty')
+        self.assertEqual(elt.holdsUser('anguenot', FakeAclUsers()), False)
+        elt = GroupStackElement('group_wdata:truc')
+        self.assertEqual(elt.holdsUser('anguenot', FakeAclUsers()), False)
+
+
 class TestHiddenStackElements(unittest.TestCase):
 
     def test_HiddenUserStackElementCopy(self):
@@ -525,9 +667,13 @@ class TestSubstituteStackElements(unittest.TestCase):
 def test_suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(TestStackElement))
+    suite.addTest(unittest.makeSuite(TestStackElementWithData))
     suite.addTest(unittest.makeSuite(TestBasicStackElements))
     suite.addTest(unittest.makeSuite(TestHiddenStackElements))
     suite.addTest(unittest.makeSuite(TestSubstituteStackElements))
+    suite.addTest(doctest.DocFileTest('basicstackelements.py',
+                                      package='Products.CPSWorkflow',
+                                      optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS))
     return suite
 
 

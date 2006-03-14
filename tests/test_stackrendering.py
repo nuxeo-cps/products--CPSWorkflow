@@ -34,7 +34,13 @@ from Products.CPSWorkflow.basicstacks import SimpleStack
 from Products.CPSWorkflow.basicstacks import HierarchicalStack
 
 # XXX has to be changed.
-from Products.CPSInstaller.CMFInstaller import CMFInstaller
+RUN = True
+try:
+    from Products.CPSInstaller.CMFInstaller import CMFInstaller
+except ImportError:
+    RUN = False
+    class CMFInstaller:
+        pass
 
 SKINS = {'cps_workflow_default':
          'Products/CPSWorkflow/skins/cps_workflow_default',
@@ -110,8 +116,14 @@ class StackRenderingTestCase(ZopeTestCase.PortalTestCase, CMFInstaller):
         stackob.render(context=self.portal, mode='view')
 
 def test_suite():
-    loader = unittest.TestLoader()
-    return loader.loadTestsFromTestCase(StackRenderingTestCase)
+    suite = unittest.TestSuite()
+    if RUN is True:
+        suite.addTest(unittest.makeSuite(StackRenderingTestCase))
+    else:
+        from logging import getLogger
+        logger = getLogger('StackRenderingTestCase')
+        logger.warn('Test cannot be run, CPSInstaller product is missing')
+    return suite
 
 if __name__=='__main__':
     unittest.TextTestRunner().run(test_suite())

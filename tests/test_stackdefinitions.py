@@ -21,10 +21,10 @@
 # $Id$
 
 import unittest
+from zope.testing import doctest
 
 from AccessControl.SecurityManagement import newSecurityManager
 
-from Testing import ZopeTestCase
 from Products.CMFCore.tests.base.testcase import SecurityRequestTest
 
 from Products.CPSWorkflow.basicstacks import SimpleStack
@@ -1806,8 +1806,12 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                           })
 
 def test_suite():
-    loader = unittest.TestLoader()
-    return loader.loadTestsFromTestCase(TestCPSWorkflowStackDefinition)
+    suite = unittest.TestSuite()
+    suite.addTest(unittest.makeSuite(TestCPSWorkflowStackDefinition))
+    suite.addTest(doctest.DocFileTest('doc/stackdefinition.txt',
+                                      package='Products.CPSWorkflow',
+                                      optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS))
+    return suite
 
 if __name__=='__main__':
     unittest.TextTestRunner().run(test_suite())
