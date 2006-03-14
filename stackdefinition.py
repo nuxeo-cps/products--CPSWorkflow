@@ -43,7 +43,7 @@ c.f : doc/stackdefinition.txt
 
 from DateTime import DateTime
 from Globals import InitializeClass
-from AccessControl import ClassSecurityInfo
+from AccessControl import ClassSecurityInfo, getSecurityManager
 from Acquisition import aq_parent, aq_inner
 from OFS.SimpleItem import SimpleItem
 from ZODB.PersistentMapping import PersistentMapping
@@ -342,12 +342,51 @@ class StackDefinition(SimpleItem):
         raise NotImplementedError
 
     def _canManageStack(self, ds, aclu, mtool, context, **kw):
-        """Can the current member manage the stack ?
+        """Check if the current authenticated member can manage stack
 
-        It will depend on the stack data structure.  We need the acl_users in
-        use and the member_ship tool since I don't want to explicit acquicition
-        in here
+        If a user is in the stack managers, it can manage it.
+
+        ds is the stack, aclu is the acl_users, mtool is the membership tool,
+        and context is needed if the stack is not yet intialized
         """
-        raise NotImplementedError
+
+        if mtool.isAnonymousUser():
+            return 0
+
+        # prepare the ds
+        ds = self._prepareStack(ds)
+
+        #
+        # Cope with member id.
+        # It can be passed within th kw (member_id)
+        #
+
+        member_id = kw.get('member_id')
+        if member_id is None:
+            member = mtool.getAuthenticatedMember()
+            member_id = member.getMemberId()
+        else:
+            member = mtool.getMemberById(member_id)
+
+        #
+        # Check first if the member is granted because of its position within
+        # the stack content
+        #
+        for elt in ds._getManagers():
+            if elt.holdsUser(member_id, aclu):
+                return 1
+
+        #
+        # Now let's cope with the first case when the stack is not yet
+        # intialized. Call the specific guard for this
+        #
+
+        if ds.isEmpty():
+            wf_def = self._getWorkflowDefinition()
+            return self.getEmptyStackManageGuard().check(
+                getSecurityManager(), wf_def, context)
+
+        return 0
+
 
 InitializeClass(StackDefinition)

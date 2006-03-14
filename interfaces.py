@@ -143,6 +143,10 @@ class IWorkflowStack(Interface):
         Check WorkflowStackElementRegistry
         """
 
+    def _getManagers():
+        """Get stack elements representing stack managers.
+        """
+
     # Public
 
     def getMetaType():

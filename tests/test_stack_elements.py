@@ -38,6 +38,27 @@ from Products.CPSWorkflow.basicstackelements import \
 from Products.CPSWorkflow.stackdefinitionguard import \
      StackDefinitionGuard as Guard
 
+
+class FakeAclUsers:
+
+    def getGroupById(self, group_id):
+        if group_id == 'nuxeo':
+            return FakeGroup('nuxeo', users='anguenot')
+        elif group_id == 'empty':
+            return FakeGroup('empty')
+        else:
+            raise KeyError(group_id)
+
+class FakeGroup:
+
+    def __init__(self, id, users=[]):
+        self.id = id
+        self.users = users
+
+    def getUsers(self):
+        return self.users
+
+
 class TestStackElement(unittest.TestCase):
 
     def test_interface(self):
@@ -52,9 +73,14 @@ class TestStackElement(unittest.TestCase):
         stack_elt = StackElement('fake')
         self.assertEquals(stack_elt.getIdWithoutPrefix(), 'fake')
 
-    def test_getHiddenMetaTypem(self):
+    def test_getHiddenMetaType(self):
         stack_elt = StackElement('fake')
         self.assertEquals(stack_elt.getHiddenMetaType(), '')
+
+    def test_holdsUser(self):
+        stack_elt = StackElement('fake')
+        self.assertEquals(stack_elt.holdsUser('toto'), False)
+        self.assertEquals(stack_elt.holdsUser('fake'), False)
 
     # XXX TODO: test isVisible, isEditable
 
@@ -392,6 +418,9 @@ class TestBasicStackElements(unittest.TestCase):
 
         self.assertEqual(elt.getHiddenMetaType(), 'Hidden User Stack Element')
 
+        self.assertEqual(elt.holdsUser('anguenot'), True)
+        self.assertEqual(elt.holdsUser('anguenoteuh'), False)
+
     def test_UserStackElementCopy(self):
         elt = UserStackElement('user:anguenot')
         copy = elt.getCopy()
@@ -409,6 +438,15 @@ class TestBasicStackElements(unittest.TestCase):
         self.assertEqual(elt.getPrefix(), 'group')
 
         self.assertEqual(elt.getHiddenMetaType(), 'Hidden Group Stack Element')
+
+        self.assertEqual(elt.holdsUser('anguenot', FakeAclUsers()), True)
+        self.assertEqual(elt.holdsUser('anguenoteuh', FakeAclUsers()), False)
+
+        # test with other groups
+        elt = GroupStackElement('group:empty')
+        self.assertEqual(elt.holdsUser('anguenot', FakeAclUsers()), False)
+        elt = GroupStackElement('group:truc')
+        self.assertEqual(elt.holdsUser('anguenot', FakeAclUsers()), False)
 
     def test_GroupStackElementCopy(self):
         elt = GroupStackElement('group:nuxeo')

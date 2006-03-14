@@ -135,6 +135,11 @@ class Stack(SimpleItem):
         """
         raise NotImplementedError
 
+    def getManagers(self):
+        """Return stack elements representing stack managers.
+        """
+        raise NotImplementedError
+
     #
     # MISC
     #

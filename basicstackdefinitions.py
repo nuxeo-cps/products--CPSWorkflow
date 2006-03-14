@@ -28,7 +28,7 @@ c.f : doc/stackdefinitions.txt
 from zLOG import LOG, DEBUG
 
 from Globals import InitializeClass
-from AccessControl import ClassSecurityInfo, getSecurityManager
+from AccessControl import ClassSecurityInfo
 
 from stackdefinition import StackDefinition
 from stackregistries import WorkflowStackDefRegistry
@@ -77,79 +77,12 @@ class SimpleStackDefinition(StackDefinition):
 
         return mapping
 
-    def _getManagerStackElements(self, ds):
-        """Return current level elements
-        """
-        return ds._getStackContent()
-
-    def _canManageStack(self, ds, aclu, mtool, context, **kw):
-        """Check if the current authenticated member scan manage stack
-
-        Simple case in here. If a user is in the stack it can manage it we need
-        the acl_users in use and the member_ship tool since I don't want to
-        explicit acquicition in here
-
-        We need the context if the case is not yet intialized
-        """
-
-        if mtool.isAnonymousUser():
-            return 0
-
-        # prepare the ds
-        ds = self._prepareStack(ds)
-
-        #
-        # Cope with member id.
-        # It can be passed within th kw (member_id)
-        #
-
-        member_id = kw.get('member_id')
-        if member_id is None:
-            member = mtool.getAuthenticatedMember()
-            member_id = member.getMemberId()
-        else:
-            member = mtool.getMemberById(member_id)
-
-        #
-        # Check first if the member is granted because of its position within
-        # the stack content
-        #
-        for each in self._getManagerStackElements(ds):
-            role_setting_id = each.getIdForRoleSettings()
-            if role_setting_id.startswith('group:'):
-                # check if it's current user
-                group_id = role_setting_id[len('group:'):]
-                try:
-                    group = aclu.getGroupById(group_id)
-                except KeyError:
-                    # Group has probably been removed
-                    pass
-                else:
-                    group_users = group.getUsers()
-                    if member_id in group_users:
-                        return 1
-            else:
-                if role_setting_id == member_id:
-                    return 1
-
-        #
-        # Now let's cope with the first case when the stack is not yet
-        # intialized. Call the specific guard for this
-        #
-
-        if ds.isEmpty():
-            wf_def = self._getWorkflowDefinition()
-            return self.getEmptyStackManageGuard().check(
-                getSecurityManager(), wf_def, context)
-
-        return 0
-
 InitializeClass(SimpleStackDefinition)
 
 ###################################################
 ###################################################
 
-class HierarchicalStackDefinition(SimpleStackDefinition):
+class HierarchicalStackDefinition(StackDefinition):
     """Hierarchical Stack Definition
     """
 
@@ -189,11 +122,6 @@ class HierarchicalStackDefinition(SimpleStackDefinition):
                         mapping[elt_id] = mapping.get(elt_id, ()) + (role_id,)
 
         return mapping
-
-    def _getManagerStackElements(self, ds):
-        """Return current level elements
-        """
-        return ds._getLevelContent()
 
     #
     # SPECIFIC PRIVATE API

@@ -81,6 +81,14 @@ class UserStackElement(StackElement):
             return self.getIdWithoutPrefix()
         return self.getId()
 
+    def holdsUser(self, member_id, aclu=None):
+        """Return True if given member_id is represented by stack element
+        """
+        if member_id == self.getIdForRoleSettings():
+            return True
+        else:
+            return False
+
 InitializeClass(UserStackElement)
 
 class GroupStackElement(UserStackElement):
@@ -111,6 +119,21 @@ class GroupStackElement(UserStackElement):
 
     def getIdForRoleSettings(self):
         return self.getId()
+
+    def holdsUser(self, member_id, aclu=None):
+        """Return True if given member_id is represented by stack element
+        """
+        group_id = self.getIdWithoutPrefix()
+        try:
+            group = aclu.getGroupById(group_id)
+        except KeyError:
+            # Group has probably been removed
+            pass
+        else:
+            group_users = group.getUsers()
+            if member_id in group_users:
+                return True
+        return False
 
 InitializeClass(GroupStackElement)
 

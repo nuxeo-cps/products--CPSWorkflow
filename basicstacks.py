@@ -91,14 +91,6 @@ class SimpleStack(Stack):
     # PRIVATE API
     #
 
-    def _getStackElementIndex(self, id):
-        i = 0
-        for each in self._getElementsContainer():
-            if id == each.getId():
-                return i
-            i += 1
-        return -1
-
     def _push(self, elt=None, **kw):
         """Push an element in the queue
 
@@ -140,11 +132,26 @@ class SimpleStack(Stack):
             return res
         return 0
 
+    def _getManagers(self):
+        """Get stack elements representing stack managers.
+        """
+        return self._getStackContent()
 
     def _getStackContent(self):
         """Return stack content, no check on permissions
         """
         return list(self._getElementsContainer())
+
+
+    def _getStackElementIndex(self, id):
+        """Get stack element index in stack
+        """
+        i = 0
+        for each in self._getElementsContainer():
+            if id == each.getId():
+                return i
+            i += 1
+        return -1
 
     #
     # API
@@ -386,6 +393,14 @@ class HierarchicalStack(SimpleStack):
             except KeyError:
                 pass
         return 0
+
+
+    def _getManagers(self):
+        """Get stack elements representing stack managers.
+        """
+        current_level = self.getCurrentLevel()
+        return self._getLevelContent(current_level)
+
 
     def _getLevelContent(self, level=None):
         """Return content of given level

@@ -302,16 +302,25 @@ class TestSimpleStack(unittest.TestCase):
         sstack = SimpleStack()
 
         # Add a user
-        sstack.push(push_ids=['elt1'], levels=[0])
+        sstack.push(push_ids=['elt1'])
         elt = sstack._getElementsContainer()[0]
         self.assert_(isinstance(elt, UserStackElement))
         self.assert_(elt == 'elt1')
 
         # Add a group
-        sstack.push(push_ids=['group:elt2'], levels=[0])
+        sstack.push(push_ids=['group:elt2'])
         elt2 = sstack._getElementsContainer()[1]
         self.assert_(isinstance(elt2, GroupStackElement))
         self.assert_(elt2 == 'group:elt2')
+
+    def test_getManagers(self):
+        sstack = SimpleStack()
+        sstack.push(push_ids=['user:elt1', 'group:elt2'])
+        managers = [
+            UserStackElement('user:elt1'),
+            GroupStackElement('group:elt2'),
+            ]
+        self.assertEqual(sstack._getManagers(), managers)
 
     def test_reset(self):
         simple = SimpleStack()
@@ -1011,6 +1020,15 @@ class TestHierarchicalStack(unittest.TestCase):
         hstack.pop(pop_ids=['1,elt1'])
         self.assert_(not hstack.hasUpperLevel())
         self.assert_(not hstack.hasLowerLevel())
+
+    def test_getManagers(self):
+        stack = HierarchicalStack()
+        stack.push(push_ids=['user:elt1', 'group:elt2'], levels=[0, 1])
+        # current level is 0
+        managers = [
+            UserStackElement('user:elt1'),
+            ]
+        self.assertEqual(sstack._getManagers(), managers)
 
     def test_reset(self):
         hierarchical = HierarchicalStack()

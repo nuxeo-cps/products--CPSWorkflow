@@ -109,6 +109,11 @@ class StackElement(SimpleItem):
         """
         return copy.deepcopy(self)
 
+    def holdsUser(self, member_id=None, aclu=None, mtool=None, context=None):
+        """Return True if given member_id is represented by stack element
+        """
+        return False
+
     #
     # SECURITY
     #

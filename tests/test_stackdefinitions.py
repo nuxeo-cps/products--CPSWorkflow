@@ -114,8 +114,6 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Not implemented methods
         self.assertRaises(NotImplementedError, base._getLocalRolesMapping,
                           None)
-        self.assertRaises(NotImplementedError, base._canManageStack,
-                          None, None, None, None)
 
     def test_SimpleStackDefinition(self):
         self.login('user1', ('Owner',))
