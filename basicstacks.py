@@ -639,7 +639,8 @@ class HierarchicalStack(SimpleStack):
     def reset(self, **kw):
         """Reset the stack
 
-        new_stack  : stack that might be a substitute of self
+        new_stack : stack that might be a substitute of self, current level is
+                    set to its current level
         reset_ids  : new elements to add at current level
         """
         # Replace the stack container

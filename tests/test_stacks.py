@@ -273,25 +273,20 @@ class TestSimpleStack(unittest.TestCase):
                          ['elt1'])
 
     def test_reset_complex(self):
-
-        #
-        # Test the reset behavior on the Stack class type
-        #
-
         stack = SimpleStack()
-        stack.push(push_ids=['elt1'])
+        stack.push(push_ids=['user:elt1'])
         self.assertEqual([x.getId() for x in stack._getStackContent()],
-                         ['elt1'])
+                         ['user:elt1'])
 
         # Reset with one (1) new user
-        stack.reset(reset_ids=('elt2',))
+        stack.reset(reset_ids=('user:elt2',))
         self.assertEqual([x.getId() for x in stack._getStackContent()],
-                         ['elt2'])
+                         ['user:elt2'])
 
         # Reset with two (2) new users
-        stack.reset(reset_ids=('elt3', 'elt4'))
+        stack.reset(reset_ids=('user:elt3', 'user:elt4'))
         self.assertEqual([x.getId() for x in stack._getStackContent()],
-                         ['elt3', 'elt4'])
+                         ['user:elt3', 'user:elt4'])
 
         # Reset with one (1) new group
         stack.reset(reset_ids=('group:elt2',))
@@ -312,10 +307,10 @@ class TestSimpleStack(unittest.TestCase):
 
         # Reset with a new stack, new users and new groups
         new_stack = SimpleStack()
-        stack.reset(new_stack=new_stack,
-                   reset_ids=('elt1', 'elt2', 'group:elt3', 'group:elt4'))
+        reset_ids = ('user:elt1', 'user:elt2', 'group:elt3', 'group:elt4')
+        stack.reset(new_stack=new_stack, reset_ids=reset_ids)
         self.assertEqual([x.getId() for x in stack._getStackContent()],
-                         ['elt1', 'elt2', 'group:elt3', 'group:elt4'])
+                         ['user:elt1', 'user:elt2', 'group:elt3', 'group:elt4'])
 
     def test_replace(self):
         #
@@ -323,19 +318,22 @@ class TestSimpleStack(unittest.TestCase):
         #
 
         stack = SimpleStack()
-        stack.push(push_ids=['elt1'])
-        stack.push(push_ids=['elt2'])
-        self.assertEqual(stack.getStackContent(context=self), ['elt1', 'elt2'])
-        stack.replace('elt2', 'elt4')
-        self.assertEqual(stack.getStackContent(context=self), ['elt1', 'elt4'])
+        stack.push(push_ids=['user:elt1'])
+        stack.push(push_ids=['user:elt2'])
+        self.assertEqual(stack.getStackContent(context=self),
+                         ['user:elt1', 'user:elt2'])
+        stack.replace('user:elt2', 'user:elt4')
+        self.assertEqual(stack.getStackContent(context=self),
+                         ['user:elt1', 'user:elt4'])
 
         #
         # Test with elements objects
         #
 
-        oelt = UserStackElement('string_elt')
-        stack.replace('elt4', oelt)
-        self.assertEqual(stack.getStackContent(context=self), ['elt1', 'string_elt'])
+        oelt = UserStackElement('user:string_elt')
+        stack.replace('user:elt4', oelt)
+        self.assertEqual(stack.getStackContent(context=self),
+                         ['user:elt1', 'user:string_elt'])
 
 
 class TestHierarchicalStack(unittest.TestCase):
@@ -987,50 +985,52 @@ class TestHierarchicalStack(unittest.TestCase):
                          ['elt1'])
 
     def test_reset_complex(self):
-
-        #
-        # Test the reset behavior on the Stack class type
-        #
-
         stack = HierarchicalStack()
-        stack.push(push_ids=['elt1'], levels=[0])
-        self.assertEqual([x.getId() for x in stack._getStackContent()[0]],
-                         ['elt1'])
+        stack.push(push_ids=['user:elt1'], levels=[0])
+        self.assertEqual(stack.getStackContent(context=self),
+                         {0: ['user:elt1']})
 
         # Reset with one (1) new user
-        stack.reset(reset_ids=('elt2',))
-        self.assertEqual([x.getId() for x in stack._getStackContent()[0]],
-                         ['elt2'])
+        stack.reset(reset_ids=('user:elt2',))
+        self.assertEqual(stack.getStackContent(context=self),
+                         {0: ['user:elt2']})
 
         # Reset with two (2) new users
-        stack.reset(reset_ids=('elt3', 'elt4'))
-        self.assertEqual([x.getId() for x in stack._getStackContent()[0]],
-                         ['elt3', 'elt4'])
+        stack.reset(reset_ids=('user:elt3', 'user:elt4'))
+        self.assertEqual(stack.getStackContent(context=self),
+                         {0: ['user:elt3', 'user:elt4']})
 
         # Reset with one (1) new group
         stack.reset(reset_ids=('group:elt2',))
-        self.assertEqual([x.getId() for x in stack._getStackContent()[0]],
-                         ['group:elt2'])
+        self.assertEqual(stack.getStackContent(context=self),
+                         {0: ['group:elt2']})
 
-        # Reset with two (2) new users
-        stack.reset(reset_ids=('group:elt3', 'group:elt4'))
-        self.assertEqual([x.getId() for x in stack._getStackContent()[0]],
-                         ['group:elt3', 'group:elt4'])
+        # Reset with two (2) new users and levels
+        stack.reset(reset_ids=('group:elt3', 'group:elt4'), levels=[0, 1])
+        self.assertEqual(stack.getStackContent(context=self),
+                         {0: ['group:elt3'], 1: ['group:elt4']})
 
         # Reset with one new stack
         new_stack = HierarchicalStack()
-        new_stack.push('new_elt')
+        new_stack.push(push_ids=['user:elt1', 'user:elt2'], levels=[0, 1])
+        new_stack.doIncLevel()
+        self.assertEqual(stack.getCurrentLevel(), 0)
+        self.assertEqual(new_stack.getCurrentLevel(), 1)
         stack.reset(new_stack=new_stack)
         self.assertEqual(stack._getStackContent(),
                          new_stack._getStackContent())
+        self.assertEqual(stack.getCurrentLevel(),
+                         new_stack.getCurrentLevel())
 
         # Reset with a new stack, new users and new groups
-        new_stack = HierarchicalStack()
-        stack.reset(new_stack=new_stack,
-                   reset_ids=('elt1', 'elt2', 'group:elt3', 'group:elt4'))
-        self.assertEqual([x.getId() for x in stack._getStackContent()[0]],
-                         ['elt1', 'elt2', 'group:elt3', 'group:elt4'])
-
+        stack = HierarchicalStack()
+        stack.push(push_ids=['user:elt1'], levels=[0])
+        reset_ids = ('group:elt3', 'group:elt4')
+        stack.reset(new_stack=new_stack, reset_ids=reset_ids)
+        self.assertEqual(stack.getStackContent(context=self),
+                         {0: ['user:elt1', 'group:elt3', 'group:elt4'],
+                          1: ['user:elt2']})
+        self.assertEqual(stack.getCurrentLevel(), 1)
 
     def test_replace(self):
 
@@ -1039,57 +1039,60 @@ class TestHierarchicalStack(unittest.TestCase):
         #
 
         stack = HierarchicalStack()
-        stack.push(push_ids=['elt1'], levels=[0])
-        stack.push(push_ids=['elt2'], levels=[0])
-        self.assertEqual(stack.getLevelContent(context=self), ['elt1', 'elt2'])
-        stack.replace('elt2', 'elt4')
-        self.assertEqual(stack.getLevelContent(context=self), ['elt1', 'elt4'])
+        stack.push(push_ids=['user:elt1'], levels=[0])
+        stack.push(push_ids=['user:elt2'], levels=[0])
+        self.assertEqual(stack.getLevelContent(context=self),
+                         ['user:elt1', 'user:elt2'])
+        stack.replace('user:elt2', 'user:elt4')
+        self.assertEqual(stack.getLevelContent(context=self),
+                         ['user:elt1', 'user:elt4'])
 
         #
         # Test with elements objects
         #
 
-        oelt = UserStackElement('string_elt')
-        stack.replace('elt4', oelt)
+        oelt = UserStackElement('user:string_elt')
+        stack.replace('user:elt4', oelt)
         self.assertEqual(stack.getLevelContent(context=self),
-                         ['elt1', 'string_elt'])
+                         ['user:elt1', 'user:string_elt'])
 
         #
         # Test with different levels
         #
 
-        stack.push('string_elt', level=1)
-        stack.push('string_elt', level=-1)
+        stack.push('user:string_elt', level=1)
+        stack.push('user:string_elt', level=-1)
         self.assertEqual(stack.getLevelContent(context=self),
-                         ['elt1', 'string_elt'])
+                         ['user:elt1', 'user:string_elt'])
         self.assertEqual(stack.getLevelContent(level=1, context=self),
-                         ['string_elt'])
+                         ['user:string_elt'])
         self.assertEqual(stack.getLevelContent(level=-1, context=self),
-                         ['string_elt'])
+                         ['user:string_elt'])
 
-        stack.push('elt1', level=1)
+        stack.push('user:elt1', level=1)
         self.assertEqual(stack.getLevelContent(context=self),
-                         ['elt1', 'string_elt'])
+                         ['user:elt1', 'user:string_elt'])
         self.assertEqual(stack.getLevelContent(level=1, context=self),
-                         ['string_elt', 'elt1'])
+                         ['user:string_elt', 'user:elt1'])
         self.assertEqual(stack.getLevelContent(level=-1, context=self),
-                         ['string_elt'])
+                         ['user:string_elt'])
 
-        stack.replace('string_elt', 'string_elt2')
+        stack.replace('user:string_elt', 'user:string_elt2')
         self.assertEqual(stack.getLevelContent(context=self),
-                         ['elt1', 'string_elt2'])
+                         ['user:elt1', 'user:string_elt2'])
         self.assertEqual(stack.getLevelContent(level=1, context=self),
-                         ['string_elt2', 'elt1'])
+                         ['user:string_elt2', 'user:elt1'])
         self.assertEqual(stack.getLevelContent(level=-1, context=self),
-                         ['string_elt2'])
+                         ['user:string_elt2'])
 
-        stack.replace('elt1', 'elt2')
+        stack.replace('user:elt1', 'user:elt2')
         self.assertEqual(stack.getLevelContent(context=self),
-                         ['elt2', 'string_elt2'])
+                         ['user:elt2', 'user:string_elt2'])
         self.assertEqual(stack.getLevelContent(level=1, context=self),
-                         ['string_elt2', 'elt2'])
+                         ['user:string_elt2', 'user:elt2'])
         self.assertEqual(stack.getLevelContent(level=-1, context=self),
-                         ['string_elt2'])
+                         ['user:string_elt2'])
+
 
     def test_insertInBetweenLevels(self):
 
