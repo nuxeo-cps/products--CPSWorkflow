@@ -29,7 +29,7 @@ site. It includes :
  - User Substitute Stack Element : a stack element that can be used to store a
    user substitute.
 
- - Group Subsctitute Stack Element : a stack element that can be used to store
+ - Group Substitute Stack Element : a stack element that can be used to store
    a group substitute.
 
  - Hidden User Stack Element : a stack element used when a given user stack
@@ -38,11 +38,10 @@ site. It includes :
  - Hidden Group Stack Element : a stack element used when a given group stack
    element is not visible
 
-Each stack element *MUST* have a meta_type and a prefix.  It is
-compulsory to register you new stack element within the
-WorkflowStackElementRegistry. Furthermore, it is a quite practical way
-to introspect your stack element and to known what's the nature of a
-given stack element.
+Each stack element *MUST* have a meta_type and a prefix. It is compulsory to
+register you new stack element within the WorkflowStackElementRegistry.
+Furthermore, it is a quite practical way to introspect your stack element and
+to known what's the nature of a given stack element.
 """
 
 from Globals import InitializeClass
