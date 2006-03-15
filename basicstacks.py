@@ -505,6 +505,7 @@ class HierarchicalStack(SimpleStack):
         """
         new_level = self.getCurrentLevel() + 1
         self.setCurrentLevel(new_level)
+        return self.getCurrentLevel()
 
     def doDecLevel(self):
         """Decrement the level value
@@ -513,6 +514,7 @@ class HierarchicalStack(SimpleStack):
         """
         new_level = self.getCurrentLevel() - 1
         self.setCurrentLevel(new_level)
+        return self.getCurrentLevel()
 
     def getAllLevels(self):
         """Return all the existing levels with elts
@@ -629,11 +631,9 @@ class HierarchicalStack(SimpleStack):
         new_elt = self._prepareElement(new)
         old_elt = self._prepareElement(old)
         for level in self.getAllLevels():
-            try:
-                index_level = self._getStackElementIndex(old_elt, level=level)
+            index_level = self._getStackElementIndex(old_elt, level=level)
+            if index_level >= 0:
                 self._elements_container[level][index_level] = new_elt
-            except ValueError:
-                pass
 
 
     def reset(self, **kw):
@@ -647,6 +647,7 @@ class HierarchicalStack(SimpleStack):
         new_stack = kw.get('new_stack')
         if new_stack is not None:
             self._elements_container = new_stack._getElementsContainer()
+            self.setCurrentLevel(new_stack.getCurrentLevel())
         else:
             self.__init__()
 
