@@ -1668,7 +1668,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         # Reset with one new stack
         new_stack = SimpleStack()
-        new_stack.push('new_elt')
+        new_stack._push('new_elt')
         stack = stackdef._reset(stack, new_stack=new_stack)
         self.assertEqual(stack._getElementsContainer(),
                          new_stack._getElementsContainer())
@@ -1721,7 +1721,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         # Reset with one new stack
         new_stack = HierarchicalStack()
-        new_stack.push('new_elt')
+        new_stack._push('new_elt')
         stack = stackdef._reset(stack, new_stack=new_stack)
         self.assertEqual(stack._getElementsContainer(),
                          new_stack._getElementsContainer())
@@ -1743,8 +1743,8 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
 
         # Normal
         #hstack = hstackdef._push(hstack, elt='elt1')
-        hstack.push('elt1')
-        hstack.push('elt3', level=1)
+        hstack._push('elt1')
+        hstack._push('elt3', level=1)
         self.assertEqual(hstack.getStackContent(context=self),
                          {0:['elt1'],
                           1:['elt3']})
@@ -1752,7 +1752,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # Insert in between 0 and 1
         # current_level is 0
         self.assertEqual(hstack.getCurrentLevel(), 0)
-        hstack.push('elt2', low_level=0, high_level=1)
+        hstack._push('elt2', low_level=0, high_level=1)
         self.assertEqual(hstack.getStackContent(context=self),
                          {0:['elt1'],
                           1:['elt2'],
@@ -1762,14 +1762,14 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
         # 0 is the edge level where we need to test
         hstack.doIncLevel()
         self.assertEqual(hstack.getCurrentLevel(), 1)
-        hstack.push('elt4', low_level=0, high_level=1)
+        hstack._push('elt4', low_level=0, high_level=1)
         self.assertEqual(hstack.getStackContent(context=self),
                          {-1:['elt1'],
                           0:['elt4'],
                           1:['elt2'],
                           2:['elt3'],
                           })
-        hstack.push('elt5', low_level=2, high_level=3)
+        hstack._push('elt5', low_level=2, high_level=3)
         self.assertEqual(hstack.getStackContent(context=self),
                          {-1:['elt1'],
                           0:['elt4'],
@@ -1777,7 +1777,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                           2:['elt3'],
                           3:['elt5'],
                           })
-        hstack.push('elt6', low_level=-2, high_level=-1)
+        hstack._push('elt6', low_level=-2, high_level=-1)
         self.assertEqual(hstack.getStackContent(context=self),
                          {-2:['elt6'],
                           -1:['elt1'],
@@ -1786,7 +1786,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                           2:['elt3'],
                           3:['elt5'],
                           })
-        hstack.push('elt7', low_level=-4, high_level=-3)
+        hstack._push('elt7', low_level=-4, high_level=-3)
         self.assertEqual(hstack.getStackContent(context=self),
                          {-2:['elt6'],
                           -1:['elt1'],
@@ -1795,7 +1795,7 @@ class TestCPSWorkflowStackDefinition(SecurityRequestTest):
                           2:['elt3'],
                           3:['elt5'],
                           })
-        hstack.push('elt7', low_level=4, high_level=5)
+        hstack._push('elt7', low_level=4, high_level=5)
         self.assertEqual(hstack.getStackContent(context=self),
                          {-2:['elt6'],
                           -1:['elt1'],
