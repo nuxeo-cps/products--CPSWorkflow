@@ -349,27 +349,27 @@ class TestSimpleStack(unittest.TestCase):
 
         stack = SimpleStack()
         stack.push(push_ids=['elt1'])
-        self.assertEqual([x() for x in stack._getElementsContainer()],
+        self.assertEqual([x.getId() for x in stack._getElementsContainer()],
                          ['elt1'])
 
         # Reset with one (1) new user
         stack.reset(reset_ids=('elt2',))
-        self.assertEqual([x() for x in stack._getElementsContainer()],
+        self.assertEqual([x.getId() for x in stack._getElementsContainer()],
                          ['elt2'])
 
         # Reset with two (2) new users
         stack.reset(reset_ids=('elt3', 'elt4'))
-        self.assertEqual([x() for x in stack._getElementsContainer()],
+        self.assertEqual([x.getId() for x in stack._getElementsContainer()],
                          ['elt3', 'elt4'])
 
         # Reset with one (1) new group
         stack.reset(reset_ids=('group:elt2',))
-        self.assertEqual([x() for x in stack._getElementsContainer()],
+        self.assertEqual([x.getId() for x in stack._getElementsContainer()],
                          ['group:elt2'])
 
         # Reset with two (2) new users
         stack.reset(reset_ids=('group:elt3', 'group:elt4'))
-        self.assertEqual([x() for x in stack._getElementsContainer()],
+        self.assertEqual([x.getId() for x in stack._getElementsContainer()],
                          ['group:elt3', 'group:elt4'])
 
         # Reset with one new stack
@@ -383,7 +383,7 @@ class TestSimpleStack(unittest.TestCase):
         new_stack = SimpleStack()
         stack.reset(new_stack=new_stack,
                    reset_ids=('elt1', 'elt2', 'group:elt3', 'group:elt4'))
-        self.assertEqual([x() for x in stack._getElementsContainer()],
+        self.assertEqual([x.getId() for x in stack._getElementsContainer()],
                          ['elt1', 'elt2', 'group:elt3', 'group:elt4'])
 
     def test_replace(self):
@@ -1063,27 +1063,27 @@ class TestHierarchicalStack(unittest.TestCase):
 
         stack = HierarchicalStack()
         stack.push(push_ids=['elt1'], levels=[0])
-        self.assertEqual([x() for x in stack._getElementsContainer()[0]],
+        self.assertEqual([x.getId() for x in stack._getElementsContainer()[0]],
                          ['elt1'])
 
         # Reset with one (1) new user
         stack.reset(reset_ids=('elt2',))
-        self.assertEqual([x() for x in stack._getElementsContainer()[0]],
+        self.assertEqual([x.getId() for x in stack._getElementsContainer()[0]],
                          ['elt2'])
 
         # Reset with two (2) new users
         stack.reset(reset_ids=('elt3', 'elt4'))
-        self.assertEqual([x() for x in stack._getElementsContainer()[0]],
+        self.assertEqual([x.getId() for x in stack._getElementsContainer()[0]],
                          ['elt3', 'elt4'])
 
         # Reset with one (1) new group
         stack.reset(reset_ids=('group:elt2',))
-        self.assertEqual([x() for x in stack._getElementsContainer()[0]],
+        self.assertEqual([x.getId() for x in stack._getElementsContainer()[0]],
                          ['group:elt2'])
 
         # Reset with two (2) new users
         stack.reset(reset_ids=('group:elt3', 'group:elt4'))
-        self.assertEqual([x() for x in stack._getElementsContainer()[0]],
+        self.assertEqual([x.getId() for x in stack._getElementsContainer()[0]],
                          ['group:elt3', 'group:elt4'])
 
         # Reset with one new stack
@@ -1097,7 +1097,7 @@ class TestHierarchicalStack(unittest.TestCase):
         new_stack = HierarchicalStack()
         stack.reset(new_stack=new_stack,
                    reset_ids=('elt1', 'elt2', 'group:elt3', 'group:elt4'))
-        self.assertEqual([x() for x in stack._getElementsContainer()[0]],
+        self.assertEqual([x.getId() for x in stack._getElementsContainer()[0]],
                          ['elt1', 'elt2', 'group:elt3', 'group:elt4'])
 
 

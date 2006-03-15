@@ -52,7 +52,6 @@ from zope.interface import implements
 from Products.CPSWorkflow.interfaces import IStackElement
 from Products.CPSWorkflow.stackregistries import WorkflowStackElementRegistry
 from Products.CPSWorkflow.stackelement import StackElement
-from Products.CPSWorkflow.stackelement import StackElementWithData
 
 class UserStackElement(StackElement):
     """User Stack Element
@@ -62,15 +61,24 @@ class UserStackElement(StackElement):
     You may use it like this :
 
     >>> from Products.CPSWorkflow.basicstackelements import UserStackElement
-    >>> use = UserStackElement('user:anguenot')
+    >>> use = UserStackElement('user:anguenot', data={'title': 'Julien'})
     >>> use()
+    {'id': 'user:anguenot', 'title': 'Julien'}
+    >>> use.getData()
+    {'title': 'Julien'}
+    >>> use.getId()
     'user:anguenot'
-    >>> str(use)
-    'user:anguenot'
-    >>> 'user:anguenot' == use
-    True
+    >>> use.getIdWithoutPrefix()
+    'anguenot'
     >>> use.getIdForRoleSettings()
     'anguenot'
+    >>> use['title']
+    'Julien'
+    >>> use['title'] = 'New Julien'
+    >>> use['title']
+    'New Julien'
+    >>> print use.get('foo')
+    None
 
     """
     implements(IStackElement)
@@ -105,17 +113,22 @@ class GroupStackElement(UserStackElement):
     You may use it like this :
 
     >>> from Products.CPSWorkflow.basicstackelements import GroupStackElement
-    >>> gse = GroupStackElement('group:nuxeo')
+    >>> gse = GroupStackElement('group:nuxeo', data={'title': 'Nuxeo staff'})
     >>> gse()
+    {'id': 'group:nuxeo', 'title': 'Nuxeo staff'}
+    >>> gse.getData()
+    {'title': 'Nuxeo staff'}
+    >>> gse.getId()
     'group:nuxeo'
-    >>> str(gse)
-    'group:nuxeo'
-    >>> 'group:nuxeo' == gse
-    True
     >>> gse.getIdWithoutPrefix()
     'nuxeo'
     >>> gse.getIdForRoleSettings()
     'group:nuxeo'
+    >>> gse.get('title')
+    'Nuxeo staff'
+    >>> gse.set('title', 'New Nuxeo staff')
+    >>> gse.get('title')
+    'New Nuxeo staff'
 
     """
     implements(IStackElement)
@@ -146,70 +159,6 @@ class GroupStackElement(UserStackElement):
         return False
 
 InitializeClass(GroupStackElement)
-
-#########################################################################
-#########################################################################
-
-class UserStackElementWithData(StackElementWithData, UserStackElement):
-    """User Stack Element with data
-
-    Stack element you may use to store a member. It understand only the user
-    id without prefix. (i.e : user_id = 'anguenot')
-
-    You may use it like this :
-
-    >>> from Products.CPSWorkflow.basicstackelements import UserStackElementWithData
-    >>> use = UserStackElementWithData('user_wdata:anguenot', title='Julien')
-    >>> use()
-    {'id': 'user_wdata:anguenot', 'title': 'Julien'}
-    >>> use.getData()
-    {'title': 'Julien'}
-    >>> use.getIdForRoleSettings()
-    'anguenot'
-    >>> use['title']
-    'Julien'
-    >>> use['title'] = 'New Julien'
-    >>> use['title']
-    'New Julien'
-    >>> print use.get('foo')
-    None
-
-    """
-    implements(IStackElement)
-
-    meta_type = 'User Stack Element With Data'
-    prefix = 'user_wdata'
-    hidden_meta_type = 'Hidden User Stack Element'
-
-InitializeClass(UserStackElementWithData)
-
-class GroupStackElementWithData(StackElementWithData, GroupStackElement):
-    """Group Stack Element with data
-
-    You may use it like this :
-
-    >>> from Products.CPSWorkflow.basicstackelements import GroupStackElementWithData
-    >>> gse = GroupStackElementWithData('group_wdata:nuxeo', title='Nuxeo staff')
-    >>> gse()
-    {'id': 'group_wdata:nuxeo', 'title': 'Nuxeo staff'}
-    >>> gse.getData()
-    {'title': 'Nuxeo staff'}
-    >>> gse.getIdForRoleSettings()
-    'group:nuxeo'
-    >>> gse.get('title')
-    'Nuxeo staff'
-    >>> gse.set('title', 'New Nuxeo staff')
-    >>> gse.get('title')
-    'New Nuxeo staff'
-
-    """
-    implements(IStackElement)
-
-    meta_type = 'Group Stack Element With Data'
-    prefix = 'group_wdata'
-    hidden_meta_type = 'Hidden Group Stack Element'
-
-InitializeClass(GroupStackElementWithData)
 
 #########################################################################
 #########################################################################
@@ -294,8 +243,6 @@ InitializeClass(GroupSubstituteStackElement)
 
 WorkflowStackElementRegistry.register(UserStackElement)
 WorkflowStackElementRegistry.register(GroupStackElement)
-WorkflowStackElementRegistry.register(UserStackElementWithData)
-WorkflowStackElementRegistry.register(GroupStackElementWithData)
 WorkflowStackElementRegistry.register(UserSubstituteStackElement)
 WorkflowStackElementRegistry.register(GroupSubstituteStackElement)
 WorkflowStackElementRegistry.register(HiddenUserStackElement)

@@ -22,7 +22,7 @@
 A Stack ELement is an element stored within a stack type.
 """
 
-import copy
+from copy import deepcopy
 
 from Globals import InitializeClass
 from OFS.SimpleItem import SimpleItem
@@ -51,25 +51,37 @@ class StackElement(SimpleItem):
     view_guard = None
     edit_guard = None
 
+    _data = None
+    # list of editable attributes - when set to None, no check is done.
+    _allowed_attributes = None
+
     def __init__(self, id, **kw):
         self.id = id
+        self._data = PersistentMapping()
+        self.update(kw.get('data', {}))
 
     #
     # PRIVATE
     #
 
     def __cmp__(self, other):
+        # compare only on id
         if isinstance(other, StackElement):
-            return cmp(self.getId(), other())
+            return cmp(self.getId(), other.getId())
         elif isinstance(other, str):
             return cmp(self.getId(), other)
         return 0
 
     def __call__(self):
-        return self.getId()
+        info = {
+            'id': self.getId(),
+            }
+        info.update(self.getData())
+        return info
 
     def __str__(self):
-        return self.getId()
+        info_str = "<%s %s >" %(self.__class__.__name__, self(),)
+        return info_str
 
     def __deepcopy__(self, ob):
         """Deep copy. Just to call a clean API while calling getCopy()
@@ -77,8 +89,22 @@ class StackElement(SimpleItem):
         copy = ElementRegistry.makeWorkflowStackElementTypeInstance(
             self.meta_type, self.getId())
         for k, v in self.__dict__.items():
-            setattr(copy, k, v)
+            # dereference persistent mapping
+            setattr(copy, k, deepcopy(v))
         return copy
+
+    # dict like access to data
+
+    def __getitem__(self, key):
+        return self._data[key]
+
+    def __setitem__(self, key, value):
+        if key == 'id':
+            return
+        if (self._allowed_attributes is None
+            or key in self._allowed_attributes):
+            self._data[key] = value
+
 
     #
     # API
@@ -107,7 +133,29 @@ class StackElement(SimpleItem):
 
         Return a new object instance of the same type
         """
-        return copy.deepcopy(self)
+        return deepcopy(self)
+
+    def getData(self):
+        return dict(self._data)
+
+    def get(self, key, default=None):
+        if not self._data.has_key(key):
+            return default
+        else:
+            return self[key]
+
+    def set(self, key, value):
+        self[key] = value
+
+    def update(self, data):
+        # special key
+        if data.has_key('id'):
+            del data['id']
+        if self._allowed_attributes is not None:
+            for key, value in data.items():
+                if key not in self._allowed_attributes:
+                    del data[key]
+        self._data.update(data)
 
     #
     # SECURITY
@@ -211,74 +259,3 @@ class StackElement(SimpleItem):
 
 
 InitializeClass(StackElement)
-
-
-class StackElementWithData(StackElement):
-    """Stack Element With Data
-    """
-    implements(IStackElement)
-    meta_type = 'Stack Element With Data'
-
-    _data = None
-    # list of editable attributes - when set to None, no check is done.
-    _allowed_attributes = None
-
-    def __init__(self, id, **kw):
-        StackElement.__init__(self, id, **kw)
-        # consider kw as data information
-        self._data = PersistentMapping()
-        self.update(kw)
-
-    def __call__(self):
-        info = {
-            'id': self.getId(),
-            }
-        info.update(self._data)
-        return info
-
-    def __str__(self):
-        info_str = "<StackElementWithData %s >" %(self(),)
-        return info_str
-
-    def __getitem__(self, key):
-        return self._data[key]
-
-    def __setitem__(self, key, value):
-        if key == 'id':
-            return
-        if (self._allowed_attributes is None
-            or key in self._allowed_attributes):
-            self._data[key] = value
-
-    def __deepcopy__(self, ob):
-        """Deep copy. Just to call a clean API while calling getCopy()
-        """
-        copy = StackElement.__deepcopy__(self, ob)
-        # dereference persistent mapping
-        copy._data = PersistentMapping()
-        copy.update(self.getData())
-        return copy
-
-    def get(self, key, default=None):
-        if not self._data.has_key(key):
-            return default
-        else:
-            return self[key]
-
-    def set(self, key, value):
-        self[key] = value
-
-    def update(self, data):
-        # special key
-        if data.has_key('id'):
-            del data['id']
-        if self._allowed_attributes is not None:
-            for key, value in data.items():
-                if key not in self._allowed_attributes:
-                    del data[key]
-        self._data.update(data)
-
-    def getData(self):
-        return dict(self._data)
-
-InitializeClass(StackElementWithData)

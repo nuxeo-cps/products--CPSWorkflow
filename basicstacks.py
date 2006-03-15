@@ -148,7 +148,7 @@ class SimpleStack(Stack):
         """
         i = 0
         for each in self._getElementsContainer():
-            if id == each.getId():
+            if id == each:
                 return i
             i += 1
         return -1
@@ -234,7 +234,7 @@ class SimpleStack(Stack):
         new_elt = self._prepareElement(new)
         old_elt = self._prepareElement(old)
         try:
-            old_elt_index = self._getElementsContainer().index(old_elt())
+            old_elt_index = self._getStackElementIndex(old_elt.getId())
             self._elements_container[old_elt_index] = new_elt
         except ValueError:
             pass

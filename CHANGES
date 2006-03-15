@@ -3,7 +3,7 @@ Requires:
 -
 New features:
 ~~~~~~~~~~~~~
-- Added stack elements holding data
+- Basic stack elements can now hold additional data
 Bug fixes:
 ~~~~~~~~~~
 -

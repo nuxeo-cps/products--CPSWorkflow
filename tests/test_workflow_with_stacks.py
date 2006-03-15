@@ -1692,12 +1692,12 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Without security checks
         scontent = pstacks.getStackContent(type='object', context=content)
         elt = scontent[0]
-        self.assertEqual(str(elt), 'user:manager')
+        self.assertEqual(elt.getId(), 'user:manager')
 
         # With security checks
         scontent = pstacks.getStackContent(type='object', context=content)
         elt = scontent[0]
-        self.assertEqual(str(elt), 'user:manager')
+        self.assertEqual(elt.getId(), 'user:manager')
         self.logout()
 
         ##############################################
@@ -1738,7 +1738,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         scontent = pstacks.getStackContent(type='object', context=content)
         elt = scontent[0]
-        self.assertEqual(str(elt), 'user:manager')
+        self.assertEqual(elt.getId(), 'user:manager')
 
         self.logout()
 
