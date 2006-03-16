@@ -899,7 +899,8 @@ class HierarchicalStack(Stack):
 
         return code
 
-    def pop(self, pop_ids=(), levels=(), **kw):
+
+    def pop(self, pop_ids=(), **kw):
         """Public pop
 
         Return a code error:
