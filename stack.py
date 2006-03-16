@@ -111,15 +111,20 @@ class Stack(SimpleItem):
     # API TO BE IMPLEMENTED WITHIN THE CHILD CLASSES
     #
 
-    def push(self, elt=None):
+    def push(self, elt=None, **kw):
         """Push elt in the queue
         """
         raise NotImplementedError
 
-    def pop(self, elt=None):
+    def pop(self, elt=None, **kw):
         """Remove elt from within the queue
 
         If elt is None then remove the last one
+        """
+        raise NotImplementedError
+
+    def edit(self, elt=None, **kw):
+        """Edit elt in the queue
         """
         raise NotImplementedError
 

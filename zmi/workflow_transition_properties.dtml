@@ -261,6 +261,17 @@ Initiated by WorkflowMethod
     </tr>
     <tr>
       <td>
+        <input type="checkbox" name="transition_behavior:int:list" value="43"
+            <dtml-if "43 in behavior">checked</dtml-if> />
+      </td>
+      <td colspan="3">
+        Edit delegatees, on workflow variables
+        <input type="text" name="edit_on_workflow_variable:tokens"
+          value="<dtml-var "' '.join(edit_on_workflow_variable)" html_quote>" size="25" />
+      </td>
+    </tr>
+    <tr>
+      <td>
         <input type="checkbox" name="transition_behavior:int:list" value="44"
             <dtml-if "44 in behavior">checked</dtml-if> />
       </td>

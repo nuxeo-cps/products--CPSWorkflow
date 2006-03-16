@@ -226,6 +226,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
             description='Delegating',
             state_behaviors = (STATE_BEHAVIOR_PUSH_DELEGATEES,
                                STATE_BEHAVIOR_POP_DELEGATEES,
+                               STATE_BEHAVIOR_EDIT_DELEGATEES,
                                STATE_BEHAVIOR_WORKFLOW_UP,
                                STATE_BEHAVIOR_WORKFLOW_RESET,),
             stackdefs={'Pilots': {'stackdef_type': 'Hierarchical Stack Definition',
@@ -255,6 +256,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                        },
             push_on_workflow_variable = ['Pilots', 'Associates', 'Observers'],
             pop_on_workflow_variable = ['Pilots', 'Associates', 'Observers'],
+            edit_on_workflow_variable = ['Pilots', 'Associates', 'Observers'],
             workflow_up_on_workflow_variable = ['Pilots'],
             workflow_reset_on_workflow_variable = ['Pilots', 'Associates',
                                                    'Observers'],)
@@ -320,10 +322,12 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
             description='Validating',
             state_behaviors = (STATE_BEHAVIOR_PUSH_DELEGATEES,
                                STATE_BEHAVIOR_POP_DELEGATEES,
+                               STATE_BEHAVIOR_EDIT_DELEGATEES,
                                STATE_BEHAVIOR_WORKFLOW_DOWN,
                                STATE_BEHAVIOR_WORKFLOW_RESET,),
             push_on_workflow_variable = ['Pilots'],
             pop_on_workflow_variable = ['Pilots'],
+            edit_on_workflow_variable = ['Pilots'],
             workflow_down_on_workflow_variable = ['Pilots'],
             workflow_reset_on_workflow_variable = ['Pilots', 'Associates',
                                                    'Observers'],)
@@ -375,9 +379,9 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                                                              'Associates'],
                         )
 
-        # remove_delegate
-        wf.transitions.addTransition('remove_delegate')
-        t = wf.transitions.get('remove_delegate')
+        # remove_delegatee
+        wf.transitions.addTransition('remove_delegatee')
+        t = wf.transitions.get('remove_delegatee')
         t.setProperties('title',
                         'delegating',
                         trigger_type=TRIGGER_USER_ACTION,
@@ -385,6 +389,18 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
             TRANSITION_BEHAVIOR_POP_DELEGATEES,
             ),
                         pop_on_workflow_variable=['Pilots'],
+                        )
+
+        # edit_delegatee
+        wf.transitions.addTransition('edit_delegatee')
+        t = wf.transitions.get('edit_delegatee')
+        t.setProperties('title',
+                        'delegating',
+                        trigger_type=TRIGGER_USER_ACTION,
+                        transition_behavior=(
+            TRANSITION_BEHAVIOR_EDIT_DELEGATEES,
+            ),
+                        edit_on_workflow_variable=['Pilots', 'Associates'],
                         )
 
         # to_writing
@@ -430,7 +446,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         self.assertEqual(tuple(transitions), ('close',
                                               'create',
                                               'delegate',
-                                              'remove_delegate',
+                                              'edit_delegatee',
+                                              'remove_delegatee',
                                               'reset',
                                               'to_validate',
                                               'to_writing',
@@ -501,8 +518,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         #
 
         s = wf.states.get('delegating')
-        s.transitions += ('delegate', 'remove_delegate', 'silent', 'reset',
-                          'validate')
+        s.transitions += ('delegate', 'remove_delegatee', 'edit_delegatee',
+                          'silent', 'reset', 'validate')
 
         #
         # Workflow for the container
@@ -690,11 +707,14 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         behaviors = current_state.state_behaviors
         self.assertEqual(behaviors, (STATE_BEHAVIOR_PUSH_DELEGATEES,
                                      STATE_BEHAVIOR_POP_DELEGATEES,
+                                     STATE_BEHAVIOR_EDIT_DELEGATEES,
                                      STATE_BEHAVIOR_WORKFLOW_UP,
                                      STATE_BEHAVIOR_WORKFLOW_RESET,))
         self.assertEqual(current_state.push_on_workflow_variable,
                          ['Pilots', 'Associates', 'Observers'])
         self.assertEqual(current_state.pop_on_workflow_variable,
+                         ['Pilots', 'Associates', 'Observers'])
+        self.assertEqual(current_state.edit_on_workflow_variable,
                          ['Pilots', 'Associates', 'Observers'])
         self.assertEqual(current_state.workflow_up_on_workflow_variable,
                          ['Pilots'])
@@ -707,8 +727,9 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         allowed_transitions = current_state.getTransitions()
         # Not yet initialized
-        self.assertEqual(allowed_transitions, ('delegate', 'remove_delegate',
-                                               'silent', 'reset', 'validate'))
+        self.assertEqual(allowed_transitions,
+                         ('delegate', 'remove_delegatee', 'edit_delegatee',
+                          'silent', 'reset', 'validate'))
 
     def test_stack_hierarchical_behavior_with_users_no_levels_one_level(self):
 
@@ -938,7 +959,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # REMOVE TOTO
         ####################################################
 
-        wftool.doActionFor(content, 'remove_delegate',
+        wftool.doActionFor(content, 'remove_delegatee',
                            current_wf_var_id='Pilots',
                            pop_ids=['0,user:toto'],
                            levels=[0])
@@ -993,7 +1014,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # REMOVE TATA
         ####################################################
 
-        wftool.doActionFor(content, 'remove_delegate',
+        wftool.doActionFor(content, 'remove_delegatee',
                            current_wf_var_id='Pilots',
                            pop_ids=['0,user:tata'],
                            levels=[0])
@@ -1041,7 +1062,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # REMOVE manager
         ####################################################
 
-        wftool.doActionFor(content, 'remove_delegate',
+        wftool.doActionFor(content, 'remove_delegatee',
                            current_wf_var_id='Pilots',
                            pop_ids=['0,user:manager'],
                            levels=[0])
@@ -1435,7 +1456,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # Manager
         self.assert_( wftool.canManageStack(content, 'Pilots'))
 
-    def test_replaceOnHierarchicalStack(self):
+    def test_editOnHierarchicalStack(self):
 
         self.login('manager')
         wftool = self.wftool
@@ -1465,17 +1486,19 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         ############################
 
         kw = {'push_ids': ('user:manager',),
+              'data_list': ('comment',),
+              'comment': ('Come on manager, do your job!',),
               'levels':(0,),
               'current_wf_var_id' : 'Pilots'}
-        wftool.doActionFor(content,'delegate',
-                           **kw)
+        wftool.doActionFor(content,'delegate', **kw)
 
         pstacks = wftool.getStackFor(content, 'Pilots')
 
         # Check stack status
         self.assert_(pstacks is not None)
-        self.assertEqual(['user:manager'],
-                         pstacks.getStackContent(context=content)[0])
+        self.assertEqual(pstacks.getStackContent(type='call', context=content),
+                         {0: [{'id': 'user:manager',
+                               'comment': 'Come on manager, do your job!'}]})
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
@@ -1499,29 +1522,26 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         self.assert_( wftool.canManageStack(content, 'Pilots'))
 
         ##############################################################
-        # Replace the element within the stack and follow the reset
-        # transition
+        # Follow the edit transition
         ##############################################################
 
-        stack = wftool.getStackFor(content, 'Pilots')
-        new_stack = stack.getCopy()
-        self.assertNotEqual(stack, new_stack)
-        new_stack.replace('user:manager', 'user:toto')
-
-        wftool.doActionFor(content, 'reset',
-                           new_stack=new_stack,
-                           current_wf_var_id='Pilots')
+        kw = {'edit_ids': ('0,user:manager',),
+              'data_list': ('comment',),
+              'comment': ('Please do your job',),
+              'current_wf_var_id' : 'Pilots'}
+        wftool.doActionFor(content, 'edit_delegatee', **kw)
         pstacks = wftool.getStackFor(content, 'Pilots')
 
         # Check stack status
         self.assert_(pstacks is not None)
-        self.assertEqual(['user:toto'],
-                         pstacks.getStackContent(context=content)[0])
+        self.assertEqual(pstacks.getStackContent(type='call', context=content),
+                         {0: [{'id': 'user:manager',
+                               'comment': 'Please do your job'}]})
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Pilots')
         self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
-                         {'toto' : ('WorkspaceManager',)})
+                         {'manager' : ('WorkspaceManager',)})
 
         # Check the former local role mapping
         flrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
@@ -1534,14 +1554,13 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         mtool = getToolByName(self.portal, 'portal_membership')
         lc = mtool.getMergedLocalRoles(content)
 
-        self.assert_('user:manager' not in lc.keys())
-        self.assert_('user:toto' in lc.keys())
+        self.assert_('user:manager' in lc.keys())
 
         # Manager
-        self.assert_(not wftool.canManageStack(content, 'Pilots'))
+        self.assert_(wftool.canManageStack(content, 'Pilots'))
 
 
-    def test_replaceOnSimpleStack(self):
+    def test_editOnSimpleStack(self):
 
         self.login('manager')
         wftool = self.wftool
@@ -1571,17 +1590,18 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         ############################
 
         kw = {'push_ids': ('user:manager',),
-              'levels':(0,),
+              'data_list': ('comment',),
+              'comment': ('Come on manager, do your job!',),
               'current_wf_var_id' : 'Associates'}
-        wftool.doActionFor(content,'delegate',
-                           **kw)
+        wftool.doActionFor(content,'delegate', **kw)
 
         pstacks = wftool.getStackFor(content, 'Associates')
 
         # Check stack status
         self.assert_(pstacks is not None)
-        self.assertEqual(['user:manager'],
-                         pstacks.getStackContent(context=content))
+        self.assertEqual(pstacks.getStackContent(type='call', context=content),
+                         [{'id': 'user:manager',
+                           'comment': 'Come on manager, do your job!'}])
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Associates')
@@ -1605,29 +1625,26 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         self.assert_( wftool.canManageStack(content, 'Associates'))
 
         ##############################################################
-        # Replace the element within the stack and follow the reset
-        # transition
+        # Edit the element within the stack
         ##############################################################
 
-        stack = wftool.getStackFor(content, 'Associates')
-        new_stack = stack.getCopy()
-        self.assertNotEqual(stack, new_stack)
-        new_stack.replace('user:manager', 'user:toto')
-
-        wftool.doActionFor(content, 'reset',
-                           new_stack=new_stack,
-                           current_wf_var_id='Associates')
+        kw = {'edit_ids': ('user:manager',),
+              'data_list': ('comment',),
+              'comment': ('Please do your job',),
+              'current_wf_var_id' : 'Associates'}
+        wftool.doActionFor(content, 'edit_delegatee', **kw)
         pstacks = wftool.getStackFor(content, 'Associates')
 
         # Check stack status
         self.assert_(pstacks is not None)
-        self.assertEqual(['user:toto'],
-                         pstacks.getStackContent(context=content))
+        self.assertEqual(pstacks.getStackContent(type='call', context=content),
+                         [{'id': 'user:manager',
+                           'comment': 'Please do your job'}])
 
         # Check local roles mapping
         pstackdef = wftool.getStackDefinitionFor(content, 'Associates')
         self.assertEqual(pstackdef._getLocalRolesMapping(pstacks),
-                         {'toto' : ('WorkspaceMember',)})
+                         {'manager' : ('WorkspaceMember',)})
 
         # Check the former local role mapping
         flrm = wftool.getFormerLocalRoleMappingForStack(content, 'wf',
@@ -1640,11 +1657,10 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         mtool = getToolByName(self.portal, 'portal_membership')
         lc = mtool.getMergedLocalRoles(content)
 
-        self.assert_('user:manager' not in lc.keys())
-        self.assert_('user:toto' in lc.keys())
+        self.assert_('user:manager' in lc.keys())
 
         # Manager
-        self.assert_(not wftool.canManageStack(content, 'Associates'))
+        self.assert_(wftool.canManageStack(content, 'Associates'))
 
     def test_stack_element_security(self):
         self.login('manager')
@@ -2193,7 +2209,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         # pop toto from the Pilots stack (pop behaviour is only Pilots stack)
         kw = {'pop_ids': ('-1,user:toto',),
               'current_wf_var_id' : 'Pilots'}
-        wftool.doActionFor(content, 'remove_delegate', **kw)
+        wftool.doActionFor(content, 'remove_delegatee', **kw)
 
         sstack = wftool.getStackFor(content, 'Associates')
         # Check the former local role mapping

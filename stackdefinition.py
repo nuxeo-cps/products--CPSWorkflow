@@ -317,10 +317,18 @@ class StackDefinition(SimpleItem):
         return ds
 
     def _pop(self, ds, **kw):
-        """pop delegatees
+        """Pop delegatees
         """
         ds = self._prepareStack(ds)
         ds.pop(**kw)
+        ds = ds.getCopy()
+        return ds
+
+    def _edit(self, ds, **kw):
+        """Edit delegatees
+        """
+        ds = self._prepareStack(ds)
+        ds.edit(**kw)
         ds = ds.getCopy()
         return ds
 

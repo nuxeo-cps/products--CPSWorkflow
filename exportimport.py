@@ -213,6 +213,8 @@ class CPSWorkflowDefinitionConfigurator(WorkflowDefinitionConfigurator):
                     v.push_on_workflow_variable,
                 'pop_on_workflow_variable':
                     v.pop_on_workflow_variable,
+                'edit_on_workflow_variable':
+                    v.edit_on_workflow_variable,
                 'workflow_up_on_workflow_variable':
                     v.workflow_up_on_workflow_variable,
                 'workflow_down_on_workflow_variable':
@@ -287,6 +289,7 @@ class CPSWorkflowDefinitionConfigurator(WorkflowDefinitionConfigurator):
                 'stackdefs': stackdefs_info,
                 'push_on_workflow_variable': v.push_on_workflow_variable,
                 'pop_on_workflow_variable': v.pop_on_workflow_variable,
+                'edit_on_workflow_variable': v.edit_on_workflow_variable,
                 'workflow_up_on_workflow_variable':
                     v.workflow_up_on_workflow_variable,
                 'workflow_down_on_workflow_variable':
@@ -386,6 +389,7 @@ def _initCPSWorkflowStates(workflow, states):
                                for b in s_info['state_behaviors']],
             push_on_workflow_variable = s_info['push_on_workflow_variable'],
             pop_on_workflow_variable = s_info['pop_on_workflow_variable'],
+            edit_on_workflow_variable = s_info['edit_on_workflow_variable'],
             workflow_up_on_workflow_variable =
                 s_info['workflow_up_on_workflow_variable'],
             workflow_down_on_workflow_variable =
@@ -448,6 +452,7 @@ def _initCPSWorkflowTransitions(workflow, transitions):
                 t_info['checkin_allowed_transition'],
             push_on_workflow_variable = t_info['push_on_workflow_variable'],
             pop_on_workflow_variable = t_info['pop_on_workflow_variable'],
+            edit_on_workflow_variable = t_info['edit_on_workflow_variable'],
             workflow_up_on_workflow_variable =
                 t_info['workflow_up_on_workflow_variable'],
             workflow_down_on_workflow_variable =
@@ -509,6 +514,7 @@ def _extractCPSStateNodes(root, encoding=None):
         keylist = [
             'push_on_workflow_variable',
             'pop_on_workflow_variable',
+            'edit_on_workflow_variable',
             'workflow_up_on_workflow_variable',
             'workflow_down_on_workflow_variable',
             'workflow_reset_on_workflow_variable',
@@ -575,6 +581,7 @@ def _extractCPSTransitionNodes(root, encoding=None):
         keylist = [
             'push_on_workflow_variable',
             'pop_on_workflow_variable',
+            'edit_on_workflow_variable',
             'workflow_up_on_workflow_variable',
             'workflow_down_on_workflow_variable',
             'workflow_reset_on_workflow_variable',

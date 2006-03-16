@@ -75,6 +75,7 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
     # State Behaviors depend on a workflow variables
     push_on_workflow_variable = []
     pop_on_workflow_variable = []
+    edit_on_workflow_variable = []
     workflow_up_on_workflow_variable = []
     workflow_down_on_workflow_variable = []
     workflow_reset_on_workflow_variable = []
@@ -87,6 +88,7 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
                       stackdefs={},
                       push_on_workflow_variable = None,
                       pop_on_workflow_variable = None,
+                      edit_on_workflow_variable = None,
                       workflow_up_on_workflow_variable = None,
                       workflow_down_on_workflow_variable = None,
                       workflow_reset_on_workflow_variable = None,
@@ -114,6 +116,8 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
             self.push_on_workflow_variable = push_on_workflow_variable
         if pop_on_workflow_variable is not None:
             self.pop_on_workflow_variable = pop_on_workflow_variable
+        if edit_on_workflow_variable is not None:
+            self.edit_on_workflow_variable = edit_on_workflow_variable
         if workflow_up_on_workflow_variable is not None:
             self.workflow_up_on_workflow_variable = \
                  workflow_up_on_workflow_variable

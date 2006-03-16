@@ -150,6 +150,11 @@
       tal:repeat="variable state/pop_on_workflow_variable"
       tal:attributes="variable_id variable"
       />
+  <edit-on-workflow-variable
+      variable_id="VARIABLE_ID"
+      tal:repeat="variable state/edit_on_workflow_variable"
+      tal:attributes="variable_id variable"
+      />
   <workflow-up-on-workflow-variable
       variable_id="VARIABLE_ID"
       tal:repeat="variable state/workflow_up_on_workflow_variable"
@@ -246,6 +251,11 @@
   <pop-on-workflow-variable
       variable_id="VARIABLE_ID"
       tal:repeat="variable transition/pop_on_workflow_variable"
+      tal:attributes="variable_id variable"
+      />
+  <edit-on-workflow-variable
+      variable_id="VARIABLE_ID"
+      tal:repeat="variable transition/edit_on_workflow_variable"
       tal:attributes="variable_id variable"
       />
   <workflow-up-on-workflow-variable

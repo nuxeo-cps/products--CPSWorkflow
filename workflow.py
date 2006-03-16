@@ -725,6 +725,75 @@ class WorkflowDefinition(DCWorkflowDefinition):
                     ds = stacks.get(wf_var)
                     stacks[wf_var] = stackdef._pop(ds, **kwargs)
 
+        if TRANSITION_BEHAVIOR_EDIT_DELEGATEES in behavior:
+            LOG("::CPSWorkflow._executeTansition() :: "
+                "FLAG : TRANSITION_BEHAVIOR_EDIT_DELEGATEES",
+                TRACE,
+                str(kwargs))
+
+            #
+            # Get the stack definitions from the transition definition
+            # The workflow variable id is the stackdef id.
+            #
+
+            sdef_behaviors = new_sdef.state_behaviors
+            edit_allowed_on_variables = new_sdef.edit_on_workflow_variable
+
+            #
+            # First check if the state allows the behavior
+            # Raise an exception if not allowed
+            #
+
+            if STATE_BEHAVIOR_EDIT_DELEGATEES not in sdef_behaviors:
+                raise WorkflowException(
+                    "State behavior not allowed for '%s' on '%s'" %(
+                    STATE_BEHAVIOR_EDIT_DELEGATEES,
+                    new_sdef.getId(),
+                    ))
+
+            wf_vars = tdef.edit_on_workflow_variable
+
+            #
+            # Raise an exception if not variables are associated to the
+            # transition flag. Mostly for debuging right now. It's anyway a
+            # problem of configuration
+            #
+
+            if not wf_vars:
+                raise WorkflowException(
+                    "Transition %s needs associated variables to execute on" %(
+                    TRANSITION_BEHAVIOR_EDIT_DELEGATEES,
+                    ))
+
+            for wf_var in wf_vars:
+
+                #
+                # Filter on the working workflow variable It's necessarly since
+                # the transition can be allowed on several wf variable id
+                #
+
+                current_wf_var_id = kwargs.get('current_wf_var_id', '')
+                if current_wf_var_id != wf_var:
+                    continue
+
+                #
+                # Check here if the behavior is allowed by the state for this
+                # given worfklow variable id
+                #
+
+                if wf_var not in edit_allowed_on_variables:
+                    raise WorkflowException(
+                        "State %s dosen't allow '%s' on var '%s'" %(
+                        new_sdef.getId(),
+                        STATE_BEHAVIOR_EDIT_DELEGATEES,
+                        wf_var,
+                        ))
+
+                stackdef = new_sdef.getStackDefinitionFor(wf_var)
+                if stackdef is not None:
+                    ds = stacks.get(wf_var)
+                    stacks[wf_var] = stackdef._edit(ds, **kwargs)
+
         if TRANSITION_BEHAVIOR_WORKFLOW_UP in behavior:
 
             LOG("::CPSWorkflow._executeTansition() :: "

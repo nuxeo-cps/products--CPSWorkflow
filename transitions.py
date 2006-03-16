@@ -82,6 +82,7 @@ class TransitionDefinition(DCWFTransitionDefinition):
 
     push_on_workflow_variable = []
     pop_on_workflow_variable = []
+    edit_on_workflow_variable = []
     workflow_up_on_workflow_variable = []
     workflow_down_on_workflow_variable = []
     workflow_reset_on_workflow_variable = []
@@ -98,6 +99,7 @@ class TransitionDefinition(DCWFTransitionDefinition):
                       checkin_allowed_transitions=None,
                       push_on_workflow_variable = None,
                       pop_on_workflow_variable = None,
+                      edit_on_workflow_variable = None,
                       workflow_up_on_workflow_variable = None,
                       workflow_down_on_workflow_variable = None,
                       workflow_reset_on_workflow_variable = None,
@@ -120,6 +122,8 @@ class TransitionDefinition(DCWFTransitionDefinition):
             self.push_on_workflow_variable = push_on_workflow_variable
         if pop_on_workflow_variable is not None:
             self.pop_on_workflow_variable = pop_on_workflow_variable
+        if edit_on_workflow_variable is not None:
+            self.edit_on_workflow_variable = edit_on_workflow_variable
         if workflow_up_on_workflow_variable is not None:
             self.workflow_up_on_workflow_variable = \
                  workflow_up_on_workflow_variable
@@ -155,6 +159,8 @@ class TransitionDefinition(DCWFTransitionDefinition):
                 self.push_on_workflow_variable,
             TRANSITION_BEHAVIOR_POP_DELEGATEES  :
                 self.pop_on_workflow_variable,
+            TRANSITION_BEHAVIOR_EDIT_DELEGATEES  :
+                self.edit_on_workflow_variable,
             TRANSITION_BEHAVIOR_WORKFLOW_UP   :
                 self.workflow_up_on_workflow_variable,
             TRANSITION_BEHAVIOR_WORKFLOW_DOWN :

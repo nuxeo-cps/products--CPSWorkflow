@@ -65,6 +65,12 @@ class IWorkflowStackDefinition(Interface):
         This method has to be implemented by a child class
         """
 
+    def _edit(ds, **kw):
+        """Edit delegatees
+
+        This method has to be implemented by a child class
+        """
+
     def _reset(ds, **kw):
         """Reset stack.
 
@@ -164,12 +170,16 @@ class IWorkflowStack(Interface):
          - call
         """
 
-    def push(elt=None):
-        """Push elt in the queue.
+    def push(push_ids=(), **kw):
+        """Push elt in the stack.
         """
 
-    def pop(pop_ids=[]):
-        """Remove element in pop_ids from within the queue.
+    def pop(pop_ids=(), **kw):
+        """Remove elements in pop_ids from the stack.
+        """
+
+    def edit(edit_ids=(), **kw):
+        """Edit elements in edit_ids in the stack.
         """
 
     def reset(**kw):

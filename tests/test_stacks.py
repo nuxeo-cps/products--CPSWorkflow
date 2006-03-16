@@ -290,29 +290,26 @@ class TestSimpleStack(unittest.TestCase):
         self.assertEqual([x.getId() for x in stack._getStackContent()],
                          ['user:elt1'])
 
-
-    def test_replace(self):
-        #
-        # Test with strings
-        #
-
+    def test_edit(self):
         stack = SimpleStack()
-        stack.push(push_ids=['user:elt1'])
-        stack.push(push_ids=['user:elt2'])
-        self.assertEqual(stack.getStackContent(context=self),
-                         ['user:elt1', 'user:elt2'])
-        stack.replace('user:elt2', 'user:elt4')
-        self.assertEqual(stack.getStackContent(context=self),
-                         ['user:elt1', 'user:elt4'])
-
-        #
-        # Test with elements objects
-        #
-
-        oelt = UserStackElement('user:string_elt')
-        stack.replace('user:elt4', oelt)
-        self.assertEqual(stack.getStackContent(context=self),
-                         ['user:elt1', 'user:string_elt'])
+        stack.push(push_ids=['user:elt1', 'group:elt2'],
+                   data_list=['comment'],
+                   comment=['comment for 1', 'comment for 2'])
+        content = [
+            {'comment': 'comment for 1', 'id': 'user:elt1'},
+            {'comment': 'comment for 2', 'id': 'group:elt2'},
+            ]
+        self.assertEqual(stack.getStackContent(type='call', context=self),
+                         content)
+        stack.edit(edit_ids=['user:elt1', 'group:elt2'],
+                   data_list=['comment'],
+                   comment=['new comment for 1', 'new comment for 2 too'])
+        content = [
+            {'comment': 'new comment for 1', 'id': 'user:elt1'},
+            {'comment': 'new comment for 2 too', 'id': 'group:elt2'},
+            ]
+        self.assertEqual(stack.getStackContent(type='call', context=self),
+                         content)
 
     def test_reset(self):
         simple = SimpleStack()
@@ -1053,6 +1050,51 @@ class TestHierarchicalStack(unittest.TestCase):
         self.assertEqual(elt2(), {'id': 'group:elt2',
                                  'comment': 'comment for 2'})
 
+    def test_pop(self):
+        stack = HierarchicalStack()
+        stack.push(push_ids=['user:elt1', 'group:elt2', 'user:elt1'],
+                   levels=[0, 0, 1],
+                   data_list=['comment'],
+                   comment=['comment for 1', 'comment for 2', 'other comment'])
+        content = {
+            0: [{'comment': 'comment for 1', 'id': 'user:elt1'},
+                {'comment': 'comment for 2', 'id': 'group:elt2'}],
+            1: [{'comment': 'other comment', 'id': 'user:elt1'}],
+            }
+        self.assertEqual(stack.getStackContent(type='call', context=self),
+                         content)
+        stack.pop(pop_ids=['0,group:elt2', '1,user:elt1'])
+        content = {
+            0: [{'comment': 'comment for 1', 'id': 'user:elt1'}],
+            }
+        self.assertEqual(stack.getStackContent(type='call', context=self),
+                         content)
+
+
+    def test_edit(self):
+        stack = HierarchicalStack()
+        stack.push(push_ids=['user:elt1', 'group:elt2', 'user:elt3'],
+                   levels=[0, 0, 1],
+                   data_list=['comment'],
+                   comment=['comment for 1', 'comment for 2', 'other comment'])
+        content = {
+            0: [{'comment': 'comment for 1', 'id': 'user:elt1'},
+                {'comment': 'comment for 2', 'id': 'group:elt2'}],
+            1: [{'comment': 'other comment', 'id': 'user:elt3'}],
+            }
+        self.assertEqual(stack.getStackContent(type='call', context=self),
+                         content)
+        stack.edit(edit_ids=['0,user:elt1', '1,user:elt3'],
+                   data_list=['comment'],
+                   comment=['new comment for 1', 'another great comment'])
+        content = {
+            0: [{'comment': 'new comment for 1', 'id': 'user:elt1'},
+                {'comment': 'comment for 2', 'id': 'group:elt2'}],
+            1: [{'comment': 'another great comment', 'id': 'user:elt3'}],
+            }
+        self.assertEqual(stack.getStackContent(type='call', context=self),
+                         content)
+
     def test_insertInBetweenLevels(self):
         stack = HierarchicalStack()
         self.assertEqual(stack.getStackContent(), {})
@@ -1247,66 +1289,6 @@ class TestHierarchicalStack(unittest.TestCase):
                           1: ['user:elt2']})
         self.assertEqual(stack.getCurrentLevel(), 1)
 
-    def test_replace(self):
-
-        #
-        # Test with strings
-        #
-
-        stack = HierarchicalStack()
-        stack.push(push_ids=['user:elt1'], levels=[0])
-        stack.push(push_ids=['user:elt2'], levels=[0])
-        self.assertEqual(stack.getLevelContent(context=self),
-                         ['user:elt1', 'user:elt2'])
-        stack.replace('user:elt2', 'user:elt4')
-        self.assertEqual(stack.getLevelContent(context=self),
-                         ['user:elt1', 'user:elt4'])
-
-        #
-        # Test with elements objects
-        #
-
-        oelt = UserStackElement('user:string_elt')
-        stack.replace('user:elt4', oelt)
-        self.assertEqual(stack.getLevelContent(context=self),
-                         ['user:elt1', 'user:string_elt'])
-
-        #
-        # Test with different levels
-        #
-
-        stack.push(push_ids=['user:string_elt'], levels=[1])
-        stack.push(push_ids=['user:string_elt'], levels=[-1])
-        self.assertEqual(stack.getLevelContent(context=self),
-                         ['user:elt1', 'user:string_elt'])
-        self.assertEqual(stack.getLevelContent(level=1, context=self),
-                         ['user:string_elt'])
-        self.assertEqual(stack.getLevelContent(level=-1, context=self),
-                         ['user:string_elt'])
-
-        stack.push(push_ids=['user:elt1'], levels=[1])
-        self.assertEqual(stack.getLevelContent(context=self),
-                         ['user:elt1', 'user:string_elt'])
-        self.assertEqual(stack.getLevelContent(level=1, context=self),
-                         ['user:string_elt', 'user:elt1'])
-        self.assertEqual(stack.getLevelContent(level=-1, context=self),
-                         ['user:string_elt'])
-
-        stack.replace('user:string_elt', 'user:string_elt2')
-        self.assertEqual(stack.getLevelContent(context=self),
-                         ['user:elt1', 'user:string_elt2'])
-        self.assertEqual(stack.getLevelContent(level=1, context=self),
-                         ['user:string_elt2', 'user:elt1'])
-        self.assertEqual(stack.getLevelContent(level=-1, context=self),
-                         ['user:string_elt2'])
-
-        stack.replace('user:elt1', 'user:elt2')
-        self.assertEqual(stack.getLevelContent(context=self),
-                         ['user:elt2', 'user:string_elt2'])
-        self.assertEqual(stack.getLevelContent(level=1, context=self),
-                         ['user:string_elt2', 'user:elt2'])
-        self.assertEqual(stack.getLevelContent(level=-1, context=self),
-                         ['user:string_elt2'])
 
     def test_getLevelContent(self):
         stack = HierarchicalStack()

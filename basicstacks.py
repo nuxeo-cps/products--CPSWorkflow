@@ -127,10 +127,11 @@ class SimpleStack(Stack):
     # PRIVATE API
     #
 
-    def _push(self, elt=None, **kw):
+    def _push(self, elt=None, data={}, **kw):
         """Push an element in the queue
 
-        Additional keywords are passed to the stack element constructor.
+        data and additional keywords are passed to the stack element
+        constructor.
 
         Return a code error:
         0 : failure (element is None or already here, or stack is full)
@@ -152,7 +153,7 @@ class SimpleStack(Stack):
         if self.isFull():
             return 0
         if elt not in self._getElementsContainer():
-            elt = self._prepareElement(elt, **kw)
+            elt = self._prepareElement(elt, data=data, **kw)
             if elt is None:
                 return 0
             self._getElementsContainer().append(elt)
@@ -194,6 +195,35 @@ class SimpleStack(Stack):
             return res
         return 0
 
+
+    def _edit(self, elt=None, data={}, **kw):
+        """Edit a given element
+
+        data is used for element update.
+
+        Return a code error:
+        O : failure (element not found)
+        1 : success
+
+        >>> stack = SimpleStack()
+        >>> stack._push('user:test', data={'comment': 'This is a test'})
+        1
+        >>> [x() for x in stack._getStackContent()]
+        [{'comment': 'This is a test', 'id': 'user:test'}]
+        >>> stack._edit('user:test', data={'comment': 'This is another test'})
+        1
+        >>> [x() for x in stack._getStackContent()]
+        [{'comment': 'This is another test', 'id': 'user:test'}]
+
+        """
+        index = self._getStackElementIndex(elt)
+        if index == -1:
+            res = 0
+        else:
+            elt = self._getElementsContainer()[index]
+            elt.update(data)
+            res = 1
+        return res
 
     def _getStackContent(self):
         """Return stack content, no check on permissions
@@ -310,22 +340,51 @@ class SimpleStack(Stack):
 
         return code
 
-    # XXX make it useful for edit
-    def replace(self, old, new):
-        """Replace old with new within the elements container
+    def edit(self, edit_ids=(), **kw):
+        """Public edit
 
-        It supports both string and element objects as input
+        Return a code error:
+        0 : failure on one of the edits
+        1 : success on all edits
 
-        XXX
+        Additional keywords will be used to pass additional data for each
+        element to edit.
+
+        edit_ids and kw come from the wftool.doActionFor method keywords.
+
+        >>> stack = SimpleStack()
+        >>> push_ids = ['user:test1', 'user:test2']
+        >>> comment = ['comment for test1', 'comment for test2']
+        >>> stack.push(push_ids, data_list=['comment'], comment=comment)
+        1
+        >>> [x() for x in stack._getStackContent()]
+        [{'comment': 'comment for test1', 'id': 'user:test1'}, {'comment':
+        'comment for test2', 'id': 'user:test2'}]
+        >>> edit_ids = ['user:test1', 'user:test2']
+        >>> comment = ['new comment for test1', 'new comment for test2 too']
+        >>> stack.edit(edit_ids, data_list=['comment'], comment=comment)
+        1
+        >>> [x() for x in stack._getStackContent()]
+        [{'comment': 'new comment for test1', 'id': 'user:test1'}, {'comment':
+        'new comment for test2 too', 'id': 'user:test2'}]
 
         """
-        new_elt = self._prepareElement(new)
-        old_elt = self._prepareElement(old)
-        try:
-            old_elt_index = self._getStackElementIndex(old_elt.getId())
-            self._elements_container[old_elt_index] = new_elt
-        except ValueError:
-            pass
+        code = 1
+
+        # find out data keys and corresponding data lists
+        data_list = kw.get('data_list', ())
+        data_info = dict((key, kw.get(key, [])) for key in data_list)
+
+        for index, edit_id in enumerate(edit_ids):
+            data = {}
+            for key, values in data_info.items():
+                try:
+                    data[key] = values[index]
+                except IndexError:
+                    pass
+            code = code and self._edit(edit_id, data=data)
+
+        return code
 
 
     def reset(self, **kw):
@@ -553,9 +612,9 @@ class HierarchicalStack(Stack):
               low_level=None, high_level=None, **kw):
         """Push elt at given level or in between two levels
 
-        Additional keywords are passed to the stack element constructor.
         If level is None, push at current level.
         If low_level ang high_level are set, push in between.
+        Additional keywords are passed to the stack element constructor.
 
         Return a code error:
         0 : failure (element is None or already here, or stack is full)
@@ -647,8 +706,8 @@ class HierarchicalStack(Stack):
     def _pop(self, elt=None, level=None, **kw):
         """Remove elt at given level
 
-        Additional keywords are not used right now.
         If level is None, pop at current level.
+        Additional keywords are not used right now.
 
         Return a code error:
         O : failure (element not found)
@@ -672,6 +731,45 @@ class HierarchicalStack(Stack):
         if index >= 0:
             try:
                 del self._getElementsContainer()[level][index]
+                return 1
+            except KeyError:
+                pass
+        return 0
+
+    def _edit(self, elt=None, level=None, data={}, **kw):
+        """Edit a given element
+
+        data is used for element update.
+        If level is None, pop at current level.
+        Additional keywords are not used right now.
+
+        Return a code error:
+        O : failure (element not found)
+        1 : success
+
+        >>> stack = HierarchicalStack()
+        >>> stack._push('user:test', level=0, data={'comment': 'This is a test'})
+        1
+        >>> for level, content in stack._getStackContent().items():
+        ...     print level, [x() for x in content]
+        0 [{'comment': 'This is a test', 'id': 'user:test'}]
+        >>> stack._edit('user:test', level=0, data={'comment': 'This is another test'})
+        1
+        >>> for level, content in stack._getStackContent().items():
+        ...     print level, [x() for x in content]
+        0 [{'comment': 'This is another test', 'id': 'user:test'}]
+
+        """
+        if elt is None:
+            return 0
+        if level is None:
+            level = self.getCurrentLevel()
+
+        index = self._getStackElementIndex(elt, level)
+        if index >= 0:
+            try:
+                elt = self._getElementsContainer()[level][index]
+                elt.update(data)
                 return 1
             except KeyError:
                 pass
@@ -928,36 +1026,83 @@ class HierarchicalStack(Stack):
         {0: [<UserStackElement at user:test1>]}
 
         """
-        # XXX not sure this is a good id to use 'level,prefix:id' for pop_ids,
-        # maybe having a levels keyword would be better.
         code = 1
-
         current_level = self.getCurrentLevel()
         for pop_id in pop_ids:
-            split = pop_id.split(',')
-            if len(split) > 1:
-                level = int(split[0])
-                the_id = split[1]
+            sep = pop_id.find(',')
+            if sep != -1:
+                level = int(pop_id[:sep])
+                the_id = pop_id[sep+1:]
             else:
                 level = current_level
-                the_id = split[0]
+                the_id = pop_id
             code = code and self._pop(elt=the_id, level=level, **kw)
 
         return code
 
-    # XXX
-    def replace(self, old, new):
-        """Replace old with new within the elements container
 
-        It supports both string and element objects as input
+    def edit(self, edit_ids=(), **kw):
+        """Public edit
+
+        Return a code error:
+        0 : failure on one of the edits
+        1 : success on all edits
+
+        Additional keywords will be used to pass additional data for each
+        element to edit.
+
+        Convention used for edit_ids: 'level,prefix:elt_id'. Examples:
+        '1,user:toto' or '2,group:titi'. If level is omitted, use current
+        level.
+
+        edit_ids and kw come from the wftool.doActionFor method keywords.
+
+        >>> stack = HierarchicalStack()
+        >>> push_ids = ['user:test1', 'user:test2']
+        >>> levels = [0, 1]
+        >>> comment = ['comment for test1', 'comment for test2']
+        >>> stack.push(push_ids, levels, data_list=['comment'], comment=comment)
+        1
+        >>> for level, content in stack._getStackContent().items():
+        ...     print level, [x() for x in content]
+        0 [{'comment': 'comment for test1', 'id': 'user:test1'}]
+        1 [{'comment': 'comment for test2', 'id': 'user:test2'}]
+        >>> edit_ids = ['0,user:test1', '1,user:test2']
+        >>> comment = ['new comment for test1', 'new comment for test2 too']
+        >>> stack.edit(edit_ids, data_list=['comment'], comment=comment)
+        1
+        >>> for level, content in stack._getStackContent().items():
+        ...     print level, [x() for x in content]
+        0 [{'comment': 'new comment for test1', 'id': 'user:test1'}]
+        1 [{'comment': 'new comment for test2 too', 'id': 'user:test2'}]
+
         """
-        new_elt = self._prepareElement(new)
-        old_elt = self._prepareElement(old)
-        for level in self.getAllLevels():
-            index_level = self._getStackElementIndex(old_elt, level=level)
-            if index_level >= 0:
-                self._elements_container[level][index_level] = new_elt
+        code = 1
 
+        # find out data keys and corresponding data lists
+        data_list = kw.get('data_list', ())
+        data_info = dict((key, kw.get(key, [])) for key in data_list)
+
+        current_level = self.getCurrentLevel()
+
+        for index, edit_id in enumerate(edit_ids):
+            # data
+            data = {}
+            for key, values in data_info.items():
+                try:
+                    data[key] = values[index]
+                except IndexError:
+                    pass
+            # level
+            sep = edit_id.find(',')
+            if sep != -1:
+                level = int(edit_id[:sep])
+                the_id = edit_id[sep+1:]
+            else:
+                level = current_level
+                the_id = edit_id
+            code = code and self._edit(the_id, level=level, data=data)
+        return code
 
     def reset(self, **kw):
         """Reset the stack and return it.

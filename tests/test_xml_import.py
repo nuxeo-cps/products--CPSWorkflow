@@ -196,6 +196,7 @@ class TestFullCPSWorkflowImport(SetupWorkflowTestCase):
         behaviors = [
             STATE_BEHAVIOR_PUSH_DELEGATEES,
             STATE_BEHAVIOR_POP_DELEGATEES,
+            STATE_BEHAVIOR_EDIT_DELEGATEES,
             STATE_BEHAVIOR_WORKFLOW_UP,
             STATE_BEHAVIOR_WORKFLOW_DOWN,
             ]
@@ -311,7 +312,8 @@ class TestFullCPSWorkflowImport(SetupWorkflowTestCase):
         t = self.wf.transitions.manage_delegatees
         self.assertEqual(list(t.transition_behavior),
                          [TRANSITION_BEHAVIOR_PUSH_DELEGATEES,
-                          TRANSITION_BEHAVIOR_POP_DELEGATEES])
+                          TRANSITION_BEHAVIOR_POP_DELEGATEES,
+                          TRANSITION_BEHAVIOR_EDIT_DELEGATEES])
 
     def test_Scripts(self):
         script_ids = [

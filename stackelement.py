@@ -55,10 +55,10 @@ class StackElement(SimpleItem):
     # list of editable attributes - when set to None, no check is done.
     _allowed_attributes = None
 
-    def __init__(self, id, **kw):
+    def __init__(self, id, data={}, **kw):
         self.id = id
         self._data = PersistentMapping()
-        self.update(kw.get('data', {}))
+        self.update(data)
 
     #
     # PRIVATE

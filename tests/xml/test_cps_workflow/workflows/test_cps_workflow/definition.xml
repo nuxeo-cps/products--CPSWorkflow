@@ -47,10 +47,12 @@
   </stack-definition>
   <state-behavior behavior_id="push-delegatees"/>
   <state-behavior behavior_id="pop-delegatees"/>
+  <state-behavior behavior_id="edit-delegatees"/>
   <state-behavior behavior_id="workflow-down"/>
   <state-behavior behavior_id="workflow-up"/>
   <push-on-workflow-variable variable_id="Reviewers"/>
   <pop-on-workflow-variable variable_id="Reviewers"/>
+  <edit-on-workflow-variable variable_id="Reviewers"/>
   <workflow-up-on-workflow-variable variable_id="Reviewers"/>
   <workflow-down-on-workflow-variable
     variable_id="Reviewers"/>
@@ -96,8 +98,10 @@
   </guard>
   <transition-behavior behavior_id="push-delegatees"/>
   <transition-behavior behavior_id="pop-delegatees"/>
+  <transition-behavior behavior_id="edit-delegatees"/>
   <push-on-workflow-variable variable_id="Reviewers"/>
   <pop-on-workflow-variable variable_id="Reviewers"/>
+  <edit-on-workflow-variable variable_id="Reviewers"/>
  </transition>
  <transition transition_id="move_down_delegatees"
              title="Move down delegatees" new_state=""
