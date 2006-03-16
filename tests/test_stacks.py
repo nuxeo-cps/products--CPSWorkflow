@@ -1,8 +1,8 @@
 #!/usr/bin/python
-# -*- coding: iso-8859-15 -*-
-
-# (C) Copyright 2004-2005 Nuxeo SARL <http://nuxeo.com>
-# Author: Julien Anguenot <ja@nuxeo.com>
+# (C) Copyright 2004-2006 Nuxeo SAS <http://nuxeo.com>
+# Authors:
+# - Julien Anguenot <ja@nuxeo.com>
+# - Anahide Tchertchian <at@nuxeo.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as published
@@ -21,7 +21,7 @@
 # $Id$
 
 import unittest
-
+from zope.testing import doctest
 from zope.interface.verify import verifyClass
 
 from Products.CPSWorkflow.stack import Stack
@@ -48,210 +48,271 @@ class TestSimpleStack(unittest.TestCase):
         verifyClass(IWorkflowStack, SimpleStack)
         verifyClass(ISimpleWorkflowStack, SimpleStack)
 
+    def test_getCopy(self):
+        stack1 = SimpleStack()
+        self.assertEqual(stack1.meta_type, 'Simple Stack')
+        stack2 = stack1.getCopy()
+        self.assertEqual(stack2.meta_type, 'Simple Stack')
+
+        self.assertNotEqual(stack2, None)
+        self.assertNotEqual(stack1, stack2)
+
+        self.assertEqual(stack1.getStackContent(context=self), [])
+        self.assertEqual(stack2.getStackContent(context=self), [])
+
+        self.assertEqual(stack1.getStackContent(context=self),
+                         stack2.getStackContent(context=self))
+        self.assertEqual(stack1.isFull(), stack2.isFull())
+        self.assertEqual(stack1.isEmpty(), stack2.isEmpty())
+        self.assertEqual(stack1.getSize(), stack2.getSize())
+
+        stack1._push('elt1')
+        stack2._push('elt2')
+        self.assertEqual(stack1.getStackContent(context=self), ['elt1'])
+        self.assertEqual(stack2.getStackContent(context=self), ['elt2'])
+
+        self.assertNotEqual(stack1.getStackContent(context=self),
+                            stack2.getStackContent(context=self))
+
+    # XXX this test is too long, hard to maintain
     def test_NoMaxSize(self):
         # Test Base Stack with no initialization
-        sstack = SimpleStack()
-        self.assertEqual(sstack.getSize(), 0)
-        self.assertEqual(sstack.isEmpty(), 1)
-        self.assertEqual(sstack.isFull(), 0)
+        stack = SimpleStack()
+        self.assertEqual(stack.getSize(), 0)
+        self.assertEqual(stack.isEmpty(), 1)
+        self.assertEqual(stack.isFull(), 0)
 
         # Adding one element
-        sstack.push(push_ids=['elt1'])
-        self.assertEqual(sstack.getSize(), 1)
-        self.assertEqual(sstack.isEmpty(), 0)
-        self.assertEqual(sstack.isFull(), 0)
+        code = stack._push('elt1')
+        self.assertEqual(code, 1)
+        self.assertEqual(stack.getSize(), 1)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
 
         # Adding same element. (Not allowed with this stack)
-        res = sstack.push(push_ids=['elt1'])
-        self.assertEqual(sstack.getSize(), 1)
-        self.assertEqual(sstack.isEmpty(), 0)
-        self.assertEqual(sstack.isFull(), 0)
+        code = stack._push('elt1')
+        self.assertEqual(code, 0)
+        self.assertEqual(stack.getSize(), 1)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
 
         # Adding another element. (Allowed with this stack)
-        sstack.push(push_ids=['elt2'])
-        self.assertEqual(sstack.getSize(), 2)
-        self.assertEqual(sstack.isEmpty(), 0)
-        self.assertEqual(sstack.isFull(), 0)
+        code = stack._push('elt2')
+        self.assertEqual(code, 1)
+        self.assertEqual(stack.getSize(), 2)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
 
         # Pop now
-        code = sstack.pop(pop_ids=('elt2',))
+        code = stack._pop('elt2')
         self.assertEqual(code, 1)
-        self.assertEqual(sstack.getSize(), 1)
-        self.assertEqual(sstack.isEmpty(), 0)
-        self.assertEqual(sstack.isFull(), 0)
+        self.assertEqual(stack.getSize(), 1)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
 
         # Pop again
-        code = sstack.pop(pop_ids=('elt1',))
+        code = stack._pop('elt1')
         self.assertEqual(code, 1)
-        self.assertEqual(sstack.getSize(), 0)
-        self.assertEqual(sstack.isEmpty(), 1)
-        self.assertEqual(sstack.isFull(), 0)
+        self.assertEqual(stack.getSize(), 0)
+        self.assertEqual(stack.isEmpty(), 1)
+        self.assertEqual(stack.isFull(), 0)
 
         # Pop again
-        code = sstack.pop(pop_ids=('fake',))
+        code = stack._pop('fake')
         self.assertEqual(code, 0)
-        self.assertEqual(sstack.getSize(), 0)
-        self.assertEqual(sstack.isEmpty(), 1)
-        self.assertEqual(sstack.isFull(), 0)
+        self.assertEqual(stack.getSize(), 0)
+        self.assertEqual(stack.isEmpty(), 1)
+        self.assertEqual(stack.isFull(), 0)
 
         # Adding one element
-        sstack.push(push_ids=['elt1'])
-        self.assertEqual(sstack.getSize(), 1)
-        self.assertEqual(sstack.isEmpty(), 0)
-        self.assertEqual(sstack.isFull(), 0)
+        code = stack._push('elt1')
+        self.assertEqual(code, 1)
+        self.assertEqual(stack.getSize(), 1)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
 
         # Pop again
-        code = sstack.pop(pop_ids=('elt1',))
+        code = stack._pop('elt1')
         self.assertEqual(code, 1)
-        self.assertEqual(sstack.getSize(), 0)
-        self.assertEqual(sstack.isEmpty(), 1)
-        self.assertEqual(sstack.isFull(), 0)
+        self.assertEqual(stack.getSize(), 0)
+        self.assertEqual(stack.isEmpty(), 1)
+        self.assertEqual(stack.isFull(), 0)
 
         # Try to push a None element
-        code = sstack.push(None)
-        self.assertEqual(code, -1)
+        code = stack._push(None)
+        self.assertEqual(code, 0)
 
+    # XXX this test is too long, hard to maintain
     def test_WithMaxSize(self):
         # Test Base Stack with no initialization
-        sstack = SimpleStack(maxsize=2)
-        self.assertEqual(sstack.getSize(), 0)
-        self.assertEqual(sstack.isEmpty(), 1)
-        self.assertEqual(sstack.isFull(), 0)
+        stack = SimpleStack(max_size=2)
+        self.assertEqual(stack.getSize(), 0)
+        self.assertEqual(stack.isEmpty(), 1)
+        self.assertEqual(stack.isFull(), 0)
 
         # Adding one element
-        sstack.push(push_ids=['elt1'])
-        self.assertEqual(sstack.getSize(), 1)
-        self.assertEqual(sstack.isEmpty(), 0)
-        self.assertEqual(sstack.isFull(), 0)
+        code = stack._push('elt1')
+        self.assertEqual(code, 1)
+        self.assertEqual(stack.getSize(), 1)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
 
         # Adding same element. (Not allowed with this stack)
-        res = sstack.push(push_ids=['elt1'])
-        self.assertEqual(sstack.getSize(), 1)
-        self.assertEqual(sstack.isEmpty(), 0)
-        self.assertEqual(sstack.isFull(), 0)
-
-        self.assertEqual(sstack.getStackContent(context=self),
-                         ['elt1'])
+        code = stack._push('elt1')
+        self.assertEqual(code, 0)
+        self.assertEqual(stack.getSize(), 1)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
 
         # Adding another element.
-        res = sstack.push(push_ids=['elt2'])
-
-        self.assertEqual(sstack.getStackContent(context=self),
-                         ['elt1','elt2'])
-
-        self.assertEqual(sstack.getSize(), 2)
-        self.assertEqual(sstack.isEmpty(), 0)
-        self.assertEqual(sstack.isFull(), 1)
+        code = stack._push('elt2')
+        self.assertEqual(code, 1)
+        self.assertEqual(stack.getSize(), 2)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 1)
 
         # Pop now
-        code = sstack.pop(pop_ids=('elt1',))
+        code = stack._pop('elt1')
         self.assertEqual(code, 1)
-        self.assertEqual(sstack.getSize(), 1)
-        self.assertEqual(sstack.isEmpty(), 0)
-        self.assertEqual(sstack.isFull(), 0)
+        self.assertEqual(stack.getSize(), 1)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
 
         # Pop again
-        code = sstack.pop(pop_ids=('elt2',))
+        code = stack._pop('elt2')
         self.assertEqual(code, 1)
-        self.assertEqual(sstack.getSize(), 0)
-        self.assertEqual(sstack.isEmpty(), 1)
-        self.assertEqual(sstack.isFull(), 0)
+        self.assertEqual(stack.getSize(), 0)
+        self.assertEqual(stack.isEmpty(), 1)
+        self.assertEqual(stack.isFull(), 0)
 
         # Pop again
-        code = sstack.pop(pop_ids=('fake',))
+        code = stack._pop('fake')
         self.assertEqual(code, 0)
-        self.assertEqual(sstack.getSize(), 0)
-        self.assertEqual(sstack.isEmpty(), 1)
-        self.assertEqual(sstack.isFull(), 0)
+        self.assertEqual(stack.getSize(), 0)
+        self.assertEqual(stack.isEmpty(), 1)
+        self.assertEqual(stack.isFull(), 0)
 
         # Adding one element
-        sstack.push(push_ids=['elt1'])
-        self.assertEqual(sstack.getSize(), 1)
-        self.assertEqual(sstack.isEmpty(), 0)
-        self.assertEqual(sstack.isFull(), 0)
+        code = stack._push('elt1')
+        self.assertEqual(code, 1)
+        self.assertEqual(stack.getSize(), 1)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
 
         # Pop again
-        code = sstack.pop(pop_ids=('elt1',))
+        code = stack._pop('elt1')
         self.assertEqual(code, 1)
-        self.assertEqual(sstack.getSize(), 0)
-        self.assertEqual(sstack.isEmpty(), 1)
-        self.assertEqual(sstack.isFull(), 0)
+        self.assertEqual(stack.getSize(), 0)
+        self.assertEqual(stack.isEmpty(), 1)
+        self.assertEqual(stack.isFull(), 0)
 
         # Try to push a None element
-        res = sstack.push(None)
-        self.assertEqual(res, -1)
+        code = stack._push(None)
+        self.assertEqual(code, 0)
 
-        sstack = SimpleStack()
+    def test__getStackContent(self):
+        stack = SimpleStack()
+        stack.push(push_ids=['user:elt1', 'group:elt2'])
+        elements = [
+            UserStackElement('user:elt1'),
+            GroupStackElement('group:elt2'),
+            ]
+        self.assertEqual(stack._getStackContent(), elements)
 
-        # Test the pop() method
-        self.assertEqual(sstack.getStackContent(context=self), [])
-        self.assertEqual(sstack.pop(pop_ids=['elt1']), 0)
-        sstack.push(push_ids=['elt1'])
-        self.assertEqual(sstack.pop(pop_ids=['elt1']), 1)
-        sstack.push(push_ids=['elt1'])
-        sstack.push(push_ids=['elt2'])
-        self.assertEqual(sstack.getStackContent(context=self),
-                         ['elt1', 'elt2'])
-        sstack.push(push_ids=['elt3'])
-        self.assertEqual(sstack.getStackContent(context=self),
-                         ['elt1', 'elt2', 'elt3'])
-        self.assertEqual(sstack.pop(pop_ids=('elt2',)), 1)
-        self.assertEqual(sstack.getStackContent(context=self),
-                         ['elt1', 'elt3'])
 
-        sstack.pop(pop_ids=['elt3'])
-        sstack.pop(pop_ids=['elt1'])
-        self.assertEqual(sstack.getStackContent(context=self), [])
+    def test__getStackElementIndex(self):
+        stack = SimpleStack()
+        stack.push(push_ids=['user:elt1', 'group:elt2'])
+        self.assertEqual(stack._getStackElementIndex('user:elt1'), 0)
+        self.assertEqual(stack._getStackElementIndex('group:elt2'), 1)
 
-    def test_getCopy(self):
-        sstack1 = SimpleStack()
-        self.assertEqual(sstack1.meta_type, 'Simple Stack')
-        sstack2 = sstack1.getCopy()
-        self.assertEqual(sstack2.meta_type, 'Simple Stack')
 
-        self.assertNotEqual(sstack2, None)
-        self.assertNotEqual(sstack1, sstack2)
-
-        self.assertEqual(sstack1.getStackContent(context=self), [])
-        self.assertEqual(sstack2.getStackContent(context=self), [])
-
-        self.assertEqual(sstack1.getStackContent(context=self),
-                         sstack2.getStackContent(context=self))
-        self.assertEqual(sstack1.isFull(), sstack2.isFull())
-        self.assertEqual(sstack1.isEmpty(), sstack2.isEmpty())
-        self.assertEqual(sstack1.getSize(), sstack2.getSize())
-
-        sstack1.push('elt1')
-        sstack2.push('elt2')
-        self.assertEqual(sstack1.getStackContent(context=self), ['elt1'])
-        self.assertEqual(sstack2.getStackContent(context=self), ['elt2'])
-
-        self.assertNotEqual(sstack1.getStackContent(context=self),
-                            sstack2.getStackContent(context=self))
-
-    def test_push(self):
-        sstack = SimpleStack()
-
-        # Add a user
-        sstack.push(push_ids=['elt1'])
-        elt = sstack._getStackContent()[0]
-        self.assert_(isinstance(elt, UserStackElement))
-        self.assert_(elt == 'elt1')
-
-        # Add a group
-        sstack.push(push_ids=['group:elt2'])
-        elt2 = sstack._getStackContent()[1]
-        self.assert_(isinstance(elt2, GroupStackElement))
-        self.assert_(elt2 == 'group:elt2')
-
-    def test_getManagers(self):
-        sstack = SimpleStack()
-        sstack.push(push_ids=['user:elt1', 'group:elt2'])
+    def test__getManagers(self):
+        stack = SimpleStack()
+        stack.push(push_ids=['user:elt1', 'group:elt2'])
         managers = [
             UserStackElement('user:elt1'),
             GroupStackElement('group:elt2'),
             ]
-        self.assertEqual(sstack._getManagers(), managers)
+        self.assertEqual(stack._getManagers(), managers)
+
+    def test_push(self):
+        stack = SimpleStack()
+
+        # Add a user
+        stack.push(push_ids=['user:elt1'])
+        elt = stack._getStackContent()[0]
+        self.assertEqual(isinstance(elt, UserStackElement), True)
+        self.assertEqual(elt, 'user:elt1')
+        self.assertEqual(elt(), {'id': 'user:elt1'})
+
+        # Add a group
+        stack.push(push_ids=['group:elt2'])
+        elt2 = stack._getStackContent()[1]
+        self.assertEqual(isinstance(elt2, GroupStackElement), True)
+        self.assertEqual(elt2, 'group:elt2')
+        self.assertEqual(elt2(), {'id': 'group:elt2'})
+
+    def test_push_with_data(self):
+        stack = SimpleStack()
+        stack.push(push_ids=['user:elt1', 'group:elt2'],
+                   data_list=['comment'],
+                   comment=['comment for 1', 'comment for 2'])
+        elt = stack._getStackContent()[0]
+        self.assertEqual(isinstance(elt, UserStackElement), True)
+        self.assertEqual(elt, 'user:elt1')
+        self.assertEqual(elt(), {'id': 'user:elt1',
+                                 'comment': 'comment for 1'})
+        elt2 = stack._getStackContent()[1]
+        self.assertEqual(isinstance(elt2, GroupStackElement), True)
+        self.assertEqual(elt2, 'group:elt2')
+        self.assertEqual(elt2(), {'id': 'group:elt2',
+                                 'comment': 'comment for 2'})
+
+    def test_pop(self):
+        stack = SimpleStack()
+        stack.push(push_ids=['user:elt1', 'group:elt2'])
+        self.assertEqual([x.getId() for x in stack._getStackContent()],
+                         ['user:elt1', 'group:elt2'])
+        stack.pop(pop_ids=['group:elt2'])
+        self.assertEqual([x.getId() for x in stack._getStackContent()],
+                         ['user:elt1'])
+
+
+    def test_pop_with_data(self):
+        stack = SimpleStack()
+        stack.push(push_ids=['user:elt1', 'group:elt2'],
+                   data_list=['comment'],
+                   comment=['comment for 1', 'comment for 2'])
+        self.assertEqual([x.getId() for x in stack._getStackContent()],
+                         ['user:elt1', 'group:elt2'])
+        stack.pop(pop_ids=['group:elt2'])
+        self.assertEqual([x.getId() for x in stack._getStackContent()],
+                         ['user:elt1'])
+
+
+    def test_replace(self):
+        #
+        # Test with strings
+        #
+
+        stack = SimpleStack()
+        stack.push(push_ids=['user:elt1'])
+        stack.push(push_ids=['user:elt2'])
+        self.assertEqual(stack.getStackContent(context=self),
+                         ['user:elt1', 'user:elt2'])
+        stack.replace('user:elt2', 'user:elt4')
+        self.assertEqual(stack.getStackContent(context=self),
+                         ['user:elt1', 'user:elt4'])
+
+        #
+        # Test with elements objects
+        #
+
+        oelt = UserStackElement('user:string_elt')
+        stack.replace('user:elt4', oelt)
+        self.assertEqual(stack.getStackContent(context=self),
+                         ['user:elt1', 'user:string_elt'])
 
     def test_reset(self):
         simple = SimpleStack()
@@ -312,28 +373,40 @@ class TestSimpleStack(unittest.TestCase):
         self.assertEqual([x.getId() for x in stack._getStackContent()],
                          ['user:elt1', 'user:elt2', 'group:elt3', 'group:elt4'])
 
-    def test_replace(self):
-        #
-        # Test with strings
-        #
-
+    def test_getStackContent(self):
         stack = SimpleStack()
-        stack.push(push_ids=['user:elt1'])
-        stack.push(push_ids=['user:elt2'])
+        stack.push(push_ids=['user:elt1', 'group:elt2'],
+                   data_list=['comment'],
+                   comment=['comment for 1', 'comment for 2'])
+        # default: id
         self.assertEqual(stack.getStackContent(context=self),
-                         ['user:elt1', 'user:elt2'])
-        stack.replace('user:elt2', 'user:elt4')
-        self.assertEqual(stack.getStackContent(context=self),
-                         ['user:elt1', 'user:elt4'])
-
-        #
-        # Test with elements objects
-        #
-
-        oelt = UserStackElement('user:string_elt')
-        stack.replace('user:elt4', oelt)
-        self.assertEqual(stack.getStackContent(context=self),
-                         ['user:elt1', 'user:string_elt'])
+                         ['user:elt1', 'group:elt2'])
+        # without context: hidden
+        self.assertEqual(stack.getStackContent(), ['hidden', 'hidden'])
+        # str
+        str_content = [
+            "<UserStackElement {'comment': 'comment for 1', 'id': 'user:elt1'} >",
+            "<GroupStackElement {'comment': 'comment for 2', 'id': 'group:elt2'} >",
+            ]
+        self.assertEqual(stack.getStackContent(type='str', context=self),
+                         str_content)
+        # call
+        call_content = [
+            {'comment': 'comment for 1', 'id': 'user:elt1'},
+            {'comment': 'comment for 2', 'id': 'group:elt2'},
+            ]
+        self.assertEqual(stack.getStackContent(type='call', context=self),
+                         call_content)
+        # role
+        self.assertEqual(stack.getStackContent(type='role', context=self),
+                         ['elt1', 'group:elt2'])
+        # object (no check on stack element data for comparison)
+        obj_content = [
+            UserStackElement('user:elt1'),
+            GroupStackElement('group:elt2'),
+            ]
+        self.assertEqual(stack.getStackContent(type='object', context=self),
+                         obj_content)
 
 
 class TestHierarchicalStack(unittest.TestCase):
@@ -343,6 +416,7 @@ class TestHierarchicalStack(unittest.TestCase):
         verifyClass(ISimpleWorkflowStack, HierarchicalStack)
         verifyClass(IHierarchicalWorkflowStack, HierarchicalStack)
 
+    # XXX this test is too long, hard to maintain
     def test_NoMaxSize(self):
 
         #
@@ -354,67 +428,79 @@ class TestHierarchicalStack(unittest.TestCase):
         #
 
         # Test Base Stack with no initialization
-        hstack = HierarchicalStack()
-        self.assertEqual(hstack.getSize(), 0)
-        self.assertEqual(hstack.isEmpty(), 1)
-        self.assertEqual(hstack.isFull(), 0)
+        stack = HierarchicalStack()
+        self.assertEqual(stack.getSize(), 0)
+        self.assertEqual(stack.isEmpty(), 1)
+        self.assertEqual(stack.isFull(), 0)
 
         # Adding one element
-        hstack.push(push_ids=['elt1'], levels=[0])
-        self.assertEqual(hstack.getSize(), 1)
-        self.assertEqual(hstack.isEmpty(), 0)
-        self.assertEqual(hstack.isFull(), 0)
+        code = stack._push('elt1', level=0)
+        self.assertEqual(code, 1)
+        self.assertEqual(stack.getSize(), 1)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
 
         # Adding same element. (Not allowed with this stack)
-        res = hstack.push('elt1')
-        self.assertEqual(hstack.getSize(), 1)
-        self.assertEqual(hstack.isEmpty(), 0)
-        self.assertEqual(hstack.isFull(), 0)
-
-        # Adding another element. (Allowed with this stack)
-        hstack.push(push_ids=['elt2'], levels=[0])
-        self.assertEqual(hstack.getSize(), 2)
-        self.assertEqual(hstack.isEmpty(), 0)
-        self.assertEqual(hstack.isFull(), 0)
-
-        # Pop now
-        code = hstack.pop(pop_ids=('elt2',))
-        self.assertEqual(code, 1)
-        self.assertEqual(hstack.getSize(), 1)
-        self.assertEqual(hstack.isEmpty(), 0)
-        self.assertEqual(hstack.isFull(), 0)
-
-        # Pop again
-        code = hstack.pop(pop_ids=['elt1'])
-        self.assertEqual(code, 1)
-        self.assertEqual(hstack.getSize(), 0)
-        self.assertEqual(hstack.isEmpty(), 1)
-        self.assertEqual(hstack.isFull(), 0)
-
-        # Pop again
-        code = hstack.pop(pop_ids=('fake',))
+        code = stack._push('elt1', level=0)
         self.assertEqual(code, 0)
-        self.assertEqual(hstack.getSize(), 0)
-        self.assertEqual(hstack.isEmpty(), 1)
-        self.assertEqual(hstack.isFull(), 0)
+        self.assertEqual(stack.getSize(), 1)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
+
+        # Adding same element, different level (allowed)
+        code = stack._push('elt1', level=1)
+        self.assertEqual(code, 1)
+        self.assertEqual(stack.getSize(), 2)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
+
+        # Adding another element.
+        code = stack._push('elt2', level=0)
+        self.assertEqual(code, 1)
+        self.assertEqual(stack.getSize(), 3)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
+
+        # Pop now, at current level
+        code = stack._pop('elt2')
+        self.assertEqual(code, 1)
+        self.assertEqual(stack.getSize(), 2)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
+
+        # Pop again
+        code = stack._pop('elt1')
+        self.assertEqual(code, 1)
+        self.assertEqual(stack.getSize(), 1)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
+
+        # Pop again
+        code = stack._pop('fake')
+        self.assertEqual(code, 0)
+        self.assertEqual(stack.getSize(), 1)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
 
         # Adding one element
-        hstack.push(push_ids=['elt1'], levels=[0])
-        self.assertEqual(hstack.getSize(), 1)
-        self.assertEqual(hstack.isEmpty(), 0)
-        self.assertEqual(hstack.isFull(), 0)
+        code = stack._push('elt1', level=0)
+        self.assertEqual(code, 1)
+        self.assertEqual(stack.getSize(), 2)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
 
         # Pop again
-        code = hstack.pop(pop_ids=('elt1',))
+        code = stack._pop('elt1')
         self.assertEqual(code, 1)
-        self.assertEqual(hstack.getSize(), 0)
-        self.assertEqual(hstack.isEmpty(), 1)
-        self.assertEqual(hstack.isFull(), 0)
+        self.assertEqual(stack.getSize(), 1)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
 
         # Try to push a None element
-        res = hstack._push(None)
-        self.assertEqual(res, -1)
+        code = stack._push(None)
+        self.assertEqual(code, 0)
 
+    # XXX this test is too long, hard to maintain
     def test_NoMaxSizeWithLevels(self):
 
         #
@@ -422,331 +508,321 @@ class TestHierarchicalStack(unittest.TestCase):
         #
 
         # Test Base Stack with no initialization
-        hstack = HierarchicalStack()
+        stack = HierarchicalStack()
 
-        self.assertEqual(hstack.getSize(level=-1), 0)
-        self.assertEqual(hstack.getSize(level=0), 0)
-        self.assertEqual(hstack.getSize(level=1), 0)
+        self.assertEqual(stack.getSize(level=-1), 0)
+        self.assertEqual(stack.getSize(level=0), 0)
+        self.assertEqual(stack.getSize(level=1), 0)
 
-        self.assertEqual(hstack.isEmpty(level=-1), 1)
-        self.assertEqual(hstack.isEmpty(level=0), 1)
-        self.assertEqual(hstack.isEmpty(level=1), 1)
+        self.assertEqual(stack.isEmpty(level=-1), 1)
+        self.assertEqual(stack.isEmpty(level=0), 1)
+        self.assertEqual(stack.isEmpty(level=1), 1)
 
-        self.assertEqual(hstack.isFull(level=-1), 0)
-        self.assertEqual(hstack.isFull(level=0), 0)
-        self.assertEqual(hstack.isFull(level=1), 0)
+        self.assertEqual(stack.isFull(level=-1), 0)
+        self.assertEqual(stack.isFull(level=0), 0)
+        self.assertEqual(stack.isFull(level=1), 0)
 
 
         # Adding one element at level 0
-        hstack.push('elt1', level=0)
+        stack._push('elt1', level=0)
 
-        self.assertEqual(hstack.getSize(), 1)
-        self.assertEqual(hstack.getSize(level=0), 1)
+        self.assertEqual(stack.getSize(), 1)
+        self.assertEqual(stack.getSize(level=0), 1)
 
-        self.assertEqual(hstack.getSize(level=1), 0)
-        self.assertEqual(hstack.getSize(level=-1), 0)
+        self.assertEqual(stack.getSize(level=1), 0)
+        self.assertEqual(stack.getSize(level=-1), 0)
 
-        self.assertEqual(hstack.isEmpty(), 0)
-        self.assertEqual(hstack.isEmpty(level=0), 0)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isEmpty(level=0), 0)
 
-        self.assertEqual(hstack.isEmpty(level=-1), 1)
-        self.assertEqual(hstack.isEmpty(level=1), 1)
+        self.assertEqual(stack.isEmpty(level=-1), 1)
+        self.assertEqual(stack.isEmpty(level=1), 1)
 
-        self.assertEqual(hstack.isFull(), 0)
-        self.assertEqual(hstack.isFull(level=0), 0)
+        self.assertEqual(stack.isFull(), 0)
+        self.assertEqual(stack.isFull(level=0), 0)
 
-        self.assertEqual(hstack.isFull(level=-1), 0)
-        self.assertEqual(hstack.isFull(level=1), 0)
+        self.assertEqual(stack.isFull(level=-1), 0)
+        self.assertEqual(stack.isFull(level=1), 0)
 
         # Adding one element at level -1
-        hstack.push('elt-1', level=-1)
+        stack._push('elt-1', level=-1)
+        self.assertEqual(stack.getSize(), 2)
+        self.assertEqual(stack.getSize(level=0), 1)
+        self.assertEqual(stack.getSize(level=1), 0)
+        self.assertEqual(stack.getSize(level=-1), 1)
 
-        self.assertEqual(hstack.getSize(), 1)
-        self.assertEqual(hstack.getSize(level=0), 1)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isEmpty(level=0), 0)
 
-        self.assertEqual(hstack.getSize(level=1), 0)
-        self.assertEqual(hstack.getSize(level=-1), 1)
+        self.assertEqual(stack.isEmpty(level=-1), 0)
+        self.assertEqual(stack.isEmpty(level=1), 1)
 
-        self.assertEqual(hstack.isEmpty(), 0)
-        self.assertEqual(hstack.isEmpty(level=0), 0)
+        self.assertEqual(stack.isFull(), 0)
+        self.assertEqual(stack.isFull(level=0), 0)
 
-        self.assertEqual(hstack.isEmpty(level=-1), 0)
-        self.assertEqual(hstack.isEmpty(level=1), 1)
-
-        self.assertEqual(hstack.isFull(), 0)
-        self.assertEqual(hstack.isFull(level=0), 0)
-
-        self.assertEqual(hstack.isFull(level=-1), 0)
-        self.assertEqual(hstack.isFull(level=1), 0)
+        self.assertEqual(stack.isFull(level=-1), 0)
+        self.assertEqual(stack.isFull(level=1), 0)
 
         # Adding one element at level 1
-        hstack.push('elt11', level=1)
+        stack._push('elt11', level=1)
 
-        self.assertEqual(hstack.getSize(), 1)
-        self.assertEqual(hstack.getSize(level=0), 1)
+        self.assertEqual(stack.getSize(), 3)
+        self.assertEqual(stack.getSize(level=0), 1)
 
-        self.assertEqual(hstack.getSize(level=1), 1)
-        self.assertEqual(hstack.getSize(level=-1), 1)
+        self.assertEqual(stack.getSize(level=1), 1)
+        self.assertEqual(stack.getSize(level=-1), 1)
 
-        self.assertEqual(hstack.isEmpty(), 0)
-        self.assertEqual(hstack.isEmpty(level=0), 0)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isEmpty(level=0), 0)
 
-        self.assertEqual(hstack.isEmpty(level=-1), 0)
-        self.assertEqual(hstack.isEmpty(level=1), 0)
+        self.assertEqual(stack.isEmpty(level=-1), 0)
+        self.assertEqual(stack.isEmpty(level=1), 0)
 
-        self.assertEqual(hstack.isFull(), 0)
-        self.assertEqual(hstack.isFull(level=0), 0)
+        self.assertEqual(stack.isFull(), 0)
+        self.assertEqual(stack.isFull(level=0), 0)
 
-        self.assertEqual(hstack.isFull(level=-1), 0)
-        self.assertEqual(hstack.isFull(level=1), 0)
+        self.assertEqual(stack.isFull(level=-1), 0)
+        self.assertEqual(stack.isFull(level=1), 0)
 
         # Adding same element at each level  (Not allowed with this stack)
 
         # Level 0
-        res = hstack.push('elt1', level=0)
-        self.assertEqual(res, -2)
+        res = stack._push('elt1', level=0)
+        self.assertEqual(res, 0)
 
-        res = hstack.push('elt-1', level=0)
+        res = stack._push('elt-1', level=0)
         self.assertEqual(res, 1)
 
-        res = hstack.push('elt11', level=0)
+        res = stack._push('elt11', level=0)
         self.assertEqual(res, 1)
 
         # Level -1
-        res = hstack.push('elt-1', level=-1)
-        self.assertEqual(res, -2)
+        res = stack._push('elt-1', level=-1)
+        self.assertEqual(res, 0 )
 
-        res = hstack.push('elt1', level=-1)
+        res = stack._push('elt1', level=-1)
         self.assertEqual(res, 1)
 
-        res = hstack.push('elt11', level=-1)
+        res = stack._push('elt11', level=-1)
         self.assertEqual(res, 1)
 
         # Level 1
-        res = hstack.push('elt11', level=1)
-        self.assertEqual(res, -2)
+        res = stack._push('elt11', level=1)
+        self.assertEqual(res, 0 )
 
-        res = hstack.push('elt-1', level=1)
+        res = stack._push('elt-1', level=1)
         self.assertEqual(res, 1)
 
-        res = hstack.push('elt1', level=1)
+        res = stack._push('elt1', level=1)
         self.assertEqual(res, 1)
 
-        self.assertEqual(hstack.getSize(), 3)
-        self.assertEqual(hstack.getSize(level=0), 3)
-        self.assertEqual(hstack.getSize(level=-1), 3)
-        self.assertEqual(hstack.getSize(level=1), 3)
+        self.assertEqual(stack.getSize(), 9)
+        self.assertEqual(stack.getSize(level=0), 3)
+        self.assertEqual(stack.getSize(level=-1), 3)
+        self.assertEqual(stack.getSize(level=1), 3)
 
         # Check level 0 (current level)
-        self.assertEqual(hstack.getLevelContent(level=0, context=self),
+        self.assertEqual(stack.getLevelContent(level=0, context=self),
                          ['elt1','elt-1','elt11'])
-        self.assertEqual(hstack.getLevelContent(level=0, context=self),
+        self.assertEqual(stack.getLevelContent(level=0, context=self),
                          ['elt1','elt-1','elt11'])
-        self.assertEqual(hstack.getLevelContent(level=-1, context=self),
+        self.assertEqual(stack.getLevelContent(level=-1, context=self),
                          ['elt-1','elt1','elt11'])
-        self.assertEqual(hstack.getLevelContent(level=1, context=self),
+        self.assertEqual(stack.getLevelContent(level=1, context=self),
                          ['elt11','elt-1','elt1'])
 
         # Dec Level
-        clevel = hstack.doDecLevel()
+        clevel = stack.doDecLevel()
         self.assertEqual(clevel, -1)
-        self.assertEqual(clevel, hstack.getCurrentLevel())
+        self.assertEqual(clevel, stack.getCurrentLevel())
 
         # Check the level content
-        self.assertEqual(hstack.getLevelContent(context=self),
-                         hstack.getLevelContent(
-            level=hstack.getCurrentLevel(), context=self))
-        self.assertEqual(hstack.getLevelContent(context=self),
-                         hstack.getLevelContent(level=-1, context=self))
-        self.assertEqual(hstack.getLevelContent(context=self),
+        self.assertEqual(stack.getLevelContent(context=self),
+                         stack.getLevelContent(
+            level=stack.getCurrentLevel(), context=self))
+        self.assertEqual(stack.getLevelContent(context=self),
+                         stack.getLevelContent(level=-1, context=self))
+        self.assertEqual(stack.getLevelContent(context=self),
                          ['elt-1','elt1','elt11'])
 
         # Check the consistency of the rest
-        self.assertEqual(hstack.getLevelContent(level=0, context=self),
+        self.assertEqual(stack.getLevelContent(level=0, context=self),
                          ['elt1','elt-1','elt11'])
-        self.assertEqual(hstack.getLevelContent(level=-1, context=self),
+        self.assertEqual(stack.getLevelContent(level=-1, context=self),
                          ['elt-1','elt1','elt11'])
-        self.assertEqual(hstack.getLevelContent(level=1, context=self),
+        self.assertEqual(stack.getLevelContent(level=1, context=self),
                          ['elt11','elt-1','elt1'])
 
         # Increment now
-        clevel = hstack.doIncLevel()
+        clevel = stack.doIncLevel()
         self.assertEqual(clevel, 0)
-        self.assertEqual(clevel, hstack.getCurrentLevel())
+        self.assertEqual(clevel, stack.getCurrentLevel())
 
-        self.assertEqual(hstack.getLevelContent(context=self),
+        self.assertEqual(stack.getLevelContent(context=self),
                          ['elt1','elt-1','elt11'])
-        self.assertEqual(hstack.getLevelContent(level=0, context=self),
+        self.assertEqual(stack.getLevelContent(level=0, context=self),
                          ['elt1','elt-1','elt11'])
-        self.assertEqual(hstack.getLevelContent(level=-1, context=self),
+        self.assertEqual(stack.getLevelContent(level=-1, context=self),
                          ['elt-1','elt1','elt11'])
-        self.assertEqual(hstack.getLevelContent(level=1, context=self),
+        self.assertEqual(stack.getLevelContent(level=1, context=self),
                          ['elt11','elt-1','elt1'])
 
         # Increment again
-        clevel = hstack.doIncLevel()
+        clevel = stack.doIncLevel()
         self.assertEqual(clevel, 1)
-        self.assertEqual(clevel, hstack.getCurrentLevel())
+        self.assertEqual(clevel, stack.getCurrentLevel())
 
         # Check the level content
-        self.assertEqual(hstack.getLevelContent(context=self),
-                         hstack.getLevelContent(level=hstack.getCurrentLevel(),
+        self.assertEqual(stack.getLevelContent(context=self),
+                         stack.getLevelContent(level=stack.getCurrentLevel(),
                                                 context=self))
-        self.assertEqual(hstack.getLevelContent(context=self),
-                         hstack.getLevelContent(level=1, context=self))
-        self.assertEqual(hstack.getLevelContent(context=self),
+        self.assertEqual(stack.getLevelContent(context=self),
+                         stack.getLevelContent(level=1, context=self))
+        self.assertEqual(stack.getLevelContent(context=self),
                          ['elt11','elt-1','elt1'])
 
         # Check levels
-        self.assertEqual(hstack.getAllLevels(), [-1, 0, 1])
+        self.assertEqual(stack.getAllLevels(), [-1, 0, 1])
 
         # Let's test the remove / pop API
 
         # Pop element at current level (1)
-        self.assertEqual(hstack.getCurrentLevel(), 1)
-        self.assertEqual(hstack.pop(pop_ids=('elt1',)), 1)
+        self.assertEqual(stack.getCurrentLevel(), 1)
+        self.assertEqual(stack.pop(pop_ids=('elt1',)), 1)
 
         # Let's check the consistency of the rest
-        self.assertEqual(hstack.getSize(), 2)
-        self.assertEqual(hstack.getSize(level=0), 3)
+        self.assertEqual(stack.getSize(), 8)
+        self.assertEqual(stack.getSize(level=0), 3)
+        self.assertEqual(stack.getSize(level=1), 2)
+        self.assertEqual(stack.getSize(level=-1), 3)
 
-        self.assertEqual(hstack.getSize(level=1), 2)
-        self.assertEqual(hstack.getSize(level=-1), 3)
-
-        self.assertEqual(hstack.isEmpty(), 0)
-        self.assertEqual(hstack.isEmpty(level=0), 0)
-
-        self.assertEqual(hstack.isEmpty(level=-1), 0)
-        self.assertEqual(hstack.isEmpty(level=1), 0)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isEmpty(level=0), 0)
+        self.assertEqual(stack.isEmpty(level=-1), 0)
+        self.assertEqual(stack.isEmpty(level=1), 0)
 
         # Pop element at level 0
         # not found
-        self.assertEqual(hstack.getCurrentLevel(), 1)
-        self.assertEqual(hstack.pop(pop_ids=['fake'],level=0), 0)
+        self.assertEqual(stack.getCurrentLevel(), 1)
+        self.assertEqual(stack.pop(pop_ids=['fake']), 0)
 
         # Let's check the consistency of the rest
-        self.assertEqual(hstack.getSize(level=0), 3)
+        self.assertEqual(stack.getSize(level=0), 3)
+        self.assertEqual(stack.getSize(), 8)
+        self.assertEqual(stack.getSize(level=1), 2)
+        self.assertEqual(stack.getSize(level=-1), 3)
 
-        self.assertEqual(hstack.getSize(), 2)
-        self.assertEqual(hstack.getSize(level=1), 2)
-        self.assertEqual(hstack.getSize(level=-1), 3)
-
-        self.assertEqual(hstack.isEmpty(), 0)
-        self.assertEqual(hstack.isEmpty(level=0), 0)
-
-        self.assertEqual(hstack.isEmpty(level=-1), 0)
-        self.assertEqual(hstack.isEmpty(level=1), 0)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isEmpty(level=0), 0)
+        self.assertEqual(stack.isEmpty(level=-1), 0)
+        self.assertEqual(stack.isEmpty(level=1), 0)
 
         # Pop element at level -1
-        self.assertEqual(hstack.getCurrentLevel(), 1)
-        self.assertEqual(hstack.pop(pop_ids=('elt11',),level=-1), 1)
+        self.assertEqual(stack.getCurrentLevel(), 1)
+        self.assertEqual(stack.pop(pop_ids=('1,elt11',)), 1)
 
         # Let's check the consistency of the rest
-        self.assertEqual(hstack.getSize(), 2)
-        self.assertEqual(hstack.getSize(level=0), 3)
+        self.assertEqual(stack.getSize(), 7)
+        self.assertEqual(stack.getSize(level=0), 3)
+        self.assertEqual(stack.getSize(level=1), 1)
+        self.assertEqual(stack.getSize(level=-1), 3)
 
-        self.assertEqual(hstack.getSize(level=1), 2)
-        self.assertEqual(hstack.getSize(level=-1), 2)
-
-        self.assertEqual(hstack.isEmpty(), 0)
-        self.assertEqual(hstack.isEmpty(level=0), 0)
-
-        self.assertEqual(hstack.isEmpty(level=-1), 0)
-        self.assertEqual(hstack.isEmpty(level=1), 0)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isEmpty(level=0), 0)
+        self.assertEqual(stack.isEmpty(level=-1), 0)
+        self.assertEqual(stack.isEmpty(level=1), 0)
 
         # Let's change level
-        clevel = hstack.doDecLevel()
-        self.assertEqual(clevel, hstack.getCurrentLevel())
+        clevel = stack.doDecLevel()
+        self.assertEqual(clevel, stack.getCurrentLevel())
         self.assertEqual(clevel, 0)
 
         # Let's check the consistency of the rest
-        self.assertEqual(hstack.getSize(), 3)
-        self.assertEqual(hstack.getSize(level=0), 3)
+        self.assertEqual(stack.getSize(), 7)
+        self.assertEqual(stack.getSize(level=0), 3)
+        self.assertEqual(stack.getSize(level=1), 1)
+        self.assertEqual(stack.getSize(level=-1), 3)
 
-        self.assertEqual(hstack.getSize(level=1), 2)
-        self.assertEqual(hstack.getSize(level=-1), 2)
-
-        self.assertEqual(hstack.isEmpty(), 0)
-        self.assertEqual(hstack.isEmpty(level=0), 0)
-
-        self.assertEqual(hstack.isEmpty(level=-1), 0)
-        self.assertEqual(hstack.isEmpty(level=1), 0)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isEmpty(level=0), 0)
+        self.assertEqual(stack.isEmpty(level=-1), 0)
+        self.assertEqual(stack.isEmpty(level=1), 0)
 
         # Check now the pop
-        self.assertEqual(hstack.pop(pop_ids=('XXX',)), 0)
-        self.assertEqual(hstack.pop(pop_ids=('elt1',), level=89), 0)
-        self.assertEqual(hstack.pop(pop_ids=('elt1',),), 1)
-        self.assertEqual(hstack.getSize(), 2)
-        self.assertEqual(hstack.getSize(level=hstack.getCurrentLevel()), 2)
-        self.assertEqual(hstack.getSize(level=0), 2)
-        self.assertEqual(hstack.pop(pop_ids=('elt1',)), 0)
-        self.assertEqual(hstack.pop(pop_ids=('elt-1', 'elt11')), 1)
-        self.assertEqual(hstack.getSize(), 0)
-        self.assertEqual(hstack.isEmpty(), 1)
+        self.assertEqual(stack.pop(pop_ids=('XXX',)), 0)
+        self.assertEqual(stack.pop(pop_ids=('89,elt1',)), 0)
+        self.assertEqual(stack.pop(pop_ids=('elt1',)), 1)
+        self.assertEqual(stack.getSize(), 6)
+        self.assertEqual(stack.getSize(level=stack.getCurrentLevel()), 2)
+        self.assertEqual(stack.getSize(level=0), 2)
+        self.assertEqual(stack.pop(pop_ids=('elt1',)), 0)
+        self.assertEqual(stack.pop(pop_ids=('elt-1', 'elt11')), 1)
+        self.assertEqual(stack.getSize(), 4)
+        self.assertEqual(stack.isEmpty(), False)
 
         # Check levels
-        self.assertEqual(hstack.getAllLevels(), [-1, 1])
-        clevel = hstack.doDecLevel()
+        self.assertEqual(stack.getAllLevels(), [-1, 1])
+        clevel = stack.doDecLevel()
         self.assertEqual(clevel, -1)
-        self.assertEqual(clevel, hstack.getCurrentLevel())
+        self.assertEqual(clevel, stack.getCurrentLevel())
 
         # Not possible to go back to level 0 (empty)
-        clevel = hstack.doIncLevel()
+        clevel = stack.doIncLevel()
         self.assertEqual(clevel, -1)
-        self.assertEqual(clevel, hstack.getCurrentLevel())
+        self.assertEqual(clevel, stack.getCurrentLevel())
 
         # Add an elemet to level 0
-        self.assertEqual(hstack.push(elt='elt1', level=0), 1)
+        self.assertEqual(stack._push(elt='elt1', level=0), 1)
 
         # Now possible to go back to level 0
-        clevel = hstack.doIncLevel()
+        clevel = stack.doIncLevel()
         self.assertEqual(clevel, 0)
-        self.assertEqual(clevel, hstack.getCurrentLevel())
+        self.assertEqual(clevel, stack.getCurrentLevel())
 
-        # Let's empty evrything
-        clevel = hstack.doDecLevel()
+        # Let's empty evrything at level -1
+        clevel = stack.doDecLevel()
         self.assertEqual(clevel, -1)
-        self.assertEqual(clevel, hstack.getCurrentLevel())
-        self.assertEqual(hstack.pop(pop_ids=('elt1', 'elt-1')), 1)
-
+        self.assertEqual(clevel, stack.getCurrentLevel())
+        self.assertEqual(stack.pop(pop_ids=('elt1', 'elt-1', 'elt11')), 1)
         # Empty now (-1)
-        self.assertEqual(hstack.isEmpty(), 1)
+        self.assertEqual(stack.isEmpty(level=-1), 1)
 
         # Go back to 0
-        clevel = hstack.doIncLevel()
+        clevel = stack.doIncLevel()
         self.assertEqual(clevel, 0)
-        self.assertEqual(clevel, hstack.getCurrentLevel())
+        self.assertEqual(clevel, stack.getCurrentLevel())
 
         # Trying to go back to -1
-        clevel = hstack.doDecLevel()
+        clevel = stack.doDecLevel()
         self.assertEqual(clevel, 0)
-        self.assertEqual(clevel, hstack.getCurrentLevel())
+        self.assertEqual(clevel, stack.getCurrentLevel())
         # ... now way... let's pop the level 0
 
-        self.assertEqual(hstack.pop(pop_ids=['elt1']), 1)
-        # Empty now (0)
-        self.assertEqual(hstack.isEmpty(), 1)
+        self.assertEqual(stack.pop(pop_ids=['elt1']), 1)
+        # Empty now at level (0)
+        self.assertEqual(stack.isEmpty(level=0), 1)
 
         # Go to 1
-        clevel = hstack.doIncLevel()
+        clevel = stack.doIncLevel()
         self.assertEqual(clevel, 1)
-        self.assertEqual(clevel, hstack.getCurrentLevel())
+        self.assertEqual(clevel, stack.getCurrentLevel())
 
-        self.assertEqual(hstack.pop(pop_ids=('elt-1', 'elt11')), 1)
+        self.assertEqual(stack.pop(pop_ids=('elt-1',)), 1)
         # Empty now (1)
-        self.assertEqual(hstack.isEmpty(), 1)
+        self.assertEqual(stack.isEmpty(), 1)
 
         # Check the status of the stack now
-        self.assertEqual(hstack.getAllLevels(), [])
-        self.assertEqual(hstack.getLevelContent(context=self), [])
-        self.assertEqual(hstack.getLevelContent(level=-1, context=self), [])
-        self.assertEqual(hstack.getLevelContent(level=0, context=self), [])
-        self.assertEqual(hstack.getLevelContent(level=1, context=self), [])
+        self.assertEqual(stack.getAllLevels(), [])
+        self.assertEqual(stack.getLevelContent(context=self), [])
+        self.assertEqual(stack.getLevelContent(level=-1, context=self), [])
+        self.assertEqual(stack.getLevelContent(level=0, context=self), [])
+        self.assertEqual(stack.getLevelContent(level=1, context=self), [])
 
-        # Check wiered stuffs
-        self.assertEqual(hstack.getLevelContent(level=90000, context=self), [])
-        self.assertEqual(hstack.pop(pop_ids=('wiered',), level=90000), 0)
+        # Check weird stuffs
+        self.assertEqual(stack.getLevelContent(level=90000, context=self), [])
+        self.assertEqual(stack.pop(pop_ids=('90000,weird',)), 0)
 
+    # XXX this test is too long, hard to maintain
     def test_WithMaxSize(self):
 
         #
@@ -758,199 +834,159 @@ class TestHierarchicalStack(unittest.TestCase):
         #
 
         # Test Base Stack with no initialization
-        hstack = HierarchicalStack(maxsize=2)
-        self.assertEqual(hstack.getSize(), 0)
-        self.assertEqual(hstack.isEmpty(), 1)
-        self.assertEqual(hstack.isFull(), 0)
+        stack = HierarchicalStack(max_size=2)
+        self.assertEqual(stack.getSize(), 0)
+        self.assertEqual(stack.isEmpty(), 1)
+        self.assertEqual(stack.isFull(), 0)
 
         # Adding one element
-        hstack.push(push_ids=['elt1'], levels=[0])
-        self.assertEqual(hstack.getSize(), 1)
-        self.assertEqual(hstack.isEmpty(), 0)
-        self.assertEqual(hstack.isFull(), 0)
+        stack.push(push_ids=['elt1'], levels=[0])
+        self.assertEqual(stack.getSize(), 1)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
 
         # Adding same element. (Not allowed with this stack)
-        res = hstack.push('elt1')
-        self.assertEqual(res, -2)
-        self.assertEqual(hstack.getSize(), 1)
-        self.assertEqual(hstack.isEmpty(), 0)
-        self.assertEqual(hstack.isFull(), 0)
+        res = stack._push('elt1')
+        self.assertEqual(res, 0)
+        self.assertEqual(stack.getSize(), 1)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
 
-        self.assertEqual(hstack.getStackContent(context=self),
+        self.assertEqual(stack.getStackContent(context=self),
                          {0:['elt1']})
 
         # Adding another element.
-        res = hstack.push('elt2')
-        self.assertEqual(res, 1)
-        self.assertEqual(hstack.getStackContent(context=self),
+        code = stack._push('elt2')
+        self.assertEqual(code, 1)
+        self.assertEqual(stack.getStackContent(context=self),
                          {0:['elt1','elt2']})
 
-        self.assertEqual(hstack.getSize(), 2)
-        self.assertEqual(hstack.isEmpty(), 0)
-        self.assertEqual(hstack.isFull(), 1)
+        self.assertEqual(stack.getSize(), 2)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 1)
 
         # Pop now
-        code = hstack.pop(pop_ids=['elt2'])
+        code = stack._pop('elt2')
         self.assertEqual(code, 1)
-        self.assertEqual(hstack.getSize(), 1)
-        self.assertEqual(hstack.isEmpty(), 0)
-        self.assertEqual(hstack.isFull(), 0)
+        self.assertEqual(stack.getSize(), 1)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
 
         # Pop again
-        code = hstack.pop(pop_ids=['elt1'])
+        code = stack._pop('elt1')
         self.assertEqual(code, 1)
-        self.assertEqual(hstack.getSize(), 0)
-        self.assertEqual(hstack.isEmpty(), 1)
-        self.assertEqual(hstack.isFull(), 0)
+        self.assertEqual(stack.getSize(), 0)
+        self.assertEqual(stack.isEmpty(), 1)
+        self.assertEqual(stack.isFull(), 0)
 
         # Pop again
-        code = hstack.pop(pop_ids=['fake'])
+        code = stack._pop('fake')
         self.assertEqual(code, 0)
-        self.assertEqual(hstack.getSize(), 0)
-        self.assertEqual(hstack.isEmpty(), 1)
-        self.assertEqual(hstack.isFull(), 0)
+        self.assertEqual(stack.getSize(), 0)
+        self.assertEqual(stack.isEmpty(), 1)
+        self.assertEqual(stack.isFull(), 0)
 
         # Adding one element
-        hstack.push(push_ids=['elt1'], levels=[0])
-        self.assertEqual(hstack.getSize(), 1)
-        self.assertEqual(hstack.isEmpty(), 0)
-        self.assertEqual(hstack.isFull(), 0)
+        stack.push(push_ids=['elt1'], levels=[0])
+        self.assertEqual(stack.getSize(), 1)
+        self.assertEqual(stack.isEmpty(), 0)
+        self.assertEqual(stack.isFull(), 0)
 
         # Pop again
-        code = hstack.pop(pop_ids=['elt1'])
+        code = stack._pop('elt1')
         self.assertEqual(code, 1)
-        self.assertEqual(hstack.getSize(), 0)
-        self.assertEqual(hstack.isEmpty(), 1)
-        self.assertEqual(hstack.isFull(), 0)
+        self.assertEqual(stack.getSize(), 0)
+        self.assertEqual(stack.isEmpty(), 1)
+        self.assertEqual(stack.isFull(), 0)
 
         # Try to push a None element
-        res = hstack.push(None)
-        self.assertEqual(res, -1)
+        code = stack._push(None)
+        self.assertEqual(code, 0)
 
-        hstack = HierarchicalStack()
+        stack = HierarchicalStack()
 
         # Test the pop() method
-        self.assertEqual(hstack.getStackContent(context=self), {})
-        self.assertEqual(hstack.pop(pop_ids=['elt1']), 0)
-        hstack.push(push_ids=['elt1'], levels=[0])
-        self.assertEqual(hstack.pop(pop_ids=['elt1']), 1)
-        hstack.push(push_ids=['elt1'], levels=[0])
-        hstack.push(push_ids=['elt2'], levels=[0])
-        self.assertEqual(hstack.getStackContent(context=self),
+        self.assertEqual(stack.getStackContent(context=self), {})
+        self.assertEqual(stack.pop(pop_ids=['elt1']), 0)
+        stack.push(push_ids=['elt1'], levels=[0])
+        self.assertEqual(stack.pop(pop_ids=['elt1']), 1)
+        stack.push(push_ids=['elt1'], levels=[0])
+        stack.push(push_ids=['elt2'], levels=[0])
+        self.assertEqual(stack.getStackContent(context=self),
                          {0:['elt1', 'elt2']})
-        hstack.push(push_ids=['elt3'], levels=[0])
-        self.assertEqual(hstack.getStackContent(context=self),
+        stack.push(push_ids=['elt3'], levels=[0])
+        self.assertEqual(stack.getStackContent(context=self),
                          {0:['elt1', 'elt2', 'elt3']})
-        self.assertEqual(hstack.pop(pop_ids=['elt2']), 1)
-        self.assertEqual(hstack.getStackContent(context=self),
+        self.assertEqual(stack.pop(pop_ids=['elt2']), 1)
+        self.assertEqual(stack.getStackContent(context=self),
                          {0:['elt1', 'elt3']})
 
-        hstack.pop(pop_ids=['0,elt3'])
-        hstack.pop(pop_ids=['0,elt1'])
-        self.assertEqual(hstack.getStackContent(context=self), {})
+        stack.pop(pop_ids=['0,elt3'])
+        stack.pop(pop_ids=['0,elt1'])
+        self.assertEqual(stack.getStackContent(context=self), {})
 
     def test_getCopy(self):
+        # check copy is not the same object
+        stack1 = HierarchicalStack()
+        self.assertEqual(stack1.meta_type, 'Hierarchical Stack')
+        stack2 = stack1.getCopy()
+        self.assertEqual(stack2.meta_type, 'Hierarchical Stack')
 
-        #
-        # Test getCopy()
-        # Goal is to prove the copy is not same object
-        #
+        self.assertNotEqual(stack2, None)
+        self.assertNotEqual(stack1, stack2)
 
-        hstack1 = HierarchicalStack()
-        self.assertEqual(hstack1.meta_type, 'Hierarchical Stack')
-        hstack2 = hstack1.getCopy()
-        self.assertEqual(hstack2.meta_type, 'Hierarchical Stack')
+        self.assertEqual(stack1.getStackContent(context=self), {})
+        self.assertEqual(stack2.getStackContent(context=self), {})
 
-        self.assertNotEqual(hstack2, None)
-        self.assertNotEqual(hstack1, hstack2)
+        self.assertEqual(stack1.getStackContent(context=self),
+                         stack2.getStackContent(context=self))
+        self.assertEqual(stack1.isFull(), stack2.isFull())
+        self.assertEqual(stack1.isEmpty(), stack2.isEmpty())
+        self.assertEqual(stack1.getSize(), stack2.getSize())
 
-        self.assertEqual(hstack1.getStackContent(context=self), {})
-        self.assertEqual(hstack2.getStackContent(context=self), {})
+        stack1._push('elt1', level=0)
+        stack2._push('elt2', level=0)
+        self.assertEqual(stack1.getLevelContent(context=self), ['elt1'])
+        self.assertEqual(stack2.getLevelContent(context=self), ['elt2'])
 
-        self.assertEqual(hstack1.getStackContent(context=self),
-                         hstack2.getStackContent(context=self))
-        self.assertEqual(hstack1.isFull(), hstack2.isFull())
-        self.assertEqual(hstack1.isEmpty(), hstack2.isEmpty())
-        self.assertEqual(hstack1.getSize(), hstack2.getSize())
+        self.assertNotEqual(stack1.getStackContent(context=self),
+                            stack2.getStackContent(context=self))
 
-        hstack1.push('elt1')
-        hstack2.push('elt2')
-        self.assertEqual(hstack1.getLevelContent(context=self), ['elt1'])
-        self.assertEqual(hstack2.getLevelContent(context=self), ['elt2'])
 
-        self.assertNotEqual(hstack1.getStackContent(context=self),
-                            hstack2.getStackContent(context=self))
+    def test_getCopy_with_data(self):
+        # check copy is not the same object, nor data
+        stack1 = HierarchicalStack()
+        self.assertEqual(stack1.meta_type, 'Hierarchical Stack')
+        stack1._push('elt1', level=0, data={'comment': "comment for 1"})
+        stack2 = stack1.getCopy()
+        self.assertEqual(stack2.meta_type, 'Hierarchical Stack')
 
-    def test_push(self):
-        hstack = HierarchicalStack()
+        self.assertNotEqual(stack2, None)
+        self.assertNotEqual(stack1, stack2)
 
-        # Add a user
-        hstack.push(push_ids=['elt1'], levels=[0])
-        elt = hstack._getStackContent()[0][0]
-        self.assert_(isinstance(elt, UserStackElement))
-        self.assert_(elt == 'elt1')
+        self.assertEqual(stack1.getStackContent(context=self),
+                         {0: ['elt1']})
+        self.assertEqual(stack2.getStackContent(context=self),
+                         {0: ['elt1']})
 
-        # Add a group
-        hstack.push(push_ids=['group:elt2'], levels=[0])
-        elt2 = hstack._getStackContent()[0][1]
-        self.assert_(isinstance(elt2, GroupStackElement))
-        self.assert_(elt2 == 'group:elt2')
+        self.assertEqual(stack1.getStackContent(context=self),
+                         stack2.getStackContent(context=self))
+        self.assertEqual(stack1.isFull(), stack2.isFull())
+        self.assertEqual(stack1.isEmpty(), stack2.isEmpty())
+        self.assertEqual(stack1.getSize(), stack2.getSize())
 
-    def test_level_api(self):
-        hstack = HierarchicalStack()
+        stack2._push('elt2', level=0, data={'comment': "comment for 2"})
+        self.assertEqual(stack1.getLevelContent(type='call', context=self),
+                         [{'id': 'elt1', 'comment': 'comment for 1'}])
+        self.assertEqual(stack2.getLevelContent(type='call', context=self),
+                         [{'id': 'elt1', 'comment': 'comment for 1'},
+                          {'id': 'elt2', 'comment': 'comment for 2'}])
 
-        # no upper nor lower level here.
-        self.assert_(not hstack.hasUpperLevel())
-        self.assert_(not hstack.hasLowerLevel())
+        self.assertNotEqual(stack1.getStackContent(context=self),
+                            stack2.getStackContent(context=self))
 
-        # Add someone at level 0
-        hstack.push(push_ids=['base'], levels=[0])
-        self.assert_(not hstack.hasUpperLevel())
-        self.assert_(not hstack.hasLowerLevel())
 
-        # Add someone at level 1
-        hstack.push(push_ids=['elt1'], levels=[1])
-        self.assert_(hstack.hasUpperLevel())
-        self.assert_(not hstack.hasLowerLevel())
-
-        # Add someone at level -1
-        hstack.push(push_ids=['elt2'], levels=[-1])
-        self.assert_(hstack.hasUpperLevel())
-        self.assert_(hstack.hasLowerLevel())
-
-        # Dec level
-        hstack.doDecLevel()
-        self.assertEqual(hstack.getCurrentLevel(), -1)
-        self.assert_(hstack.hasUpperLevel())
-        self.assert_(not hstack.hasLowerLevel())
-
-        # Inc level
-        hstack.doIncLevel()
-        self.assertEqual(hstack.getCurrentLevel(), 0)
-        self.assert_(hstack.hasUpperLevel())
-        self.assert_(hstack.hasLowerLevel())
-
-        # Inc level
-        hstack.doIncLevel()
-        self.assertEqual(hstack.getCurrentLevel(), 1)
-        self.assert_(not hstack.hasUpperLevel())
-        self.assert_(hstack.hasLowerLevel())
-
-        # Dec level
-        hstack.doDecLevel()
-        self.assert_(hstack.getCurrentLevel() == 0)
-
-        # Remove elt2 at level -1
-        hstack.pop(pop_ids=['-1,elt2'])
-        self.assert_(hstack.hasUpperLevel())
-        self.assert_(not hstack.hasLowerLevel())
-
-        # Remove elt1 at level 1
-        hstack.pop(pop_ids=['1,elt1'])
-        self.assert_(not hstack.hasUpperLevel())
-        self.assert_(not hstack.hasLowerLevel())
-
-    def test_getManagers(self):
+    def test__getManagers(self):
         stack = HierarchicalStack()
         stack.push(push_ids=['user:elt1', 'group:elt2'], levels=[0, 1])
         # current level is 0
@@ -958,6 +994,185 @@ class TestHierarchicalStack(unittest.TestCase):
             UserStackElement('user:elt1'),
             ]
         self.assertEqual(stack._getManagers(), managers)
+
+    def test__getLevelContent(self):
+        stack = HierarchicalStack()
+        stack.push(push_ids=['user:elt1', 'group:elt2'], levels=[0, 1])
+        # current level is 0
+        self.assertEqual(stack._getLevelContent(),
+                         [UserStackElement('user:elt1')])
+        self.assertEqual(stack._getLevelContent(level=1),
+                         [GroupStackElement('group:elt2')])
+
+    def test__getStackContent(self):
+        stack = HierarchicalStack()
+        stack.push(push_ids=['user:elt1', 'group:elt2'], levels=[0, 1])
+        stack_content = {
+            0: [UserStackElement('user:elt1')],
+            1: [GroupStackElement('group:elt2')],
+            }
+        self.assertEqual(stack._getStackContent(), stack_content)
+
+    def test__getStackElementIndex(self):
+        stack = HierarchicalStack()
+        stack.push(push_ids=['user:elt1', 'user:elt2', 'user:elt2'],
+                   levels=[0, 0, 1])
+        self.assertEqual(stack._getStackElementIndex('user:elt1'), 0)
+        self.assertEqual(stack._getStackElementIndex('user:elt2'), 1)
+        self.assertEqual(stack._getStackElementIndex('user:elt2', level=1), 0)
+
+    def test_push(self):
+        stack = HierarchicalStack()
+
+        # Add a user
+        stack.push(push_ids=['elt1'], levels=[0])
+        elt = stack._getStackContent()[0][0]
+        self.assert_(isinstance(elt, UserStackElement))
+        self.assert_(elt == 'elt1')
+
+        # Add a group
+        stack.push(push_ids=['group:elt2'], levels=[0])
+        elt2 = stack._getStackContent()[0][1]
+        self.assert_(isinstance(elt2, GroupStackElement))
+        self.assert_(elt2 == 'group:elt2')
+
+    def test_push_with_data(self):
+        stack = HierarchicalStack()
+        stack.push(push_ids=['user:elt1', 'group:elt2'],
+                   levels=[0, 1],
+                   data_list=['comment'],
+                   comment=['comment for 1', 'comment for 2'])
+        elt = stack._getStackContent()[0][0]
+        self.assertEqual(isinstance(elt, UserStackElement), True)
+        self.assertEqual(elt, 'user:elt1')
+        self.assertEqual(elt(), {'id': 'user:elt1',
+                                 'comment': 'comment for 1'})
+        elt2 = stack._getStackContent()[1][0]
+        self.assertEqual(isinstance(elt2, GroupStackElement), True)
+        self.assertEqual(elt2, 'group:elt2')
+        self.assertEqual(elt2(), {'id': 'group:elt2',
+                                 'comment': 'comment for 2'})
+
+    def test_insertInBetweenLevels(self):
+        stack = HierarchicalStack()
+        self.assertEqual(stack.getStackContent(), {})
+
+        # Normal
+        stack._push('elt1', level=0)
+        stack._push('elt3', level=1)
+        self.assertEqual(stack.getStackContent(context=self),
+                         {0:['elt1'], 1:['elt3']})
+
+        # Insert in between 0 and 1
+        # current_level is 0
+        self.assertEqual(stack.getCurrentLevel(), 0)
+        stack._push('elt2', low_level=0, high_level=1)
+        self.assertEqual(stack.getStackContent(context=self),
+                         {0:['elt1'],
+                          1:['elt2'],
+                          2:['elt3'],
+                          })
+        # Change current level and try to insert
+        # 0 is the edge level where we need to test
+        stack.doIncLevel()
+        self.assertEqual(stack.getCurrentLevel(), 1)
+        stack._push('elt4', low_level=0, high_level=1)
+        self.assertEqual(stack.getStackContent(context=self),
+                         {-1:['elt1'],
+                          0:['elt4'],
+                          1:['elt2'],
+                          2:['elt3'],
+                          })
+        stack._push('elt5', low_level=2, high_level=3)
+        self.assertEqual(stack.getStackContent(context=self),
+                         {-1:['elt1'],
+                          0:['elt4'],
+                          1:['elt2'],
+                          2:['elt3'],
+                          3:['elt5'],
+                          })
+        stack._push('elt6', low_level=-2, high_level=-1)
+        self.assertEqual(stack.getStackContent(context=self),
+                         {-2:['elt6'],
+                          -1:['elt1'],
+                          0:['elt4'],
+                          1:['elt2'],
+                          2:['elt3'],
+                          3:['elt5'],
+                          })
+        stack._push('elt7', low_level=-4, high_level=-3)
+        self.assertEqual(stack.getStackContent(context=self),
+                         {-2:['elt6'],
+                          -1:['elt1'],
+                          0:['elt4'],
+                          1:['elt2'],
+                          2:['elt3'],
+                          3:['elt5'],
+                          })
+        stack._push('elt7', low_level=4, high_level=5)
+        self.assertEqual(stack.getStackContent(context=self),
+                         {-2:['elt6'],
+                          -1:['elt1'],
+                          0:['elt4'],
+                          1:['elt2'],
+                          2:['elt3'],
+                          3:['elt5'],
+                          })
+
+    def test_level_api(self):
+        stack = HierarchicalStack()
+
+        # no upper nor lower level here.
+        self.assertEqual(stack.hasUpperLevel(), False)
+        self.assertEqual(stack.hasLowerLevel(), False)
+
+        # Add someone at level 0
+        stack.push(push_ids=['base'], levels=[0])
+        self.assertEqual(stack.hasUpperLevel(), False)
+        self.assertEqual(stack.hasLowerLevel(), False)
+
+        # Add someone at level 1
+        stack.push(push_ids=['elt1'], levels=[1])
+        self.assertEqual(stack.hasUpperLevel(), True)
+        self.assertEqual(stack.hasLowerLevel(), False)
+
+        # Add someone at level -1
+        stack.push(push_ids=['elt2'], levels=[-1])
+        self.assertEqual(stack.hasUpperLevel(), True)
+        self.assertEqual(stack.hasLowerLevel(), True)
+
+        # Dec level
+        stack.doDecLevel()
+        self.assertEqual(stack.getCurrentLevel(), -1)
+        self.assertEqual(stack.hasUpperLevel(), True)
+        self.assertEqual(stack.hasLowerLevel(), False)
+
+        # Inc level
+        stack.doIncLevel()
+        self.assertEqual(stack.getCurrentLevel(), 0)
+        self.assertEqual(stack.hasUpperLevel(), True)
+        self.assertEqual(stack.hasLowerLevel(), True)
+
+        # Inc level
+        stack.doIncLevel()
+        self.assertEqual(stack.getCurrentLevel(), 1)
+        self.assertEqual(stack.hasUpperLevel(), False)
+        self.assertEqual(stack.hasLowerLevel(), True)
+
+        # Dec level
+        stack.doDecLevel()
+        self.assertEqual(stack.getCurrentLevel(), 0)
+
+        # Remove elt2 at level -1
+        stack.pop(pop_ids=['-1,elt2'])
+        self.assertEqual(stack.hasUpperLevel(), True)
+        self.assertEqual(stack.hasLowerLevel(), False)
+
+        # Remove elt1 at level 1
+        stack.pop(pop_ids=['1,elt1'])
+        self.assertEqual(stack.hasUpperLevel(), False)
+        self.assertEqual(stack.hasLowerLevel(), False)
+
 
     def test_reset(self):
         hierarchical = HierarchicalStack()
@@ -1060,8 +1275,8 @@ class TestHierarchicalStack(unittest.TestCase):
         # Test with different levels
         #
 
-        stack.push('user:string_elt', level=1)
-        stack.push('user:string_elt', level=-1)
+        stack.push(push_ids=['user:string_elt'], levels=[1])
+        stack.push(push_ids=['user:string_elt'], levels=[-1])
         self.assertEqual(stack.getLevelContent(context=self),
                          ['user:elt1', 'user:string_elt'])
         self.assertEqual(stack.getLevelContent(level=1, context=self),
@@ -1069,7 +1284,7 @@ class TestHierarchicalStack(unittest.TestCase):
         self.assertEqual(stack.getLevelContent(level=-1, context=self),
                          ['user:string_elt'])
 
-        stack.push('user:elt1', level=1)
+        stack.push(push_ids=['user:elt1'], levels=[1])
         self.assertEqual(stack.getLevelContent(context=self),
                          ['user:elt1', 'user:string_elt'])
         self.assertEqual(stack.getLevelContent(level=1, context=self),
@@ -1093,73 +1308,76 @@ class TestHierarchicalStack(unittest.TestCase):
         self.assertEqual(stack.getLevelContent(level=-1, context=self),
                          ['user:string_elt2'])
 
+    def test_getLevelContent(self):
+        stack = HierarchicalStack()
+        stack.push(push_ids=['user:elt1', 'group:elt2'],
+                   data_list=['comment'],
+                   comment=['comment for 1', 'comment for 2'])
+        # default: id
+        self.assertEqual(stack.getLevelContent(context=self),
+                         ['user:elt1', 'group:elt2'])
+        # without context: hidden
+        self.assertEqual(stack.getLevelContent(), ['hidden', 'hidden'])
+        # str
+        str_content = [
+            "<UserStackElement {'comment': 'comment for 1', 'id': 'user:elt1'} >",
+            "<GroupStackElement {'comment': 'comment for 2', 'id': 'group:elt2'} >",
+            ]
+        self.assertEqual(stack.getLevelContent(type='str', context=self),
+                         str_content)
+        # call
+        call_content = [
+            {'comment': 'comment for 1', 'id': 'user:elt1'},
+            {'comment': 'comment for 2', 'id': 'group:elt2'},
+            ]
+        self.assertEqual(stack.getLevelContent(type='call', context=self),
+                         call_content)
+        # role
+        self.assertEqual(stack.getLevelContent(type='role', context=self),
+                         ['elt1', 'group:elt2'])
+        # object (no check on stack element data for comparison)
+        obj_content = [
+            UserStackElement('user:elt1'),
+            GroupStackElement('group:elt2'),
+            ]
+        self.assertEqual(stack.getLevelContent(type='object', context=self),
+                         obj_content)
 
-    def test_insertInBetweenLevels(self):
-
-        hstack = HierarchicalStack()
-        self.assertEqual(hstack.getStackContent(), {})
-
-        # Normal
-        hstack.push(push_ids=['elt1'], levels=[0])
-        hstack.push(push_ids=['elt3'], levels=[1])
-        self.assertEqual(hstack.getStackContent(context=self),
-                         {0:['elt1'], 1:['elt3']})
-
-        # Insert in between 0 and 1
-        # current_level is 0
-        self.assertEqual(hstack.getCurrentLevel(), 0)
-        hstack.push('elt2', low_level=0, high_level=1)
-        self.assertEqual(hstack.getStackContent(context=self),
-                         {0:['elt1'],
-                          1:['elt2'],
-                          2:['elt3'],
-                          })
-        # Change current level and try to insert
-        # 0 is the edge level where we need to test
-        hstack.doIncLevel()
-        self.assertEqual(hstack.getCurrentLevel(), 1)
-        hstack.push('elt4', low_level=0, high_level=1)
-        self.assertEqual(hstack.getStackContent(context=self),
-                         {-1:['elt1'],
-                          0:['elt4'],
-                          1:['elt2'],
-                          2:['elt3'],
-                          })
-        hstack.push('elt5', low_level=2, high_level=3)
-        self.assertEqual(hstack.getStackContent(context=self),
-                         {-1:['elt1'],
-                          0:['elt4'],
-                          1:['elt2'],
-                          2:['elt3'],
-                          3:['elt5'],
-                          })
-        hstack.push('elt6', low_level=-2, high_level=-1)
-        self.assertEqual(hstack.getStackContent(context=self),
-                         {-2:['elt6'],
-                          -1:['elt1'],
-                          0:['elt4'],
-                          1:['elt2'],
-                          2:['elt3'],
-                          3:['elt5'],
-                          })
-        hstack.push('elt7', low_level=-4, high_level=-3)
-        self.assertEqual(hstack.getStackContent(context=self),
-                         {-2:['elt6'],
-                          -1:['elt1'],
-                          0:['elt4'],
-                          1:['elt2'],
-                          2:['elt3'],
-                          3:['elt5'],
-                          })
-        hstack.push('elt7', low_level=4, high_level=5)
-        self.assertEqual(hstack.getStackContent(context=self),
-                         {-2:['elt6'],
-                          -1:['elt1'],
-                          0:['elt4'],
-                          1:['elt2'],
-                          2:['elt3'],
-                          3:['elt5'],
-                          })
+    def test_getStackContent(self):
+        stack = HierarchicalStack()
+        stack.push(push_ids=['user:elt1', 'group:elt2'],
+                   levels = [0, 1],
+                   data_list=['comment'],
+                   comment=['comment for 1', 'comment for 2'])
+        # default: id
+        self.assertEqual(stack.getStackContent(context=self),
+                         {0: ['user:elt1'], 1: ['group:elt2']})
+        # without context: hidden
+        self.assertEqual(stack.getStackContent(), {0: ['hidden'], 1: ['hidden']})
+        # str
+        str_content = {
+            0: ["<UserStackElement {'comment': 'comment for 1', 'id': 'user:elt1'} >"],
+            1: ["<GroupStackElement {'comment': 'comment for 2', 'id': 'group:elt2'} >"],
+            }
+        self.assertEqual(stack.getStackContent(type='str', context=self),
+                         str_content)
+        # call
+        call_content = {
+            0: [{'comment': 'comment for 1', 'id': 'user:elt1'}],
+            1: [{'comment': 'comment for 2', 'id': 'group:elt2'}],
+            }
+        self.assertEqual(stack.getStackContent(type='call', context=self),
+                         call_content)
+        # role
+        self.assertEqual(stack.getStackContent(type='role', context=self),
+                        {0: ['elt1'], 1: ['group:elt2']})
+        # object (no check on stack element data for comparison)
+        obj_content = {
+            0: [UserStackElement('user:elt1')],
+            1: [GroupStackElement('group:elt2')],
+            }
+        self.assertEqual(stack.getStackContent(type='object', context=self),
+                         obj_content)
 
 
 def test_suite():
@@ -1167,6 +1385,10 @@ def test_suite():
     suite.addTest(unittest.makeSuite(TestStack))
     suite.addTest(unittest.makeSuite(TestSimpleStack))
     suite.addTest(unittest.makeSuite(TestHierarchicalStack))
+    suite.addTest(doctest.DocFileTest('basicstacks.py',
+                                      package='Products.CPSWorkflow',
+                                      optionflags=doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS))
+
     return suite
 
 if __name__=='__main__':

@@ -101,15 +101,15 @@ class Stack(SimpleItem):
                 return elt
         return elt_str
 
-
-    #
-    # API TO BE IMPLEMENTED WITHIN THE CHILD CLASSES
-    #
-
     def _getManagers(self):
         """Return stack elements representing stack managers.
         """
         raise NotImplementedError
+
+
+    #
+    # API TO BE IMPLEMENTED WITHIN THE CHILD CLASSES
+    #
 
     def push(self, elt=None):
         """Push elt in the queue

@@ -1,6 +1,7 @@
-# -*- coding: iso-8859-15 -*-
-# (C) Copyright 2004 Nuxeo SARL <http://nuxeo.com>
-# Author: Julien Anguenot <ja@nuxeo.com>
+# (C) Copyright 2004-2006 Nuxeo SAZ <http://nuxeo.com>
+# Authors:
+# - Julien Anguenot <ja@nuxeo.com>
+# - Anahide Tchertchian <at@nuxeo.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as published
@@ -17,7 +18,6 @@
 # 02111-1307, USA.
 #
 # $Id$
-
 """ Stack type definitions
 """
 
@@ -47,6 +47,12 @@ class SimpleStack(Stack):
 
     Notice :  No Hierachy in this structure
     The container is a simple list with acessors.
+
+    The stack is created by the stack definition given its configuration.
+
+    Usage:
+    >>> from Products.CPSWorkflow.basicstacks import SimpleStack
+
     """
 
     implements(IWorkflowStack, ISimpleWorkflowStack)
@@ -61,31 +67,61 @@ class SimpleStack(Stack):
     def __init__(self, **kw):
         """Default constructor
         """
-        self.max_size = kw.get('maxsize')
+        self.max_size = kw.get('max_size')
         self._elements_container = PersistentList()
 
     #
-    # BORING ACCESSRORS
+    # ACCESSORS
     #
 
     def getSize(self):
-        """ Return the current size of the Stack
+        """Return the current size of the Stack
+
+        >>> stack = SimpleStack()
+        >>> stack.getSize()
+        0
+        >>> stack.push(push_ids=['user:test'])
+        1
+        >>> stack.getSize()
+        1
+
         """
         return len(self._getElementsContainer())
+
+    def isEmpty(self):
+        """Is the Stack empty ?
+
+        >>> stack = SimpleStack()
+        >>> stack.isEmpty()
+        1
+        >>> stack.push(push_ids=['user:test'])
+        1
+        >>> stack.isEmpty()
+        0
+
+        """
+        return self.getSize() == 0
 
     def isFull(self):
         """Is the queue Full ?
 
         Used in the case of max size is specified
+
+        >>> stack = SimpleStack(max_size=2)
+        >>> stack.isFull()
+        0
+        >>> stack.push(push_ids=['user:test1', 'user:test2'])
+        1
+        >>> stack.getSize()
+        2
+        >>> stack.isFull()
+        1
+
         """
         if self.max_size is not None:
             return self.getSize() >= self.max_size
         return 0
 
-    def isEmpty(self):
-        """Is the Stack empty ?
-        """
-        return self.getSize() == 0
 
     #
     # PRIVATE API
@@ -94,31 +130,57 @@ class SimpleStack(Stack):
     def _push(self, elt=None, **kw):
         """Push an element in the queue
 
-        1  : ok
-        0  : queue id full
-        -1 : elt is None
-        -2 : already in here
+        Additional keywords are passed to the stack element constructor.
+
+        Return a code error:
+        0 : failure (element is None or already here, or stack is full)
+        1 : success
+
+        >>> stack = SimpleStack(max_size=2)
+        >>> stack._push('user:test')
+        1
+        >>> stack._push('user:test')
+        0
+        >>> stack._push(None)
+        0
+        >>> stack._push('user:test2')
+        1
+        >>> stack._push('user:test3') # stack is full
+        0
+
         """
         if self.isFull():
             return 0
         if elt not in self._getElementsContainer():
             elt = self._prepareElement(elt, **kw)
             if elt is None:
-                return -1
+                return 0
             self._getElementsContainer().append(elt)
             return 1
-        return -2
+        return 0
 
-    def _pop(self, element=None, **kw):
+    def _pop(self, elt=None, **kw):
         """Remove a given element
 
-        O : failed
-        1 : sucsess
+        Additional keywords are not used right now.
+
+        Return a code error:
+        O : failure (element not found)
+        1 : success
+
+        >>> stack = SimpleStack()
+        >>> stack._push('user:test')
+        1
+        >>> stack._pop('user:test')
+        1
+        >>> stack._pop('user:fake')
+        0
+
         """
         if self.isEmpty():
             return 0
-        if element is not None:
-            index = self._getStackElementIndex(element)
+        if elt is not None:
+            index = self._getStackElementIndex(elt)
             if index >= 0:
                 try:
                     del self._getElementsContainer()[index]
@@ -132,10 +194,6 @@ class SimpleStack(Stack):
             return res
         return 0
 
-    def _getManagers(self):
-        """Get stack elements representing stack managers.
-        """
-        return self._getStackContent()
 
     def _getStackContent(self):
         """Return stack content, no check on permissions
@@ -145,6 +203,17 @@ class SimpleStack(Stack):
 
     def _getStackElementIndex(self, id):
         """Get stack element index in stack
+
+        >>> stack = SimpleStack()
+        >>> stack._push('user:test1')
+        1
+        >>> stack._getStackElementIndex('user:test1')
+        0
+        >>> stack._push('user:test2')
+        1
+        >>> stack._getStackElementIndex('user:test2')
+        1
+
         """
         i = 0
         for each in self._getElementsContainer():
@@ -153,56 +222,140 @@ class SimpleStack(Stack):
             i += 1
         return -1
 
+
+    def _getManagers(self):
+        """Get stack elements representing stack managers.
+
+        All elements are managers.
+
+        >>> stack = SimpleStack()
+        >>> stack._push('user:test')
+        1
+        >>> [x.getId() for x in stack._getManagers()]
+        ['user:test']
+
+        """
+        return self._getStackContent()
+
     #
     # API
     #
 
-    def push(self, elt=None, **kw):
+    def push(self, push_ids=(), **kw):
         """Public push
+
+        Return a code error:
+        0 : failure on one of the pushes
+        1 : success on all pushes
+
+        Additional keywords will be used to pass additional data for each
+        element to push.
+
+        push_ids and kw come from the wftool.doActionFor method keywords.
+
+        >>> stack = SimpleStack()
+        >>> push_ids = ['user:test1', 'user:test2']
+        >>> comment = ['comment for test1', 'comment for test2']
+        >>> stack.push(push_ids, data_list=['comment'], comment=comment)
+        1
+        >>> [x() for x in stack._getStackContent()]
+        [{'comment': 'comment for test1', 'id': 'user:test1'}, {'comment':
+        'comment for test2', 'id': 'user:test2'}]
+
         """
-
-        # XXX kws are prefixed by 'push_' because in a transition with
-        # push and pop flags, _executeTransition will perform both pop
-        # and push actions (and with the same kws ids, pop and push
-        # actions could cancel each others)
-        push_ids = kw.get('push_ids', ())
-
-        # XXX case where a single element is passed (compatibility)
-        if not push_ids:
-            return self._push(elt, **kw)
-
-        # Push elements
-        # Ids in push_ids have to be prefixed so the registry can find out the
-        # element type (exp: groups got a prefixed id 'group:')
-        for push_id in push_ids:
-            self._push(push_id, **kw)
-
-
-    def pop(self, pop_ids=[], **kw):
-        """Public pop
-
-        0 : at least one pop operation failed
-        1 : success
-        """
-
-        # XXX kws are prefixed by 'pop_' because in a transition with push and
-        # pop flags, _executeTransition will perform both pop and push actions
-        # (and with the same kws ids, pop and push actions could cancel each
-        # others).
-
         code = 1
-        # pop_ids have to be prefixed
-        for pop_id in pop_ids:
-            code = code and self._pop(pop_id, **kw)
+
+        # find out data keys and corresponding data lists
+        data_list = kw.get('data_list', ())
+        data_info = dict((key, kw.get(key, [])) for key in data_list)
+
+        for index, push_id in enumerate(push_ids):
+            data = {}
+            for key, values in data_info.items():
+                try:
+                    data[key] = values[index]
+                except IndexError:
+                    pass
+            code = code and self._push(push_id, data=data)
+
         return code
 
 
-    def getStackContent(self, type='id', level=None,
-                        context=None, **kw):
+    def pop(self, pop_ids=(), **kw):
+        """Public pop
+
+        Return a code error:
+        0 : failure on one of the pops
+        1 : success on all pops
+
+        pop_ids and kw come from the wftool.doActionFor method keywords.
+
+        >>> stack = SimpleStack()
+        >>> push_ids = ['user:test1', 'user:test2']
+        >>> stack.push(push_ids)
+        1
+        >>> [x.getId() for x in stack._getStackContent()]
+        ['user:test1', 'user:test2']
+        >>> pop_ids = ['user:test1']
+        >>> stack.pop(pop_ids)
+        1
+        >>> [x.getId() for x in stack._getStackContent()]
+        ['user:test2']
+
+        """
+        code = 1
+
+        for pop_id in pop_ids:
+            code = code and self._pop(pop_id, **kw)
+
+        return code
+
+    # XXX make it useful for edit
+    def replace(self, old, new):
+        """Replace old with new within the elements container
+
+        It supports both string and element objects as input
+
+        XXX
+
+        """
+        new_elt = self._prepareElement(new)
+        old_elt = self._prepareElement(old)
+        try:
+            old_elt_index = self._getStackElementIndex(old_elt.getId())
+            self._elements_container[old_elt_index] = new_elt
+        except ValueError:
+            pass
+
+
+    def reset(self, **kw):
+        """Reset the stack and return it.
+
+        kw comes from the wftool.doActionFor method keywords:
+        new_stack  : stack that might be a substitute of self
+        reset_ids  : new elements to add to the stack
+
+        Additional keywords will be used by the push method.
+        """
+        # Replace the stack container
+        new_stack = kw.get('new_stack')
+        if new_stack is not None:
+            self._elements_container = new_stack._getElementsContainer()
+        else:
+            self.__init__()
+
+        # Translate for push()
+        kw['push_ids'] = kw.get('reset_ids', ())
+        self.push(**kw)
+
+        return self
+
+
+    def getStackContent(self, type='id', context=None, **kw):
         """Return the stack content
 
-        context is the context in which will check the
-        security on the element.
+        type can either be: id, str, call, role or object.
+        context is the context in which will check the security on the element.
         """
         res = []
         for each in self._getStackContent():
@@ -226,47 +379,13 @@ class SimpleStack(Stack):
                 raise ValueError, emsg
         return res
 
-    def replace(self, old, new):
-        """Replace old with new within the elements container
-
-        It supports both string and element objects as input
-        """
-        new_elt = self._prepareElement(new)
-        old_elt = self._prepareElement(old)
-        try:
-            old_elt_index = self._getStackElementIndex(old_elt.getId())
-            self._elements_container[old_elt_index] = new_elt
-        except ValueError:
-            pass
-
-    def reset(self, **kw):
-        """Reset the stack
-
-        new_stack  : stack that might be a substitute of self
-        reset_ids  : new elements to add to the stack
-        """
-        new_stack = kw.get('new_stack')
-
-        # Translate for push()
-        kw['push_ids'] = kw.get('reset_ids', ())
-
-        # Replace the stack container
-        if new_stack is not None:
-            self._elements_container = new_stack._getElementsContainer()
-        else:
-            self.__init__()
-
-        # Push the elements if needed
-        self.push(**kw)
-
-        return self
 
 InitializeClass(SimpleStack)
 
 ###########################################################
 ###########################################################
 
-class HierarchicalStack(SimpleStack):
+class HierarchicalStack(Stack):
     """Stack where the level (index) within the stack matters
     """
 
@@ -281,50 +400,202 @@ class HierarchicalStack(SimpleStack):
     render_method = 'stack_hierarchical_method'
 
     def __init__(self,  **kw):
-        """CPSSimpleStack constructor
+        """Constructor, default current level is 0
 
-        Default level is 0
-        Direction :
-          - -1 up
-          - 0 don't move
-          - 1 down
+        Usage:
+        >>> from Products.CPSWorkflow.basicstacks import HierarchicalStack
+
         """
-        SimpleStack.__init__(self, **kw)
+        self.max_size = kw.get('max_size')
         self._elements_container = PersistentMapping()
         self._level = 0
+
+
+    #
+    # ACCESSORS
+    #
+
+    def getSize(self, level=None):
+        """Return the size of a given level
+
+        If level is None, return size of all the stack
+
+        >>> stack = HierarchicalStack()
+        >>> stack._push('user:test1', level=0)
+        1
+        >>> stack._push('group:test2', level=1)
+        1
+        >>> stack.getSize(level=1)
+        1
+        >>> stack.getSize()
+        2
+
+        """
+        if level is None:
+            size = 0
+            for k, v in self._getElementsContainer().items():
+                size += len(v)
+        else:
+            size = len(self._getElementsContainer().get(level, ()))
+        return size
+
+    def isEmpty(self, level=None):
+        """Return True if given level is empty
+
+        If level is None, return True if stack is empty
+
+        >>> stack = HierarchicalStack()
+        >>> stack.isEmpty()
+        True
+        >>> stack._push('user:test1', level=0)
+        1
+        >>> stack.isEmpty()
+        False
+
+        """
+        return self.getSize(level=level) == 0
+
+    def isFull(self, level=None):
+        """Return True if given level is full
+
+        max_size keyword has to be passed to constructor
+        if level is None, use current level.
+
+        >>> stack = HierarchicalStack(max_size=1)
+        >>> stack.isFull()
+        False
+        >>> stack._push('user:test1', level=0)
+        1
+        >>> stack.isFull()
+        True
+        >>> stack.isFull(level=1)
+        False
+        >>> stack._push('user:test2', level=1)
+        1
+        >>> stack.isFull(level=1)
+        True
+
+        """
+        if level is None:
+            level = self.getCurrentLevel()
+        if self.max_size is not None:
+            return len(self.getLevelContent(level=level)) >= self.max_size
+        return 0
+
+    def getCurrentLevel(self):
+        """Return the current level
+
+        >>> stack = HierarchicalStack()
+        >>> stack.getCurrentLevel()
+        0
+
+        """
+        return self._level
+
+    def hasUpperLevel(self):
+        """Has the stack a level upper than current level
+
+        >>> stack = HierarchicalStack(max_size=1)
+        >>> stack._push('user:test1', level=0)
+        1
+        >>> stack.hasUpperLevel()
+        False
+        >>> stack._push('user:test2', level=1)
+        1
+        >>> stack.hasUpperLevel()
+        True
+
+        """
+        return (self.getCurrentLevel() + 1) in self.getAllLevels()
+
+    def hasLowerLevel(self):
+        """Has the stack a level lower than the current level
+
+        >>> stack = HierarchicalStack(max_size=1)
+        >>> stack._push('user:test1', level=0)
+        1
+        >>> stack.hasLowerLevel()
+        False
+        >>> stack._push('user:test2', level=-1)
+        1
+        >>> stack.hasLowerLevel()
+        True
+
+        """
+        return (self.getCurrentLevel() - 1) in self.getAllLevels()
+
+    def getAllLevels(self):
+        """Return all the existing levels with elts
+
+        It's returned sorted
+
+        >>> stack = HierarchicalStack(max_size=1)
+        >>> stack._push('user:test1', level=0)
+        1
+        >>> stack._push('user:test2', level=1)
+        1
+        >>> stack.getAllLevels()
+        [0, 1]
+
+        """
+        returned = []
+        for k, v in self._getElementsContainer().items():
+            if v:
+                returned.append(k)
+        returned.sort()
+        return returned
 
     #
     # PRIVATE API
     #
 
-    def _push(self, elt=None, level=0, **kw):
+    def _push(self, elt=None, level=None,
+              low_level=None, high_level=None, **kw):
         """Push elt at given level or in between two levels
 
-        Coderrors are :
+        Additional keywords are passed to the stack element constructor.
+        If level is None, push at current level.
+        If low_level ang high_level are set, push in between.
 
-           1  : ok
-           0  : queue id full
-          -1  : elt is None
-          -2  : elt already within the stack
+        Return a code error:
+        0 : failure (element is None or already here, or stack is full)
+        1 : success
+
+        >>> stack = HierarchicalStack()
+        >>> stack._push('user:test1')
+        1
+        >>> stack._push('user:test1', level=0)
+        0
+        >>> stack._push(None)
+        0
+        >>> stack._push('user:test2', level=1)
+        1
+        >>> stack._getStackContent()
+        {0: [<UserStackElement at user:test1>], 1: [<UserStackElement at user:test2>]}
+        >>> stack._push('user:test3', low_level=0, high_level=1)
+        1
+        >>> stack._getStackContent()
+        {0: [<UserStackElement at user:test1>], 1: [<UserStackElement at
+        user:test3>], 2: [<UserStackElement at user:test2>]}
+
         """
         if elt is None:
-            return -1
-        if self.isFull():
             return 0
-
-        low_level = kw.get('low_level', None)
-        high_level = kw.get('high_level', None)
 
         # Compatibility
         if (low_level is not None and
             high_level is not None):
             level = None
+        elif level is None:
+            level = self.getCurrentLevel()
 
         # Prepare the element
         prepared_elt = self._prepareElement(elt, **kw)
 
         # Simply insert a new elt at a given level
         if level is not None:
+            if self.isFull(level=level):
+                return 0
             index = self._getStackElementIndex(elt, level)
             if index == -1:
                 # element not found in level
@@ -333,7 +604,7 @@ class HierarchicalStack(SimpleStack):
                 self._getElementsContainer()[level] = content_level
             else:
                 # element already here
-                return -2
+                return 0
 
         #
         # Check if this is an insertion in between two levels either
@@ -346,15 +617,17 @@ class HierarchicalStack(SimpleStack):
         elif (low_level is not None and
               high_level is not None and
               abs(low_level - high_level) <= 1):
+            if self.isFull(level=low_level):
+                return 0
             levels = self.getAllLevels()
             if low_level == high_level:
-                self.push(elt, level=low_level)
+                self._push(elt, level=low_level)
             elif (low_level not in levels and
                   abs(min(levels) - low_level) <= 1):
-                self.push(elt, level=low_level)
+                self._push(elt, level=low_level)
             elif (high_level not in levels and
                   abs(max(levels) - high_level) <= 1):
-                self.push(elt, level=high_level)
+                self._push(elt, level=high_level)
             elif (low_level in levels and
                     high_level in levels):
                 container = self._getElementsContainer()
@@ -374,16 +647,26 @@ class HierarchicalStack(SimpleStack):
     def _pop(self, elt=None, level=None, **kw):
         """Remove elt at given level
 
-        0 : failed (not found)
+        Additional keywords are not used right now.
+        If level is None, pop at current level.
+
+        Return a code error:
+        O : failure (element not found)
         1 : success
+
+        >>> stack = HierarchicalStack()
+        >>> stack._push('user:test1', level=0)
+        1
+        >>> stack._pop('user:test1')
+        1
+        >>> stack._pop('user:fake')
+        0
+
         """
-
-        if level is None:
-            level = self.getCurrentLevel()
-        levelc = self._getLevelContent(level=level)
-
         if elt is None:
             return 0
+        if level is None:
+            level = self.getCurrentLevel()
 
         index = self._getStackElementIndex(elt, level)
         if index >= 0:
@@ -397,6 +680,17 @@ class HierarchicalStack(SimpleStack):
 
     def _getManagers(self):
         """Get stack elements representing stack managers.
+
+        All elements at current level are managers.
+
+        >>> stack = HierarchicalStack()
+        >>> stack._push('user:test1', level=0)
+        1
+        >>> stack._push('user:test2', level=1)
+        1
+        >>> [x.getId() for x in stack._getManagers()]
+        ['user:test1']
+
         """
         current_level = self.getCurrentLevel()
         return self._getLevelContent(current_level)
@@ -405,7 +699,14 @@ class HierarchicalStack(SimpleStack):
     def _getLevelContent(self, level=None):
         """Return content of given level
 
-        If not specified let's return the current level content
+        If level is None, use current level
+
+        >>> stack = HierarchicalStack()
+        >>> stack._push('user:test1', level=0)
+        1
+        >>> stack._getLevelContent()
+        [<UserStackElement at user:test1>]
+
         """
         if level is None:
             level = self.getCurrentLevel()
@@ -418,7 +719,7 @@ class HierarchicalStack(SimpleStack):
 
     # BBB
     def _getLevelContentValues(self, level=None):
-        """Return content of given level
+        """Return content of given level, deprecated
         """
         warn("_getLevelContentValues is deprecated, use _getLevelContent instead")
         return self._getLevelContent(level=level)
@@ -432,10 +733,23 @@ class HierarchicalStack(SimpleStack):
         return res
 
     def _getStackElementIndex(self, elt, level=None):
-        """Find the index of the given element within the stack at a
-        given level given the elt itself or its id. It supports both
-        since the __cmp__ method of stackelement supports the
-        operation.
+        """Get stack element index in stack at given level
+
+        If level is None, use current level.
+
+        elt can either be a stack element or its id since stack element
+        comparison says that's equivalent.
+
+        >>> stack = HierarchicalStack()
+        >>> stack._push('user:test1', level=0)
+        1
+        >>> stack._push('user:test2', level=0)
+        1
+        >>> stack._getStackElementIndex('user:test1', level=0)
+        0
+        >>> stack._getStackElementIndex('user:test2', level=0)
+        1
+
         """
         if level is None:
             level = self.getCurrentLevel()
@@ -446,93 +760,241 @@ class HierarchicalStack(SimpleStack):
             i += 1
         return -1
 
+
     #
     # API
     #
 
-    def getSize(self, level=None):
-        """Return the size of a given level
-        """
-        if level is None:
-            level = self.getCurrentLevel()
-        return len(self.getLevelContent(level=level))
-
-    def isEmpty(self, level=None):
-        """Is level empty ?
-        """
-        if level is None:
-            level = self.getCurrentLevel()
-        return len(self.getLevelContent(level=level)) == 0
-
-    def isFull(self, level=None):
-        """Is level Full ?
-
-        If maxsize has been specified
-        """
-        if level is None:
-            level = self.getCurrentLevel()
-        if self.max_size is not None:
-            return len(self.getLevelContent(level=level)) >= self.max_size
-        return 0
-
-    ###################################################
-
-    def getCurrentLevel(self):
-        """Return the current level
-        """
-        return self._level
-
     def setCurrentLevel(self, level):
         """Set the current level
+
+        level has to hold elements
+
+        >>> stack = HierarchicalStack()
+        >>> stack.getCurrentLevel()
+        0
+        >>> stack.setCurrentLevel(1)
+        >>> stack.getCurrentLevel() # 1 is empty
+        0
+        >>> stack._push('user:test1', level=1)
+        1
+        >>> stack.setCurrentLevel(1)
+        >>> stack.getCurrentLevel()
+        1
+
         """
         if level in self.getAllLevels():
             self._level = level
 
-    def hasUpperLevel(self):
-        """Has the stack a level upper than current level
-        """
-        return (self.getCurrentLevel() + 1) in self.getAllLevels()
-
-    def hasLowerLevel(self):
-        """Has the stack a level lower than the current level
-        """
-        return (self.getCurrentLevel() - 1) in self.getAllLevels()
-
     def doIncLevel(self):
-        """Increment the level value
+        """Increment the current level value, return new current level
 
-        The level has to exist and host elts
+        The new level has to hold elements
+
+        >>> stack = HierarchicalStack()
+        >>> stack.getCurrentLevel()
+        0
+        >>> stack.doIncLevel() # 1 is empty
+        0
+        >>> stack.getCurrentLevel()
+        0
+        >>> stack._push('user:test1', level=1)
+        1
+        >>> stack.doIncLevel()
+        1
+        >>> stack.getCurrentLevel()
+        1
+
         """
         new_level = self.getCurrentLevel() + 1
         self.setCurrentLevel(new_level)
         return self.getCurrentLevel()
 
     def doDecLevel(self):
-        """Decrement the level value
+        """Decrement the current level value, return new current level
 
-        The level has to exist and host elts
+        The new level has to hold elements
+
+        >>> stack = HierarchicalStack()
+        >>> stack.getCurrentLevel()
+        0
+        >>> stack.doDecLevel() # -1 is empty
+        0
+        >>> stack.getCurrentLevel()
+        0
+        >>> stack._push('user:test1', level=-1)
+        1
+        >>> stack.doDecLevel()
+        -1
+        >>> stack.getCurrentLevel()
+        -1
+
         """
         new_level = self.getCurrentLevel() - 1
         self.setCurrentLevel(new_level)
         return self.getCurrentLevel()
 
-    def getAllLevels(self):
-        """Return all the existing levels with elts
+    def push(self, push_ids=(), levels=(), **kw):
+        """Public push
 
-        It's returned sorted
+        Return a code error:
+        0 : failure on one of the pushes
+        1 : success on all pushes
+
+        Additional keywords will be used to pass additional data for each
+        element to push.
+        If levels are not given, push at current level.
+
+        push_ids, levels and kw come from the wftool.doActionFor method
+        keywords.
+
+        >>> stack = HierarchicalStack()
+        >>> push_ids = ['user:test1', 'user:test2']
+        >>> levels = [0, 1]
+        >>> comment = ['comment for test1', 'comment for test2']
+        >>> stack.push(push_ids, levels, data_list=['comment'], comment=comment)
+        1
+        >>> for level, content in stack._getStackContent().items():
+        ...     print level, [x() for x in content]
+        0 [{'comment': 'comment for test1', 'id': 'user:test1'}]
+        1 [{'comment': 'comment for test2', 'id': 'user:test2'}]
+
         """
-        returned = []
-        for k, v in self._getElementsContainer().items():
-            if v != []:
-                returned.append(k)
-        returned.sort()
-        return returned
+        code = 1
+
+        # find out data keys and corresponding data lists
+        data_list = kw.get('data_list', ())
+        data_info = dict((key, kw.get(key, [])) for key in data_list)
+
+        current_level = self.getCurrentLevel()
+
+        for index, push_id in enumerate(push_ids):
+            # data
+            data = {}
+            for key, values in data_info.items():
+                try:
+                    data[key] = values[index]
+                except IndexError:
+                    pass
+            # level
+            level = current_level
+            if levels:
+                try:
+                    level = levels[index]
+                except IndexError:
+                    pass
+            if isinstance(level, int):
+                code = code and self._push(push_id, level=int(level), data=data)
+            else:
+                # find out low and high level
+                split = str(level).split('_')
+                try:
+                    low_level = int(split[0])
+                    high_level = int(split[1])
+                except (IndexError, ValueError):
+                    # wrong user input
+                    continue
+                code = code and self._push(push_id, low_level=low_level,
+                                           high_level=high_level, data=data)
+
+        return code
+
+    def pop(self, pop_ids=(), levels=(), **kw):
+        """Public pop
+
+        Return a code error:
+        0 : failure on one of the pops
+        1 : success on all pops
+
+        Convention used for pop_ids: 'level,prefix:elt_id'. Examples:
+        '1,user:toto' or '2,group:titi'. If level is omitted, use current
+        level.
+
+        pop_ids and kw come from the wftool.doActionFor method keywords.
+
+        >>> stack = HierarchicalStack()
+        >>> push_ids = ['user:test1', 'user:test2', 'user:test1']
+        >>> levels = [0, 0, 1]
+        >>> stack.push(push_ids, levels)
+        1
+        >>> stack._getStackContent()
+        {0: [<UserStackElement at user:test1>, <UserStackElement at
+        user:test2>], 1: [<UserStackElement at user:test1>]}
+        >>> pop_ids = ['0,user:test2', '1,user:test1']
+        >>> stack.pop(pop_ids)
+        1
+        >>> stack._getStackContent()
+        {0: [<UserStackElement at user:test1>]}
+
+        """
+        # XXX not sure this is a good id to use 'level,prefix:id' for pop_ids,
+        # maybe having a levels keyword would be better.
+        code = 1
+
+        current_level = self.getCurrentLevel()
+        for pop_id in pop_ids:
+            split = pop_id.split(',')
+            if len(split) > 1:
+                level = int(split[0])
+                the_id = split[1]
+            else:
+                level = current_level
+                the_id = split[0]
+            code = code and self._pop(elt=the_id, level=level, **kw)
+
+        return code
+
+    # XXX
+    def replace(self, old, new):
+        """Replace old with new within the elements container
+
+        It supports both string and element objects as input
+        """
+        new_elt = self._prepareElement(new)
+        old_elt = self._prepareElement(old)
+        for level in self.getAllLevels():
+            index_level = self._getStackElementIndex(old_elt, level=level)
+            if index_level >= 0:
+                self._elements_container[level][index_level] = new_elt
+
+
+    def reset(self, **kw):
+        """Reset the stack and return it.
+
+        kw comes from the wftool.doActionFor method keywords:
+        new_stack  : stack that might be a substitute of self
+        reset_ids  : new elements to add to the stack
+        levels : levels where new elements are added, defaults to current
+        level.
+
+        Additional keywords will be used by the push method.
+        """
+        new_stack = kw.get('new_stack')
+        if new_stack is not None:
+            # replace the stack container
+            self._elements_container = new_stack._getElementsContainer()
+            self.setCurrentLevel(new_stack.getCurrentLevel())
+        else:
+            self.__init__()
+
+        # translate for push
+        new_elts  = kw['push_ids'] = kw.get('reset_ids', ())
+        if kw.get('levels') is None:
+            # init with level 0
+            kw['levels'] = len(new_elts)*[0]
+        self.push(**kw)
+
+        return self
 
     def getLevelContent(self, level=None, type='id', context=None, **kw):
         """Return content of given level
+
+        If level is None, use current level.
+        type can either be: id, str, call, role or object.
+        context is the context in which will check the security on the element.
         """
-        content = self._getLevelContent(level)
         res = []
+        content = self._getLevelContent(level)
         for each in content:
             if (context is None or
                 not each.isVisible(sm=getSecurityManager(), stack=self,
@@ -556,6 +1018,9 @@ class HierarchicalStack(SimpleStack):
 
     def getStackContent(self, type='id', context=None, **kw):
         """Return the stack content
+
+        type can either be: id, str, call, role or object.
+        context is the context in which will check the security on the element.
         """
         res = {}
         for level in self.getAllLevels():
@@ -563,106 +1028,7 @@ class HierarchicalStack(SimpleStack):
                                               context=context, **kw)
         return res
 
-    ###################################################
 
-    def push(self, elt=None, level=None, **kw):
-        """Push element
-        """
-
-        # XXX kws are prefixed by 'push_' because in a transition with push and
-        # pop flags, _executeTransition will perform both pop and push actions
-        # (and with the same kws ids, pop and push actions could cancel each
-        # others).
-        push_ids = kw.get('push_ids', ())
-        levels = kw.get('levels', ())
-
-        # XXX case where a single element is passed (compatibility)
-        if not (push_ids and levels):
-            if level is None:
-                level = 0
-            return self._push(elt, level, **kw)
-
-        # Push elements
-        # Ids in push_ids have to be prefixed so the registry can find out the
-        # element type (exp: groups got a prefixed id 'group:')
-        i = 0
-        for push_id in push_ids:
-            try:
-                self._push(push_id, int(levels[i]), **kw)
-                i += 1
-            except IndexError:
-                # wrong user input
-                pass
-
-    def pop(self, pop_ids=[], level=None, **kw):
-        """Pop element
-
-        0 : at least one pop operation failed
-        1 : success
-        """
-
-        # XXX kws are prefixed by 'pop_' because in a transition with push and
-        # pop flags, _executeTransition will perform both pop and push actions
-        # (and with the same kws ids, pop and push actions could cancel each
-        # others).
-        # Check arguments in here.
-
-        code = 1
-        # Pop member / group given ids
-        for pop_id in pop_ids:
-            # Convention used: 'level,prefix:elt_id'
-            # pop_id example: '1,user:toto' or '2,group:titi'
-            # XXX (compatibility): level can be omitted
-            split = pop_id.split(',')
-            if len(split) > 1:
-                level = int(split[0])
-                the_id = split[1]
-            else:
-                the_id = split[0]
-            code = code and self._pop(elt=the_id, level=level, **kw)
-        return code
-
-
-    def replace(self, old, new):
-        """Replace old with new within the elements container
-
-        It supports both string and element objects as input
-        """
-        new_elt = self._prepareElement(new)
-        old_elt = self._prepareElement(old)
-        for level in self.getAllLevels():
-            index_level = self._getStackElementIndex(old_elt, level=level)
-            if index_level >= 0:
-                self._elements_container[level][index_level] = new_elt
-
-
-    def reset(self, **kw):
-        """Reset the stack
-
-        new_stack : stack that might be a substitute of self, current level is
-                    set to its current level
-        reset_ids  : new elements to add at current level
-        """
-        # Replace the stack container
-
-        new_stack = kw.get('new_stack')
-        if new_stack is not None:
-            self._elements_container = new_stack._getElementsContainer()
-            self.setCurrentLevel(new_stack.getCurrentLevel())
-        else:
-            self.__init__()
-
-        # Translate for push
-        new_elts  = kw['push_ids'] = kw.get('reset_ids', ())
-
-        if kw.get('levels') is None:
-            # init with level 0
-            kw['levels'] = len(new_elts)*[0]
-
-        # Push elements
-        self.push(**kw)
-
-        return self
 
 InitializeClass(HierarchicalStack)
 
