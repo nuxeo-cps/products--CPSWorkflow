@@ -584,7 +584,7 @@ class HierarchicalStack(Stack):
         return (self.getCurrentLevel() - 1) in self.getAllLevels()
 
     def getAllLevels(self):
-        """Return all the existing levels with elts
+        """Return all non-empty levels
 
         It's returned sorted
 
@@ -603,6 +603,59 @@ class HierarchicalStack(Stack):
                 returned.append(k)
         returned.sort()
         return returned
+
+
+    def getInsertLevels(self, between=True):
+        """Return all levels where elements can be pushed or inserted
+
+        If between is True, also return levels between two existing levels.
+        The list is returned sorted.
+
+        >>> stack = HierarchicalStack(max_size=1)
+        >>> stack._push('user:test1', level=0)
+        1
+        >>> stack._push('user:test2', level=1)
+        1
+        >>> stack.getInsertLevels()
+        [-1, 0, '0_1', 1, 2]
+        >>> stack.getInsertLevels(between=False)
+        [-1, 0, 1, 2]
+
+        """
+        res = []
+        all_levels = self.getAllLevels() # already sorted
+
+        if len(all_levels) == 0:
+            res.append(0)
+        else:
+            start = all_levels[0] - 1
+            res.append(start)
+
+            # find all consecutive integers in this list
+            # init with two first elements
+            index = 0
+            current = all_levels[index]
+            while index < len(all_levels) - 1:
+                res.append(current)
+                index += 1
+                next = all_levels[index]
+                if (current + 1 == next):
+                    if between:
+                        # add intermediate level
+                        res.append(str(current) + '_' + str(next))
+                else:
+                    # there is a hole between two existing levels, add only one
+                    # empty level
+                    missing_level = current + 1
+                    res.append(missing_level)
+                current = next
+            res.append(current)
+
+            end = all_levels[-1] + 1
+            res.append(end)
+
+        return res
+
 
     #
     # PRIVATE API

@@ -1216,6 +1216,44 @@ class TestHierarchicalStack(unittest.TestCase):
         self.assertEqual(stack.hasLowerLevel(), False)
 
 
+    def test_getInsertLevels(self):
+        stack = HierarchicalStack()
+        levels = [0, 1, 2]
+        for level in levels:
+            stack._push('elt', level)
+        self.assertEquals(stack.getInsertLevels(),
+                          [-1, 0, '0_1', 1, '1_2', 2, 3])
+        self.assertEquals(stack.getInsertLevels(between=False),
+                          [-1, 0, 1, 2, 3])
+
+
+    def test_getInsertLevels_with_empty(self):
+        # with empty levels, e.g holes between levels
+        stack = HierarchicalStack()
+        levels = [0, 2, 3]
+        for level in levels:
+            stack._push('elt', level)
+        self.assertEquals(stack.getInsertLevels(),
+                          [-1, 0, 1, 2, '2_3', 3, 4])
+        self.assertEquals(stack.getInsertLevels(between=False),
+                          [-1, 0, 1, 2, 3, 4])
+
+
+    def test_getInsertLevels_complex(self):
+        # complicated with negative values :)
+        stack = HierarchicalStack()
+        levels = [-3, -2, -1, 0, 1, 4, 5, 6, 9]
+        for level in levels:
+            stack._push('elt', level)
+        all_between_levels = [-4, -3, '-3_-2', -2, '-2_-1', -1, '-1_0', 0,
+                              '0_1', 1, 2, 4, '4_5', 5, '5_6', 6, 7, 9, 10]
+        self.assertEquals(stack.getInsertLevels(),
+                          all_between_levels)
+        all_levels = [-4, -3, -2, -1, 0, 1, 2, 4, 5, 6, 7, 9, 10]
+        self.assertEquals(stack.getInsertLevels(between=False),
+                          all_levels)
+
+
     def test_reset(self):
         hierarchical = HierarchicalStack()
         self.assertEqual(hierarchical.getMetaType(),

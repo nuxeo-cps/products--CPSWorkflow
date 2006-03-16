@@ -5,6 +5,7 @@ New features:
 ~~~~~~~~~~~~~
 - Basic stack elements can now hold additional data.
 - Added transition and state behaviours to edit a stack.
+- Added hierarchical stack method to get insert levels.
 Bug fixes:
 ~~~~~~~~~~
 -
