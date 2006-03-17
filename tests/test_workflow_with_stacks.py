@@ -146,42 +146,6 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
     ######################################################################
 
-    def _setStackDefinitionsFor(self, s):
-
-        # Add Pilots stack
-        s.addStackDefinition(
-            'Hierarchical Stack Definition',
-            'Hierarchical Stack',
-            'Pilots',
-            managed_role_exprs= {'WorkspaceManager': "python:level == stack.getCurrentLevel() and 1 or nothing",
-                                 'WorkspaceMember' : "python:level < stack.getCurrentLevel() and 1 or nothing",
-                                 'WorkspaceReader' : "python:level > stack.getCurrentLevel() and 1 or nothing",
-                                 },
-            manager_stack_ids=['Associates', 'Observers'],
-            empty_stack_manage_guard={'guard_roles':'Owner; WorkspaceManager'},
-            )
-
-        # Add Associates stack
-        s.addStackDefinition(
-            'Simple Stack Definition',
-            'Simple Stack',
-            'Associates',
-            managed_role_exprs={'WorkspaceMember': 'python:1',
-                                },
-            empty_stack_manage_guard={'guard_roles':'Owner; WorkspaceMember'},
-            manager_stack_ids=['Observers']
-            )
-
-        # Add Observers stack
-        s.addStackDefinition(
-            'Simple Stack Definition',
-            'Simple Stack',
-            'Observers',
-            managed_role_exprs={'WorkspaceReader': 'python:1',
-                                },
-            empty_stack_manage_guard={'guard_roles':'Owner; WorkspaceReader'},
-            )
-
     def _makeWorkflows(self):
 
         #
