@@ -937,34 +937,30 @@ class WorkflowTool(BaseWorkflowTool):
 
         Return True if:
         - user can manage the stack.
-        - user can manage another stack that defines current stack as manageable.
+        - user can manage another stack defined as a manager of current stack.
         """
+        res = 0
         stackdef = self.getStackDefinitionFor(ob, stack_id)
         if stackdef:
             mtool = getToolByName(self, 'portal_membership')
             aclu = self.acl_users
             ds = self.getStackFor(ob, stack_id)
-            canManage = stackdef._canManageStack(ds, aclu, mtool, ob, **kw)
-            if canManage:
-                return 1
+            can_manage = stackdef._canManageStack(ds, aclu, mtool, ob, **kw)
+            if can_manage:
+                res = 1
             else:
-                # XXX AT: the same stack def is checked another time. If user
-                # can manage the empty stack and the stack definition is in its
-                # manager stacks ids, canManageStack will say yes and we don't
-                # want that.
-                # I would have done it the other way round: stack lists other
-                # stacks that can manage it, so that its own _canManageStack
-                # method can take care of it.
-                stackdefs = self.getStackDefinitionsFor(ob)
-                for stackdef_id in stackdefs.keys():
-                    ostack_def = stackdefs[stackdef_id]
-                    canManage = ostack_def._canManageStack(None, aclu, mtool,
-                                                           ob, **kw)
-                    manager_stack_ids = ostack_def.getManagerStackIds()
-                    if (canManage and
-                        stack_id in manager_stack_ids):
-                        return 1
-        return 0
+                # check manager stacks
+                manager_stack_ids = stackdef.getManagerStackIds()
+                for stack_id in manager_stack_ids:
+                    stackdef = self.getStackDefinitionFor(ob, stack_id)
+                    if stackdef:
+                        ds = self.getStackFor(ob, stack_id)
+                        can_manage = stackdef._canManageStack(ds, aclu, mtool,
+                                                              ob, **kw)
+                        if can_manage:
+                            res = 1
+                            break
+        return res
 
     ####################################################################
 

@@ -13,3 +13,6 @@ Bug fixes:
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
 - Stacks now have an edit api, the replace method has been removed.
+- manager_stack_ids property on stack definition now defines stacks whose
+  managers can manage current stack (not anymore stacks manageable by current
+  stack managers)

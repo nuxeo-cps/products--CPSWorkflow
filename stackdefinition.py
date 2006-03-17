@@ -70,10 +70,7 @@ class StackDefinition(SimpleItem):
 
     security = ClassSecurityInfo()
 
-    # List of other stacks that will be manageable by managers of current
-    # stack.
-    # XXX AT: It would be better to do it the other way round, listing stacks
-    # that will be able to manage current stack.
+    # List of other stacks whose managers can manage the current stack.
     manager_stack_ids = []
     # List of roles that will be able to manage current stack.
     manager_stack_roles = []
@@ -208,7 +205,6 @@ class StackDefinition(SimpleItem):
         This is useful when we want managers of the 'Pilots' stack to be able
         to manage the 'Associates' and 'Watchers' stacks.
         """
-        # XXX has to be refactored
         return self.manager_stack_ids
 
     security.declarePublic('getManagerStackRoles')
