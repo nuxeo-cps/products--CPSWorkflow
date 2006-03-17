@@ -950,13 +950,13 @@ class WorkflowTool(BaseWorkflowTool):
                 res = 1
             else:
                 # check manager stacks
-                manager_stack_ids = stackdef.getManagerStackIds()
-                for stack_id in manager_stack_ids:
-                    stackdef = self.getStackDefinitionFor(ob, stack_id)
-                    if stackdef:
-                        ds = self.getStackFor(ob, stack_id)
-                        can_manage = stackdef._canManageStack(ds, aclu, mtool,
-                                                              ob, **kw)
+                mstack_ids = stackdef.getManagerStackIds()
+                for mstack_id in mstack_ids:
+                    mstackdef = self.getStackDefinitionFor(ob, mstack_id)
+                    if mstackdef:
+                        mds = self.getStackFor(ob, mstack_id)
+                        can_manage = mstackdef._canManageStack(mds, aclu,
+                                                               mtool, ob, **kw)
                         if can_manage:
                             res = 1
                             break
