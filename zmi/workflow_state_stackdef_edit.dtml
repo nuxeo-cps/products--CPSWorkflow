@@ -76,6 +76,18 @@
              value='<dtml-var "' '.join(stackdef.manager_stack_ids)">' />
   </td>
 </tr>
+
+<tr>
+  <td align="left">
+    <strong>Manager stack roles</strong>
+  </td>
+  <td>
+    <input type="text" size="50"
+             name="manager_stack_roles:tokens"
+             value='<dtml-var "' '.join(stackdef.manager_stack_roles)">' />
+  </td>
+</tr>
+
 <tr>
   <td colspan="2">
     <br />

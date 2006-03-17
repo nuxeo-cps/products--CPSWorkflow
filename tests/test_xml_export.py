@@ -190,6 +190,7 @@ class TestFullCPSWorkflowExport(SetupWorkflowTestCase):
             'stackdef_type': 'Hierarchical Stack Definition',
             'stack_type'   : 'Hierarchical Stack',
             'var_id'    : 'Reviewers',
+            'manager_stack_roles': ['Manager'],
             'managed_role_exprs' : {
                 # SectionReviewer: top of the stack, and at current level
                 'SectionReviewer': "python:stack.getAllLevels() and level == stack.getAllLevels()[-1] and level == stack.getCurrentLevel()",

@@ -39,6 +39,11 @@
     <input type="text"
              name="manager_stack_ids:tokens"
              value="" />
+    <br /><br />
+    <small>Roles that can manage the stack.</small>
+    <input type="text"
+             name="manager_stack_roles:tokens"
+             value="" />
     <br />
     <br />
     <input type="submit" name="addStackDefinition:method" value="Add Stack Definition" />
@@ -68,10 +73,12 @@
         </b>
         &nbsp;(&nbsp;
         <i>Stack Type : </i>
-          <dtml-var expr="stackdef.getStackDataStructureType()">
-        <i>Var id : </i><dtml-var expr="current_variable_id">
+          <dtml-var expr="stackdef.getStackDataStructureType()">,
+        <i>Var id : </i><dtml-var expr="current_variable_id">,
         <i>Manager stack ids : </i><dtml-var
-        expr="getattr(stackdef, 'manager_stack_ids', 'Not Defined')">
+        expr="getattr(stackdef, 'manager_stack_ids', 'Not Defined')">,
+        <i>Manager stack roles : </i><dtml-var
+        expr="getattr(stackdef, 'manager_stack_roles', 'Not Defined')">
         </dtml-let>
         </dtml-let>
         &nbsp;)&nbsp;

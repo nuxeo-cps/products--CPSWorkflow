@@ -70,7 +70,13 @@ class StackDefinition(SimpleItem):
 
     security = ClassSecurityInfo()
 
+    # List of other stacks that will be manageable by managers of current
+    # stack.
+    # XXX AT: It would be better to do it the other way round, listing stacks
+    # that will be able to manage current stack.
     manager_stack_ids = []
+    # List of roles that will be able to manage current stack.
+    manager_stack_roles = []
 
     _empty_stack_manage_guard = None
     _edit_stack_element_guard = None
@@ -90,7 +96,6 @@ class StackDefinition(SimpleItem):
 
         # Managed role expressions
         self._managed_role_exprs = PersistentMapping()
-
         # Fetch from the kw the argument we are interested in
         for k, v in kw.items():
             if k == 'managed_role_exprs':
@@ -98,6 +103,8 @@ class StackDefinition(SimpleItem):
                     for role, expr in v.items():
                         self.addManagedRole(role, expr)
             if k == 'manager_stack_ids':
+                setattr(self, k, v)
+            if k == 'manager_stack_roles':
                 setattr(self, k, v)
             if k == 'empty_stack_manage_guard':
                 self.setEmptyStackManageGuard(**v)
@@ -196,13 +203,21 @@ class StackDefinition(SimpleItem):
 
     security.declarePublic('getManagerStackIds')
     def getManagerStackIds(self):
-        """Returns the ids of other stacks for which the people within those
-        can manage this stack. For instance in the common use case members
-        within the 'Pilots' stack can manage 'Associates' and 'Watchers'
-        stacks.
+        """Returns ids of other stacks whose managers can manage this stack.
+
+        This is useful when we want managers of the 'Pilots' stack to be able
+        to manage the 'Associates' and 'Watchers' stacks.
         """
         # XXX has to be refactored
         return self.manager_stack_ids
+
+    security.declarePublic('getManagerStackRoles')
+    def getManagerStackRoles(self):
+        """Returns roles of people who can manage the stack
+
+        This is useful to set a 'Manager' bypass for instance.
+        """
+        return self.manager_stack_roles
 
 
     #
@@ -357,17 +372,14 @@ class StackDefinition(SimpleItem):
         ds is the stack, aclu is the acl_users, mtool is the membership tool,
         and context is needed if the stack is not yet intialized
         """
-
         if mtool.isAnonymousUser():
             return 0
 
-        # prepare the ds
+        # Prepare the ds
         ds = self._prepareStack(ds)
 
-        #
-        # Cope with member id.
-        # It can be passed within th kw (member_id)
-        #
+        # Find the member_id. It can be passed within the kw parameter as
+        # 'member_id'.
 
         member_id = kw.get('member_id')
         if member_id is None:
@@ -376,19 +388,21 @@ class StackDefinition(SimpleItem):
         else:
             member = mtool.getMemberById(member_id)
 
-        #
-        # Check first if the member is granted because of its position within
-        # the stack content
-        #
+        # Check if member is granted because of its role.
+        manager_roles = self.getManagerStackRoles()
+        if manager_roles:
+            user_roles = member.getRolesInContext(context)
+            for manager_role in manager_roles:
+                if manager_role in user_roles:
+                    return 1
+
+        # Check if member is granted because of its position within the stack
+        # content
         for elt in ds._getManagers():
             if elt.holdsUser(member_id, aclu):
                 return 1
 
-        #
-        # Now let's cope with the first case when the stack is not yet
-        # intialized. Call the specific guard for this
-        #
-
+        # If stack is empty, check its empty guard.
         if ds.isEmpty():
             wf_def = self._getWorkflowDefinition()
             return self.getEmptyStackManageGuard().check(

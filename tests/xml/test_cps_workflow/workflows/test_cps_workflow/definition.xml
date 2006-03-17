@@ -28,6 +28,7 @@
                     variable_id="Reviewers"
                     meta_type="Hierarchical Stack Definition"
                     stack_type="Hierarchical Stack">
+   <manager-stack-role name="Manager"/>
    <managed-roles>
     <managed-role name="SectionIntermediateReviewer"
                   expression="python:stack.getAllLevels() and level &lt; stack.getAllLevels()[-1] or level != stack.getCurrentLevel()"/>

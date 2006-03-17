@@ -930,12 +930,14 @@ class WorkflowTool(BaseWorkflowTool):
 
     security.declarePublic('canManageStack')
     def canManageStack(self, ob, stack_id, **kw):
-        """Can the authenticated use or the user given it's member_id
-        manage the stack given its id.
+        """Can user manager the given stack on given object?
 
-        You may have a hierarchy in between the stack. For instance, in the
-        'Pilots' stack the people can manage the 'Associates' and 'Observers'
-        stacks.
+        User is current authenticated member, or the user identified by the
+        member_id keyword.
+
+        Return True if:
+        - user can manage the stack.
+        - user can manage another stack that defines current stack as manageable.
         """
         stackdef = self.getStackDefinitionFor(ob, stack_id)
         if stackdef:
@@ -950,8 +952,9 @@ class WorkflowTool(BaseWorkflowTool):
                 # can manage the empty stack and the stack definition is in its
                 # manager stacks ids, canManageStack will say yes and we don't
                 # want that.
-                # Anyway I'm not correcting it because manager_stack_ids
-                # mechanism will not stay as it is, right? ;)
+                # I would have done it the other way round: stack lists other
+                # stacks that can manage it, so that its own _canManageStack
+                # method can take care of it.
                 stackdefs = self.getStackDefinitionsFor(ob)
                 for stackdef_id in stackdefs.keys():
                     ostack_def = stackdefs[stackdef_id]

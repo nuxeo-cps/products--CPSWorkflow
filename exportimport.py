@@ -262,6 +262,7 @@ class CPSWorkflowDefinitionConfigurator(WorkflowDefinitionConfigurator):
                     # as variable is created from it
                     'variable_id': stackdef.getStackWorkflowVariableId(),
                     'manager_stack_ids': stackdef.getManagerStackIds(),
+                    'manager_stack_roles': stackdef.getManagerStackRoles(),
                     'managed_roles': managed_roles,
                     }
 
@@ -613,6 +614,9 @@ def _extractStackDefinitionNodes(root, encoding=None):
             'manager_stack_ids':
                 [_getNodeAttribute(x, 'stack_id', encoding)
                  for x in node.getElementsByTagName('manager-stack-id')],
+            'manager_stack_roles':
+                [_getNodeAttribute(x, 'name', encoding)
+                 for x in node.getElementsByTagName('manager-stack-role')],
             'managed_role_exprs': _extractCPSManagedRolesNode(node, encoding),
             'empty_stack_manage_guard': _extractCPSGuardNode(
                 node, 'empty-stack-manage-guard', encoding),

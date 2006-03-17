@@ -65,6 +65,11 @@
        tal:repeat="stack stackdef/manager_stack_ids"
        tal:attributes="stack_id stack"
        />
+   <manager-stack-role
+       name=""
+       tal:repeat="role stackdef/manager_stack_roles"
+       tal:attributes="name role"
+       />
    <managed-roles>
     <managed-role
         name=""

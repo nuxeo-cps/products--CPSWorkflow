@@ -202,6 +202,7 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
                                                          },
                                   'empty_stack_manage_guard':{'guard_roles':'Owner; WorkspaceManager'},
                                   'manager_stack_ids':['Associates', 'Observers'],
+                                  'manager_stack_roles': ['Manager'], # Manager bypass
                                   },
                        'Associates': {'stackdef_type' : 'Simple Stack Definition',
                                       'stack_type': 'Simple Stack',
@@ -782,8 +783,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
             if k == 'user:toto':
                 self.assert_('WorkspaceManager' in v)
 
-        # Manager can't manage the stack
-        self.assert_(not wftool.canManageStack(content, 'Pilots'))
+        # manager can manage the stack ('Manager' bypass)
+        self.assertEqual(wftool.canManageStack(content, 'Pilots'), True)
 
         ################################################
         # Delegate tata
@@ -828,8 +829,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
             if k in ('user:toto', 'user:tata',):
                 self.assert_('WorkspaceManager' in v)
 
-            # Manager can't manage the stack
-        self.assert_(not wftool.canManageStack(content, 'Pilots'))
+        # manager can manage the stack ('Manager' bypass)
+        self.assertEqual(wftool.canManageStack(content, 'Pilots'), True)
 
         ################################################
         # EXECUTE BORING TRANSITION
@@ -870,8 +871,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
             if k in ('user:toto', 'user:tata',):
                 self.assert_('WorkspaceManager' in v)
 
-        # Manager can't manage the stack
-        self.assert_(not wftool.canManageStack(content, 'Pilots'))
+        # manager can manage the stack ('Manager' bypass)
+        self.assertEqual(wftool.canManageStack(content, 'Pilots'), True)
 
         #################################################
         # Delegate Manager
@@ -1062,8 +1063,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
         self.assert_('user:tata' not in lc.keys())
         self.assert_('user:manager' not in lc.keys())
 
-        # Manager
-        self.assert_( not wftool.canManageStack(content, 'Pilots'))
+        # manager can manage the stack ('Manager' bypass)
+        self.assertEqual(wftool.canManageStack(content, 'Pilots'), True)
 
     def test_resetOnSImpleStack(self):
 
@@ -1161,8 +1162,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         self.assert_('user:toto' in lc.keys())
 
-        # Manager
-        self.assert_( not wftool.canManageStack(content, 'Associates'))
+        # manager can manage the stack ('Manager' bypass)
+        self.assertEqual(wftool.canManageStack(content, 'Associates'), True)
 
         ############################
         # reset with new_groups
@@ -1198,8 +1199,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         self.assert_('group:nuxeo' in lc.keys())
 
-        # Manager
-        self.assert_( not wftool.canManageStack(content, 'Associates'))
+        # manager can manage the stack ('Manager' bypass)
+        self.assertEqual(wftool.canManageStack(content, 'Associates'), True)
 
         ############################
         # reset with new_stack
@@ -1339,8 +1340,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         self.assert_('user:toto' in lc.keys())
 
-        # Manager
-        self.assert_( not wftool.canManageStack(content, 'Pilots'))
+        # manager can manage the stack ('Manager' bypass)
+        self.assertEqual(wftool.canManageStack(content, 'Pilots'), True)
 
         ############################
         # reset with new_groups
@@ -1376,8 +1377,8 @@ class WorkflowToolTests(ZopeTestCase.PortalTestCase):
 
         self.assert_('group:nuxeo' in lc.keys())
 
-        # Manager
-        self.assert_( not wftool.canManageStack(content, 'Pilots'))
+        # manager can manage the stack ('Manager' bypass)
+        self.assertEqual(wftool.canManageStack(content, 'Pilots'), True)
 
         ############################
         # reset with new_stack

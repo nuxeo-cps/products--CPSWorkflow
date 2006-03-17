@@ -218,6 +218,7 @@ class TestFullCPSWorkflowImport(SetupWorkflowTestCase):
                          'Hierarchical Stack')
         self.assertEqual(stackdef.getStackWorkflowVariableId(), stack_var_id)
         self.assertEqual(stackdef.getManagerStackIds(), [])
+        self.assertEqual(stackdef.getManagerStackRoles(), ['Manager'])
         managed_roles = [
             'SectionReviewer',
             'SectionIntermediateReviewer',
