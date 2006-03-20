@@ -21,8 +21,7 @@
 """ CPS Workflow Stack Registries and Registry Tool
 """
 
-from zLOG import LOG, INFO
-
+from logging import getLogger
 from zope.interface import implements
 from zope.interface.verify import verifyClass, DoesNotImplement
 from Products.CPSWorkflow.interfaces import IStackElement
@@ -32,12 +31,13 @@ from Products.CPSWorkflow.interfaces import IWorkflowStackRegistry
 from Products.CPSWorkflow.interfaces import IWorkflowStackDefRegistry
 from Products.CPSWorkflow.interfaces import IWorkflowStackElementRegistry
 
-
 class WorkflowStackRegistryCls(object):
     """Registry of the available stack types
     """
 
     implements(IWorkflowStackRegistry)
+
+    logger = getLogger('WorkflowStackRegistry')
 
     def __init__(self):
         self._stack_classes = {}
@@ -49,8 +49,7 @@ class WorkflowStackRegistryCls(object):
             try:
                 verifyClass(IWorkflowStack, cls)
             except DoesNotImplement:
-                LOG("WorkflowStackRegistry error : ", INFO,
-                    "Cannot import class %s" %str(cls))
+                self.logger.info("Cannot import class %s" %str(cls))
                 raise
             else:
                 meta_type = cls.meta_type
@@ -87,6 +86,8 @@ class WorkflowStackDefRegistryCls(object):
 
     implements(IWorkflowStackDefRegistry)
 
+    logger = getLogger('WorkflowStackDefRegistry')
+
     def __init__(self):
         self._stack_def_classes = {}
 
@@ -97,8 +98,7 @@ class WorkflowStackDefRegistryCls(object):
             try:
                 verifyClass(IWorkflowStackDefinition, cls)
             except DoesNotImplement:
-                LOG("WorkflowStackDefRegistry error : ", INFO,
-                    "Cannot import class %s" %str(cls))
+                self.logger.info("Cannot import class %s" %str(cls))
                 raise
             else:
                 meta_type = cls.meta_type
@@ -138,6 +138,8 @@ class WorkflowStackElementRegistryCls(object):
 
     implements(IWorkflowStackElementRegistry)
 
+    logger = getLogger('WorkflowStackElementRegistry')
+
     def __init__(self):
         self._stack_element_classes = {}
         self._prefix_meta_types = {}
@@ -149,8 +151,7 @@ class WorkflowStackElementRegistryCls(object):
             try:
                 verifyClass(IStackElement, cls)
             except DoesNotImplement:
-                LOG("WorkflowStackElementRegistry error : ", INFO,
-                    "Cannot import class %s" %str(cls))
+                self.logger.info("Cannot import class %s" %str(cls))
                 raise
             else:
                 meta_type = cls.meta_type

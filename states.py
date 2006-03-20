@@ -30,8 +30,6 @@ It adds :
 Check the documentation within the doc sub-folder
 """
 
-from zLOG import LOG, ERROR, DEBUG
-
 from Globals import DTMLFile
 from OFS.ObjectManager import ObjectManager
 

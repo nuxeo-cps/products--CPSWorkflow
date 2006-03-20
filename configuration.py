@@ -23,7 +23,6 @@ This is a placeful definition of the portal_type -> workflow chain
 mapping.
 """
 
-from zLOG import LOG, ERROR, DEBUG
 from Acquisition import aq_parent, aq_inner
 from Globals import InitializeClass, DTMLFile, PersistentMapping
 from AccessControl import ClassSecurityInfo

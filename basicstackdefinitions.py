@@ -24,8 +24,6 @@ This module contains basic stack definitions.
 c.f : doc/stackdefinitions.txt
 """
 
-from zLOG import LOG, DEBUG
-
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo
 

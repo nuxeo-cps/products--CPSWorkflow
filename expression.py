@@ -23,10 +23,9 @@
 Extends DCWorkflow Expression for CPS.
 """
 
-from zLOG import LOG, DEBUG
+from logging import getLogger
 
-from  Globals import InitializeClass
-
+from Globals import InitializeClass
 from Acquisition import aq_inner, aq_parent
 from AccessControl import getSecurityManager
 
@@ -40,6 +39,8 @@ class CPSStateChangeInfo(StateChangeInfo):
 
     Extends DCWorkflow Expression
     """
+
+    logger = getLogger('CPSStateChangeInfo')
 
     def __init__(self, object, workflow, status=None, transition=None,
                  old_state=None, new_state=None, stacks=None, kwargs=None):
@@ -60,7 +61,7 @@ class CPSStateChangeInfo(StateChangeInfo):
             stack = self.stacks.get(var_id, None)
             if stack is None:
                 current_state = self.workflow._getWorkflowStateOf(self.object)
-                LOG("Current ob state", DEBUG, str(current_state)+'x')
+                self.logger.debug("Current ob state: %s" %str(current_state))
         return stack
 
 InitializeClass(CPSStateChangeInfo)

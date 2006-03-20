@@ -38,8 +38,6 @@ It currently adds :
  - Support for stack workflows. (c.f : doc/StackWorkflows)
 """
 
-from zLOG import LOG, ERROR, DEBUG
-
 from Globals import DTMLFile
 
 from Products.DCWorkflow.Transitions \
