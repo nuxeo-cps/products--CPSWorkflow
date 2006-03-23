@@ -72,6 +72,9 @@ class SimpleStack(Stack):
         """
         self.max_size = kw.get('max_size')
         self._elements_container = PersistentList()
+        render_method = kw.get('render_method')
+        if render_method:
+            self.render_method = render_method
 
     #
     # ACCESSORS
@@ -473,6 +476,9 @@ class HierarchicalStack(Stack):
         self.max_size = kw.get('max_size')
         self._elements_container = PersistentMapping()
         self._level = 0
+        render_method = kw.get('render_method')
+        if render_method:
+            self.render_method = render_method
 
 
     #

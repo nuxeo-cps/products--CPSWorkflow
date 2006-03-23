@@ -200,6 +200,7 @@ class TestFullCPSWorkflowExport(SetupWorkflowTestCase):
             'empty_stack_manage_guard': {
                 'guard_roles': '; '.join(edit_roles),
                 },
+            'stack_render_method': 'dummy_template',
             }
 
         states['pending'] = {

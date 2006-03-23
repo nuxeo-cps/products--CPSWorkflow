@@ -264,6 +264,7 @@ class CPSWorkflowDefinitionConfigurator(WorkflowDefinitionConfigurator):
                     'manager_stack_ids': stackdef.getManagerStackIds(),
                     'manager_stack_roles': stackdef.getManagerStackRoles(),
                     'managed_roles': managed_roles,
+                    'stack_render_method': stackdef.getStackRenderMethod(),
                     }
 
                 guards = {
@@ -625,6 +626,13 @@ def _extractStackDefinitionNodes(root, encoding=None):
             'view_stack_element_guard': _extractCPSGuardNode(
                 node, 'view-stack-element-guard', encoding),
             }
+        try:
+            render = _getNodeAttribute(node, 'stack_render_method', encoding)
+        except ValueError:
+            # not set
+            pass
+        else:
+            info['stack_render_method'] = render
         result[stackdef_id] = info
 
     return result

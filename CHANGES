@@ -7,6 +7,7 @@ New features:
 - Added transition and state behaviours to edit a stack.
 - Added hierarchical stack method to get insert levels.
 - Stack definition can now set roles that can manage the stack.
+- Stack definition can now set render method to be used by stack.
 Bug fixes:
 ~~~~~~~~~~
 -

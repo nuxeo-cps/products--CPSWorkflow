@@ -79,6 +79,9 @@ class StackDefinition(SimpleItem):
     _edit_stack_element_guard = None
     _view_stack_element_guard = None
 
+    # template to init the stack
+    stack_render_method = ''
+
     def __init__(self,
                  stack_type,
                  wf_var_id,
@@ -105,6 +108,12 @@ class StackDefinition(SimpleItem):
                 setattr(self, k, v)
             if k == 'empty_stack_manage_guard':
                 self.setEmptyStackManageGuard(**v)
+            if k == 'edit_stack_element_guard':
+                self.setEditStackElementGuard(**v)
+            if k == 'view_stack_element_guard':
+                self.setViewStackElementGuard(**v)
+            if k == 'stack_render_method':
+                setattr(self, k, v)
 
     #
     # Guards
@@ -215,6 +224,12 @@ class StackDefinition(SimpleItem):
         """
         return self.manager_stack_roles
 
+    security.declarePublic('getStackRenderMethod')
+    def getStackRenderMethod(self):
+        """Returns method used to render the stack
+        """
+        return self.stack_render_method
+
 
     #
     # API : Managed roles
@@ -314,7 +329,8 @@ class StackDefinition(SimpleItem):
                 ds = None
         if ds is None:
             ds = WorkflowStackRegistry.makeWorkflowStackTypeInstance(
-                self.getStackDataStructureType())
+                self.getStackDataStructureType(),
+                render_method=self.getStackRenderMethod())
         return ds
 
     def _push(self, ds, **kw):

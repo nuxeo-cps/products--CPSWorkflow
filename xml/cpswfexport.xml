@@ -59,6 +59,7 @@
                       meta_type stackdef/meta_type;
                       stack_type stackdef/stack_type;
                       variable_id stackdef/variable_id;
+                      stack_render_method stackdef/stack_render_method;
                       ">
    <manager-stack-id
        stack_id="STACK_ID"

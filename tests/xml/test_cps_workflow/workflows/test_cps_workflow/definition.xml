@@ -27,7 +27,8 @@
   <stack-definition stackdef_id="Reviewers"
                     variable_id="Reviewers"
                     meta_type="Hierarchical Stack Definition"
-                    stack_type="Hierarchical Stack">
+                    stack_type="Hierarchical Stack"
+                    stack_render_method="dummy_template">
    <manager-stack-role name="Manager"/>
    <managed-roles>
     <managed-role name="SectionIntermediateReviewer"
