@@ -56,6 +56,8 @@ from transitions import TRANSITION_INITIAL_CHECKOUT
 from transitions import TRANSITION_ALLOW_CHECKIN
 from transitions import TRANSITION_BEHAVIOR_PUBLISHING
 
+from constants import TRANSITION_FLAGS_EXPORT
+
 from zope.interface import implements
 from Products.CPSWorkflow.interfaces import ICPSWorkflowTool
 from Products.CMFCore.interfaces import IWorkflowDefinition
@@ -380,8 +382,10 @@ class WorkflowTool(BaseWorkflowTool):
             TRANSITION_INITIAL_CHECKOUT:   TRANSITION_ALLOWSUB_CHECKOUT,
             }.get(initial_behavior)
         if subbehavior is None:
+            friendly_behavior = TRANSITION_FLAGS_EXPORT.get(initial_behavior,
+                                                            initial_behavior)
             raise WorkflowException("Incorrect initial_behavior=%s" %
-                                    initial_behavior)
+                                    friendly_behavior)
         ok, why = self.isBehaviorAllowedFor(container, subbehavior,
                                             get_details=1)
         if not ok:
@@ -389,10 +393,13 @@ class WorkflowTool(BaseWorkflowTool):
                 details = 'not allowed by workflow %s' % why
             else:
                 details = 'no workflow'
+            friendly_behavior = TRANSITION_FLAGS_EXPORT.get(subbehavior,
+                                                            subbehavior)
             raise WorkflowException("Container %s does not allow "
                                     "subobject behavior %s (%s)" %
                                     (container.getId(),
-                                     subbehavior, details))
+                                     friendly_behavior,
+                                     details))
         # Find type to create.
         if initial_behavior != TRANSITION_INITIAL_CREATE:
             type_name = old_ob.getPortalTypeName()
