@@ -22,6 +22,7 @@
 """
 
 from warnings import warn
+from logging import getLogger
 
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo, getSecurityManager
@@ -63,6 +64,8 @@ class SimpleStack(Stack):
     meta_type = 'Simple Stack'
 
     render_method = 'stack_simple_method'
+
+    logger = getLogger('SimpleStack')
 
     def __init__(self, **kw):
         """Default constructor
@@ -457,6 +460,8 @@ class HierarchicalStack(Stack):
     security.declareObjectPublic()
 
     render_method = 'stack_hierarchical_method'
+
+    logger = getLogger('HierarchicalStack')
 
     def __init__(self,  **kw):
         """Constructor, default current level is 0
@@ -998,10 +1003,11 @@ class HierarchicalStack(Stack):
 
         push_ids, levels and kw come from the wftool.doActionFor method
         keywords.
+        strings are accepted for level values.
 
         >>> stack = HierarchicalStack()
         >>> push_ids = ['user:test1', 'user:test2']
-        >>> levels = [0, 1]
+        >>> levels = [0, '1']
         >>> comment = ['comment for test1', 'comment for test2']
         >>> stack.push(push_ids, levels, data_list=['comment'], comment=comment)
         1
@@ -1034,7 +1040,7 @@ class HierarchicalStack(Stack):
                     level = levels[index]
                 except IndexError:
                     pass
-            if isinstance(level, int):
+            if isinstance(level, int) or level.isdigit():
                 code = code and self._push(push_id, level=int(level), data=data)
             else:
                 # find out low and high level
