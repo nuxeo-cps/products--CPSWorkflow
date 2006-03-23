@@ -41,6 +41,7 @@ c.f : doc/stackdefinition.txt
 
 """
 
+from logging import getLogger
 from DateTime import DateTime
 from Globals import InitializeClass
 from AccessControl import ClassSecurityInfo, getSecurityManager
@@ -81,6 +82,8 @@ class StackDefinition(SimpleItem):
 
     # template to init the stack
     stack_render_method = ''
+
+    logger = getLogger("StackDefinition")
 
     def __init__(self,
                  stack_type,

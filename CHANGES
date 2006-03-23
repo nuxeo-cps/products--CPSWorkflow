@@ -10,7 +10,8 @@ New features:
 - Stack definition can now set render method to be used by stack.
 Bug fixes:
 ~~~~~~~~~~
--
+- Import of workflow stack definition view/edit stack element guards was not
+  effective.
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
 - Stacks now have an edit api, the replace method has been removed.

@@ -647,7 +647,12 @@ def _extractCPSGuardNode(parent, guard_name, encoding=None):
     assert len(nodes) <= 1, nodes
 
     if not nodes:
-        return {'permissions': (), 'roles': (), 'groups': (), 'expr': ''}
+        return {
+            'guard_permissions': '',
+            'guard_roles': '',
+            'guard_groups': '',
+            'guard_expr': '',
+            }
 
     node = nodes[0]
 
