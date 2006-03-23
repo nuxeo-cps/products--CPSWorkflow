@@ -1007,14 +1007,14 @@ class HierarchicalStack(Stack):
 
         >>> stack = HierarchicalStack()
         >>> push_ids = ['user:test1', 'user:test2']
-        >>> levels = [0, '1']
+        >>> levels = [0, '-1']
         >>> comment = ['comment for test1', 'comment for test2']
         >>> stack.push(push_ids, levels, data_list=['comment'], comment=comment)
         1
         >>> for level, content in stack._getStackContent().items():
         ...     print level, [x() for x in content]
         0 [{'comment': 'comment for test1', 'id': 'user:test1'}]
-        1 [{'comment': 'comment for test2', 'id': 'user:test2'}]
+        -1 [{'comment': 'comment for test2', 'id': 'user:test2'}]
 
         """
         code = 1
@@ -1040,8 +1040,13 @@ class HierarchicalStack(Stack):
                     level = levels[index]
                 except IndexError:
                     pass
-            if isinstance(level, int) or level.isdigit():
-                code = code and self._push(push_id, level=int(level), data=data)
+            try:
+                level = int(level)
+            except ValueError:
+                # mid level
+                pass
+            if isinstance(level, int):
+                code = code and self._push(push_id, level=level, data=data)
             else:
                 # find out low and high level
                 split = str(level).split('_')
