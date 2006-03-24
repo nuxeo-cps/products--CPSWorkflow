@@ -51,8 +51,6 @@ from Products.DCWorkflow.Transitions import TRIGGER_USER_ACTION
 from expression import CPSStateChangeInfo as StateChangeInfo
 from expression import createExprContext
 
-from stackregistries import WorkflowStackRegistry as StackReg
-
 from zope.interface import implements
 from Products.CPSWorkflow.interfaces import ICPSWorkflowDefinition
 
@@ -1048,14 +1046,12 @@ class WorkflowDefinition(DCWorkflowDefinition):
         # update stack variables, initializing stacks defined in given state
         stacks = {}
         stackdefs = new_sdef.getStackDefinitions()
-        for k in stackdefs.keys():
+        for stackdef_id, stackdef in stackdefs.items():
             # stack is a variable, it has just been updated in the status
-            if status[k] is None:
-                # Call the registry and construct stack instance
-                stype = stackdefs[k].getStackDataStructureType()
-                new_stack = StackReg.makeWorkflowStackTypeInstance(
-                    stype)
-                status[k] = new_stack
+            if status[stackdef_id] is None:
+                # Construct stack instance
+                new_stack = stackdef._prepareStack(None)
+                status[stackdef_id] = new_stack
 
         # Update state.
         status[self.state_var] = new_state
