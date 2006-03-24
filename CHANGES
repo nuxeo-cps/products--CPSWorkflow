@@ -3,18 +3,10 @@ Requires:
 -
 New features:
 ~~~~~~~~~~~~~
-- Basic stack elements can now hold additional data.
-- Added transition and state behaviours to edit a stack.
-- Added hierarchical stack method to get insert levels.
-- Stack definition can now set roles that can manage the stack.
-- Stack definition can now set render method to be used by stack.
+-
 Bug fixes:
 ~~~~~~~~~~
-- Import of workflow stack definition view/edit stack element guards was not
-  effective.
+-
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
-- Stacks now have an edit api, the replace method has been removed.
-- manager_stack_ids property on stack definition now defines stacks whose
-  managers can manage current stack (not anymore stacks manageable by current
-  stack managers)
+-
