@@ -1305,12 +1305,10 @@ class WorkflowDefinition(DCWorkflowDefinition):
     # ZMI
     #
 
+    # hooked via view in CPSUtil
     manage_options = DCWorkflowDefinition.manage_options + (
-        {'label': 'Export', 'action': 'manage_exportWorkflow'},
+        {'label': 'Export', 'action': 'manage_export'},
         )
-
-    security.declareProtected(ManagePortal, 'manage_exportWorkflow')
-    manage_exportWorkflow = DTMLFile('zmi/workflow_export', globals())
 
 
 InitializeClass(WorkflowDefinition)
