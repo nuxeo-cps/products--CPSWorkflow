@@ -1307,7 +1307,7 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
     # hooked via view in CPSUtil
     manage_options = DCWorkflowDefinition.manage_options + (
-        {'label': 'Export', 'action': 'manage_export'},
+        {'label': 'Export', 'action': 'manage_genericSetupExport.html'},
         )
 
 
