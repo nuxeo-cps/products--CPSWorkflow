@@ -437,11 +437,6 @@ class WorkflowTool(BaseWorkflowTool):
                 proxy = pxtool.createEmptyProxy(proxy_type, container,
                                                 type_name, id)
 
-                if kwargs.has_key('datamodel'):
-                    # Fill the datamodel with the proxy we now have
-                    dm = kwargs['datamodel']
-                    dm._setObject(None, proxy=proxy)
-
                 # Set the first language as default language.
                 proxy.setDefaultLanguage(language)
                 pxtool.createRevision(proxy, language, **kwargs)
