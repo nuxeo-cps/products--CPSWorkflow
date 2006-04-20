@@ -16,6 +16,7 @@
       for=".interfaces.ILocalWorkflowConfiguration
            Products.GenericSetup.interfaces.ISetupEnviron"
       />
+  <five:traversable class="Products.CPSWorkflow.workflowtool.WorkflowTool"/>
 
   <five:registerClass
       class=".workflow.WorkflowDefinition"

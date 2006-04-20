@@ -122,7 +122,8 @@ class WorkflowTool(BaseWorkflowTool):
                          'action' : 'manage_selectWorkflows'
                        },
                        { 'label' : 'Overview', 'action' : 'manage_overview' }
-                     ) + Folder.manage_options[1:]
+                     ) + Folder.manage_options[1:] + (
+        { 'label' : 'Export', 'action' : 'manage_genericSetupExport.html' },)
 
     security = ClassSecurityInfo()
 
