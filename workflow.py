@@ -57,6 +57,8 @@ from Products.CPSWorkflow.interfaces import ICPSWorkflowDefinition
 from Products.CPSCore.ProxyBase import ProxyBase
 from Products.CPSCore.EventServiceTool import getEventService
 
+from constants import TRANSITION_FLAGS_EXPORT
+
 #
 # Backwards compatibility with CPS3 <= 3.2.x
 # Importing transition flags from here before.
@@ -1201,8 +1203,9 @@ class WorkflowDefinition(DCWorkflowDefinition):
             else:
                 return 1
         if get_details:
+            friendly_behavior = TRANSITION_FLAGS_EXPORT.get(behavior, behavior)
             return 0, ('state=%s (transition=%s) has no behavior=%s'
-                       % (sdef.getId(), transition, behavior))
+                       % (sdef.getId(), transition, friendly_behavior))
         else:
             return 0
 
