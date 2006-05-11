@@ -37,9 +37,7 @@ from AccessControl import getSecurityManager
 from Acquisition import aq_parent
 from Acquisition import aq_inner
 from Globals import InitializeClass
-from Globals import DTMLFile
 
-from Products.CMFCore.permissions import ManagePortal
 from Products.CMFCore.utils import getToolByName
 from Products.CMFCore.WorkflowCore import ObjectMoved
 from Products.CMFCore.WorkflowCore import ObjectDeleted
