@@ -199,8 +199,8 @@ class StateDefinition(DCWFStateDefinition, ObjectManager):
                 # XXX AT: not currently possible to set View permission on the
                 # stack, because in canManageStack, for instance, we check the
                 # stack content to tell if user can edit the stack. When view
-                # permission is set, user sees the stacks as anepty stack, the
-                # empty stack guard is evaluated.
+                # permission is set, user sees the stacks as an empty stack,
+                # the empty stack guard is evaluated.
                 #props={'guard_permissions': 'View',},
                 )
 
