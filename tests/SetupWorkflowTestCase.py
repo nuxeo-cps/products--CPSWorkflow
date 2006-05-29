@@ -173,6 +173,7 @@ class SetupWorkflowTestCase(BaseRegistryTests):
                 state.setPermission(permission, 0,
                                     statedef['permissions'][permission])
             state.setProperties(**statedef)
+            # XXX add variables management
 
         # transitions
         transitions = wfdef['transitions']
@@ -180,6 +181,10 @@ class SetupWorkflowTestCase(BaseRegistryTests):
             wf.transitions.addTransition(transid)
             trans = wf.transitions.get(transid)
             trans.setProperties(**transdef)
+            # variables
+            variables = transdef.get('variables', {})
+            for var_id, expr_text in variables.items():
+                trans.addVariable(var_id, expr_text)
 
         # scripts
         scripts = wfdef['scripts']

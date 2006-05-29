@@ -463,7 +463,10 @@ def _initCPSWorkflowTransitions(workflow, transitions):
                 t_info['workflow_reset_on_workflow_variable'],
             )
 
-        t.var_exprs = PersistentMapping(t_info['variables'].items())
+        # use API so that the Expression is set
+        # FIXME AT: bug still exists in GenericSetup
+        for var_id, expr_text in t_info['variables'].items():
+            t.addVariable(var_id, expr_text)
 
 
 def _extractCPSStateNodes(root, encoding=None):

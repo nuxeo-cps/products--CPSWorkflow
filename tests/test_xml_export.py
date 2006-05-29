@@ -260,6 +260,9 @@ class TestFullCPSWorkflowExport(SetupWorkflowTestCase):
             'props': {
                'guard_roles': pub_roles,
                },
+            'variables': {
+                'comments': "string:truc",
+                },
             }
         transitions['submit'] = {
             'title': 'Member requests publishing',

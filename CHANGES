@@ -6,7 +6,7 @@ New features:
 -
 Bug fixes:
 ~~~~~~~~~~
--
+- Transition variables were not imported correctly
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
 -

@@ -147,6 +147,7 @@
   <transition-behavior behavior_id="initial-clone"/>
   <transition-behavior behavior_id="freeze"/>
   <transition-behavior behavior_id="merge"/>
+  <assignment name="comments">string:truc</assignment>
  </transition>
  <transition transition_id="reject"
              title="Reviewer rejects publishing"

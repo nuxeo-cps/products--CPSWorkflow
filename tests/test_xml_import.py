@@ -317,6 +317,13 @@ class TestFullCPSWorkflowImport(SetupWorkflowTestCase):
                           TRANSITION_BEHAVIOR_POP_DELEGATEES,
                           TRANSITION_BEHAVIOR_EDIT_DELEGATEES])
 
+    def test_TransitionsVariables(self):
+        t = self.wf.transitions.reject
+        self.assertEqual(t.getVariableExprs(), [])
+        t = self.wf.transitions.publish
+        self.assertEqual(t.getVariableExprs(),
+                         [('comments', 'string:truc')])
+
     def test_Scripts(self):
         script_ids = [
             'add_language_to_proxy',
