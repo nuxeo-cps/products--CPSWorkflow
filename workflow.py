@@ -1025,6 +1025,9 @@ class WorkflowDefinition(DCWorkflowDefinition):
                 value = state_values[id]
             elif tdef_exprs.has_key(id):
                 expr = tdef_exprs[id]
+            elif not vdef.update_always and former_status.has_key(id):
+                # Preserve former value
+                value = former_status[id]
             else:
                 if vdef.default_expr is not None:
                     expr = vdef.default_expr
