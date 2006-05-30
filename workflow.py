@@ -1032,10 +1032,12 @@ class WorkflowDefinition(DCWorkflowDefinition):
             # - set update_always=1 on stack variables (if ok, but will not be
             #   compatible with existing stacks)
             # - check the update_always property here only if variable is not a
-            #   stack variable
-            #elif not vdef.update_always and former_status.has_key(id):
-            #    # Preserve former value
-            #    value = former_status[id]
+            #   stack variable -> implemented here
+            elif (id not in stacks.keys()
+                  and not vdef.update_always
+                  and former_status.has_key(id)):
+                # Preserve former value
+                value = former_status[id]
             else:
                 if vdef.default_expr is not None:
                     expr = vdef.default_expr
