@@ -60,7 +60,7 @@ class DummyContent(Dummy):
     meta_type = 'Dummy'
     _isPortalContent = 1
 
-    def _getPortalTypeName(self):
+    def getPortalTypeName(self):
         return 'Dummy Content'
 
 class DummyTypesTool(SimpleItem):
