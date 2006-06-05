@@ -822,8 +822,8 @@ class WorkflowTool(BaseWorkflowTool):
 
         if isinstance(ob, str):
             pt = ob
-        elif hasattr(aq_base(ob), '_getPortalTypeName'):
-            pt = ob._getPortalTypeName()
+        elif getattr(aq_base(ob), 'getPortalTypeName', None) is not None:
+            pt = ob.getPortalTypeName()
             if container is None:
                 container = ob
         else:
