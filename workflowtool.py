@@ -23,9 +23,9 @@
 stack workflows support.
 """
 
-from zLOG import LOG, ERROR, DEBUG, TRACE, INFO
-
 import sys
+import logging
+from ZODB.loglevels import TRACE
 from Acquisition import aq_base, aq_parent, aq_inner
 from Globals import InitializeClass, DTMLFile
 from AccessControl import ClassSecurityInfo, Unauthorized
@@ -62,6 +62,10 @@ from zope.interface import implements
 from Products.CPSWorkflow.interfaces import ICPSWorkflowTool
 from Products.CMFCore.interfaces import IWorkflowDefinition
 
+
+logger = logging.getLogger('CPSWorkflow.workflowtool')
+
+
 #
 # CPSCore is optional now.
 # Check DEPENDENCIES.txt
@@ -73,8 +77,8 @@ try:
     from Products.CPSCore.EventServiceTool import getEventService
 except ImportError:
     if sys.exc_info()[2].tb_next is not None: raise
-    LOG("Optional Dependencies missing", INFO,
-        "CPSCore.EventServiceTool and CPSCore.ProxyBase")
+    logger.info("Optional dependencies missing: "
+                "CPSCore.EventServiceTool and CPSCore.ProxyBase")
 
     #
     # Here defines optional dependencies on CPSCore elt.
@@ -172,8 +176,8 @@ class WorkflowTool(BaseWorkflowTool):
             ok, why = wf.isBehaviorAllowedFor(container, behavior,
                                               transition, get_details=1)
             if not ok:
-                LOG('isBehaviorAllowedFor', DEBUG, 'not ok for %s: %s' %
-                    (behavior, why))
+                #logger.debug("isBehaviorAllowedFor: not ok for %s: %s",
+                #             behavior, why)
                 if get_details:
                     return 0, '%s, %s' % (wf.getId(), why)
                 else:
@@ -227,9 +231,9 @@ class WorkflowTool(BaseWorkflowTool):
         Returns a sequence of transition names.
         """
         container = self._container_maybe_rpath(container)
-        LOG('CPSWFT', TRACE,
-            "getInitialTransitions container=%s type_name=%s behavior=%s "
-            % ('/'.join(container.getPhysicalPath()), type_name, behavior))
+        #logger.log(TRACE, "getInitialTransitions container=%s type_name=%s "
+        #           "behavior=%s ",
+        #           '/'.join(container.getPhysicalPath()), type_name, behavior)
         d = {}
 
         for wf_id in self.getChainFor(type_name, container=container):
@@ -245,7 +249,7 @@ class WorkflowTool(BaseWorkflowTool):
 
         transitions = d.keys()
         transitions.sort()
-        LOG('CPSWFT', TRACE, "  Transitions are %s" % `transitions`)
+        #logger.log(TRACE, "  Transitions are %r", transitions)
         return transitions
 
     def _container_maybe_rpath(self, container):
@@ -281,11 +285,10 @@ class WorkflowTool(BaseWorkflowTool):
         'folder', 'document' or 'folderishdocument'.
         """
         container = self._container_maybe_rpath(container)
-        LOG('invokeFactoryFor', DEBUG,
-            "Called with container=%s type_name=%s id=%s "
-            "language=%s initial_transition=%s" %
-            ('/'.join(container.getPhysicalPath()), type_name, id,
-             language, initial_transition))
+        #logger.debug("invokeFactoryFor: Called with container=%s "
+        #             "type_name=%s id=%s language=%s initial_transition=%s",
+        #             '/'.join(container.getPhysicalPath()), type_name, id,
+        #             language, initial_transition)
         if language is None:
             language = self.getDefaultLanguage()
         if initial_transition is None:
@@ -329,9 +332,9 @@ class WorkflowTool(BaseWorkflowTool):
 
         (Called by a CPS workflow during publishing transition.)
         """
-        LOG('cloneObject', DEBUG, 'Called with ob=%s container=%s '
-            'initial_transition=%s' % (ob.getId(), container.getId(),
-                                       initial_transition))
+        #logger.debug("cloneObject: called with ob=%s container=%s "
+        #             "initial_transition=%s", ob.getId(), container.getId(),
+        #             initial_transition)
         id = self.findNewId(container, ob.getId())
         new_ob = self._createObject(container, id,
                                     initial_transition,
@@ -349,9 +352,10 @@ class WorkflowTool(BaseWorkflowTool):
 
         (Called by CPS Workflow during checkout transition.)
         """
-        LOG('checkoutObject', DEBUG, "Called with ob=%s container=%s "
-            "initial_transition=%s language_map=%s" %
-            (ob.getId(), container.getId(), initial_transition, language_map))
+        #logger.debug("checkoutObject: called with ob=%s container=%s "
+        #             "initial_transition=%s language_map=%s",
+        #             ob.getId(), container.getId(), initial_transition,
+        #             language_map)
         id = self.findNewId(container, ob.getId())
         new_ob = self._createObject(container, id,
                                     initial_transition,
@@ -366,9 +370,9 @@ class WorkflowTool(BaseWorkflowTool):
                       language_map=None,
                       kwargs=None):
         """Create an object in a container, according to initial behavior."""
-        LOG('_createObject', DEBUG, 'Called with container=%s id=%s '
-            'initial_transition=%s' % (container.getId(), id,
-                                       initial_transition))
+        #logger.debug("_createObject called with container=%s id=%s "
+        #             "initial_transition=%s", container.getId(), id,
+        #             initial_transition)
         pxtool = getToolByName(self, 'portal_proxies')
 
         if kwargs is None:
@@ -472,9 +476,9 @@ class WorkflowTool(BaseWorkflowTool):
                         kwargs):
         """Insert ob into workflows."""
         # Do initial transition for all workflows.
-        LOG('_insertWorkflow', DEBUG,
-            "inserting %s using transition=%s behavior=%s kw=%s" %
-            (ob.getId(), initial_transition, initial_behavior, kwargs))
+        #logger.debug("_insertWorkflow inserting %s using transition=%s "
+        #             "behavior=%s kw=%s", ob.getId(), initial_transition,
+        #             initial_behavior, kwargs)
         reindex = 0
 
         # Remove old workflow information.
@@ -501,11 +505,12 @@ class WorkflowTool(BaseWorkflowTool):
 
         Only done for proxies... XXX correct?
         """
-        LOG('_insertWorkflowRecursive', DEBUG,
-            "Recursively inserting %s using transition=%s behavior=%s"
-            % (ob.getId(), initial_transition, initial_behavior))
+        #logger.debug("_insertWorkflowRecursive inserting %s using "
+        #             "transition=%s behavior=%s",
+        #             ob.getId(), initial_transition, initial_behavior)
         if not isinstance(ob, ProxyBase):
-            LOG('_insertWorkflowRecursive', DEBUG, "  Is not a proxy")
+            logger.debug("_insertWorkflowRecursive: Not a proxy")
+            pass
             #return # XXX correct?
         self._insertWorkflow(ob, initial_transition, initial_behavior, kwargs)
         # The recursion is only applied if it's a proxy folderish document.
@@ -640,11 +645,11 @@ class WorkflowTool(BaseWorkflowTool):
 
         Return the destination proxy and language_revs, or None, None.
         """
-        LOG('_checkObjectMergeable', DEBUG,
-            'check ob=%s dest=%s var=%s state=%s'
-            % (ob.getId(), dest_container, state_var, new_state))
+        #logger.debug("_checkObjectMergeable check ob=%s dest=%s var=%s "
+        #             "state=%s", ob.getId(), dest_container, state_var,
+        #             new_state)
         if not isinstance(ob, ProxyBase):
-            LOG('_checkObjectMergeable', DEBUG, ' Not a proxy')
+            logger.debug("_checkObjectMergeable: Not a proxy")
             return None, None
 
         utool = getToolByName(self, 'portal_url')
@@ -666,26 +671,27 @@ class WorkflowTool(BaseWorkflowTool):
             drpath = info['rpath']
             if drpath != container_rpath+dob.getId():
                 # Proxy not in the dest container.
-                LOG('_checkObjectMergeable', TRACE,
-                    '  Not in dest: %s' % drpath)
+                #logger.log(TRACE, "_checkObjectMergeable: not in dest: %s",
+                #           drpath)
                 continue
             if info[state_var] != new_state:
                 # Proxy not in the correct state.
-                LOG('_checkObjectMergeable', TRACE,
-                    '  Bad state=%s: %s' % (info[state_var], drpath))
+                #logger.log(TRACE, "_checkObjectMergeable: bad state=%s: %s",
+                #           info[state_var], drpath)
                 continue
             if drpath == rpath:
                 # Skip ourselves.
-                LOG('_checkObjectMergeable', TRACE,
-                    '  Ourselves: %s' % drpath)
+                #logger.log(TRACE, "_checkObjectMergeable: ourselves: %s",
+                #           drpath)
                 continue
             # Get the first one that matches.
             dest_ob = dob
             language_revs = info['language_revs']
-            LOG('_checkObjectMergeable', DEBUG, ' Found %s' % drpath)
+            #logger.debug("_checkObjectMergeable: found %s", drpath)
             break
         if dest_ob is None:
-            LOG('_checkObjectMergeable', DEBUG, ' NotFound')
+            #logger.debug("_checkObjectMergeable: not found")
+            pass
         return dest_ob, language_revs
 
     #
@@ -710,8 +716,8 @@ class WorkflowTool(BaseWorkflowTool):
     security.declarePrivate('_doActionFor')
     def _doActionFor(self, ob, action, wf_id=None, *args, **kw):
         """Follow a transition."""
-        LOG('_doActionFor', DEBUG, 'start, ob=%s action=%s' %
-            (ob.getId(), action))
+        #logger.debug("_doActionFor: start, ob=%s action=%s",
+        #             ob.getId(), action)
         wfs = self.getWorkflowsFor(ob)
         if wfs is None:
             wfs = ()
@@ -719,11 +725,11 @@ class WorkflowTool(BaseWorkflowTool):
             if not wfs:
                 raise WorkflowException('No workflows found.')
             for wf in wfs:
-                LOG('_doActionFor', TRACE, ' testing wf %s' % wf.getId())
+                #logger.log(TRACE, "_doActionFor: testing wf %s", wf.getId())
                 if wf.isActionSupported(ob, action, **kw):
-                    LOG('_doActionFor', TRACE, ' found!')
+                    #logger.log(TRACE, "_doActionFor: found!")
                     break
-                LOG('_doActionFor', TRACE, ' not found')
+                #logger.log(TRACE, "_doActionFor: not found")
             else:
                 raise WorkflowException(
                     'No workflow provides the "%s" action.' % action)
@@ -738,8 +744,8 @@ class WorkflowTool(BaseWorkflowTool):
     security.declarePrivate('_doActionForRecursive')
     def _doActionForRecursive(self, ob, action, wf_id=None, *args, **kw):
         """Recursively calls doactionfor."""
-        LOG('_doActionForRecursive', DEBUG, 'ob=%s action=%s' %
-            (ob.getId(), action))
+        #logger.debug("_doActionForRecursive: ob=%s action=%s",
+        #             ob.getId(), action)
         if not isinstance(ob, ProxyBase): # XXX
             return
         # Do the recursion children first, so that if we have to do an
@@ -818,7 +824,7 @@ class WorkflowTool(BaseWorkflowTool):
 ##         from StringIO import StringIO
 ##         s = StringIO()
 ##         traceback.print_stack(file=s)
-##         LOG('getChainFor', DEBUG, 'comming from tb:\n%s' % s.getvalue())
+##         logger.debug("getChainFor: comming from tb:\n%s", s.getvalue())
 
         if isinstance(ob, str):
             pt = ob
@@ -831,8 +837,7 @@ class WorkflowTool(BaseWorkflowTool):
         if pt is None:
             return ()
         if container is None:
-            LOG('WorkflowTool', ERROR,
-                'getChainFor: no container for ob %s' % (ob,))
+            logger.error("getChainFor: no container for ob %r", ob)
             return ()
         # Find placeful workflow configuration object.
         wfconf = getattr(container, LOCAL_WORKFLOW_CONFIG_ID, None)

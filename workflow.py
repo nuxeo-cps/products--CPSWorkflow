@@ -30,7 +30,8 @@ stack workflow support to be able to define dynamic delegation / validation
 chains through dedicated transitions.
 """
 
-from zLOG import LOG, TRACE
+import logging
+from ZODB.loglevels import TRACE
 
 from AccessControl import ClassSecurityInfo
 from AccessControl import getSecurityManager
@@ -64,6 +65,10 @@ from constants import TRANSITION_FLAGS_EXPORT
 
 from Products.CPSWorkflow.transitions import *
 from Products.CPSWorkflow.states import *
+
+
+logger = logging.getLogger('CPSWorkflow.workflow')
+
 
 class WorkflowDefinition(DCWorkflowDefinition):
     """A Workflow implementation with enhanced transitions.
@@ -401,8 +406,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
         ### CPS: Behavior sanity checks.
         #
         behavior = tdef.transition_behavior
-        LOG('CPSWorkflow', TRACE, 'Behavior in wf %s, trans %s: %s'
-            % (self.getId(), tdef.getId(), behavior))
+        logger.log(TRACE, "Behavior in wf %s, trans %s: %s",
+                   self.getId(), tdef.getId(), behavior)
         kwargs = kwargs.copy() # Because we'll modify it.
 
         if TRANSITION_BEHAVIOR_MOVE in behavior:
@@ -585,10 +590,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
         if TRANSITION_BEHAVIOR_PUSH_DELEGATEES in behavior:
 
-            LOG("::CPSWorkflow._executeTansition() :: "
-                "FLAG : TRANSITION_BEHAVIOR_PUSH_DELEGATEES",
-                TRACE,
-                str(kwargs))
+            logger.log(TRACE, "_executeTansition: FLAG: "
+                       "TRANSITION_BEHAVIOR_PUSH_DELEGATEES %r", kwargs)
 
             #
             # Get the stack definitions from the transition definition
@@ -655,10 +658,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
         if TRANSITION_BEHAVIOR_POP_DELEGATEES in behavior:
 
-            LOG("::CPSWorkflow._executeTansition() :: "
-                "FLAG : TRANSITION_BEHAVIOR_POP_DELEGATEES",
-                TRACE,
-                str(kwargs))
+            logger.log(TRACE, "_executeTansition: FLAG: "
+                       "TRANSITION_BEHAVIOR_POP_DELEGATEES %r", kwargs)
 
             #
             # Get the stack definitions from the transition definition
@@ -724,10 +725,9 @@ class WorkflowDefinition(DCWorkflowDefinition):
                     stacks[wf_var] = stackdef._pop(ds, **kwargs)
 
         if TRANSITION_BEHAVIOR_EDIT_DELEGATEES in behavior:
-            LOG("::CPSWorkflow._executeTansition() :: "
-                "FLAG : TRANSITION_BEHAVIOR_EDIT_DELEGATEES",
-                TRACE,
-                str(kwargs))
+
+            logger.log(TRACE, "_executeTansition: FLAG: "
+                       "TRANSITION_BEHAVIOR_EDIT_DELEGATEES %r", kwargs)
 
             #
             # Get the stack definitions from the transition definition
@@ -794,10 +794,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
         if TRANSITION_BEHAVIOR_WORKFLOW_UP in behavior:
 
-            LOG("::CPSWorkflow._executeTansition() :: "
-                "FLAG : TRANSITION_BEHAVIOR_WORKFLOW_UP",
-                TRACE,
-                str(kwargs))
+            logger.log(TRACE, "_executeTansition: FLAG: "
+                       "TRANSITION_BEHAVIOR_WORKFLOW_UP %r", kwargs)
 
             #
             # Get the stack definitions from the transition definition
@@ -864,10 +862,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
         if TRANSITION_BEHAVIOR_WORKFLOW_DOWN in behavior:
 
-            LOG("::CPSWorkflow._executeTansition() :: "
-                "FLAG : TRANSITION_BEHAVIOR_WORKFLOW_DOWN",
-                TRACE,
-                str(kwargs))
+            logger.log(TRACE, "_executeTansition: FLAG: "
+                       "TRANSITION_BEHAVIOR_WORKFLOW_DOWN %r", kwargs)
 
             #
             # Get the stack definitions from the transition definition
@@ -935,10 +931,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
         if TRANSITION_BEHAVIOR_WORKFLOW_RESET in behavior:
 
-            LOG("::CPSWorkflow._executeTansition() :: "
-                "FLAG : TRANSITION_BEHAVIOR_WORKFLOW_RESET",
-                TRACE,
-                str(kwargs))
+            logger.log(TRACE, "_executeTansition: FLAG: "
+                       "TRANSITION_BEHAVIOR_WORKFLOW_RESET %r", kwargs)
 
             #
             # Get the stack definitions from the transition definition
@@ -1186,8 +1180,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
         If transition is present, only check a transition with this name.
         """
-        LOG('WF', TRACE, 'isBehaviorAllowedFor ob=%s wf=%s beh=%s'
-            % (ob.getId(), self.getId(), behavior))
+        #logger.log(TRACE, "isBehaviorAllowedFor ob=%s wf=%s beh=%s",
+        #           ob.getId(), self.getId(), behavior)
         sdef = self._getWorkflowStateOf(ob)
         if sdef is None:
             if get_details:
@@ -1198,17 +1192,17 @@ class WorkflowDefinition(DCWorkflowDefinition):
         for tid in sdef.transitions:
             if transition is not None and transition != tid:
                 continue
-            LOG('WF', TRACE, ' Test transition %s' % tid)
+            #logger.log(TRACE, "Test transition %s", tid)
             tdef = self.transitions.get(tid, None)
             if tdef is None:
                 continue
             if behavior not in tdef.transition_behavior:
-                LOG('WF', TRACE, '  Not a %s' % (behavior,))
+                #logger.log(TRACE, "Not a %s", behavior)
                 continue
             if not self._checkTransitionGuard(tdef, ob):
-                LOG('WF', TRACE, '  Guard failed')
+                #logger.log(TRACE, "Guard failed")
                 continue
-            LOG('WF', TRACE, '  Ok')
+            #logger.log(TRACE, "Ok")
             if get_details:
                 return 1, ''
             else:
@@ -1250,19 +1244,19 @@ class WorkflowDefinition(DCWorkflowDefinition):
 
         Returns a sequence of transition names.
         """
-        LOG('WF', TRACE, "getInitialTransitions behavior=%s " % behavior)
+        #logger.log(TRACE, "getInitialTransitions behavior=%s", behavior)
         transitions = []
         for tdef in self.transitions.values():
-            LOG('WF', TRACE, ' Test transition %s' % tdef.getId())
+            #logger.log(TRACE, " Test transition %s", tdef.getId())
             if behavior not in tdef.transition_behavior:
-                LOG('WF', TRACE, '  Not a %s' % behavior)
+                #logger.log(TRACE, "  Not a %s", behavior)
                 continue
             if not self._checkTransitionGuard(tdef, context):
-                LOG('WF', TRACE, '  Guard failed')
+                #logger.log(TRACE, "  Guard failed")
                 continue
-            LOG('WF', TRACE, '  Ok')
+            #logger.log(TRACE, "  Ok")
             transitions.append(tdef.getId())
-        LOG('WF', TRACE, ' Returning transitions=%s' % (transitions,))
+        #logger.log(TRACE, " Returning transitions=%s", transitions)
         return transitions
 
     security.declarePrivate('getManagedPermissions')
@@ -1289,14 +1283,14 @@ class WorkflowDefinition(DCWorkflowDefinition):
         info.content.
         Returns the actions to be displayed to the user.
         '''
-        LOG('listObjectActions', TRACE, 'Called for wf %s' % self.getId())
+        #logger.log(TRACE, "listObjectActions: called for wf %s", self.getId())
         ob = info.content
         sdef = self._getWorkflowStateOf(ob)
         if sdef is None:
             return None
         res = []
         for tid in sdef.transitions:
-            LOG('listObjectActions', TRACE, ' Checking %s' % tid)
+            #logger.log("listObjectActions:  checking %s", tid)
             tdef = self.transitions.get(tid, None)
             if tdef is not None and tdef.trigger_type == TRIGGER_USER_ACTION:
                 if tdef.actbox_name:
@@ -1307,11 +1301,14 @@ class WorkflowDefinition(DCWorkflowDefinition):
                             'url': tdef.actbox_url % info,
                             'permissions': (),  # Predetermined.
                             'category': tdef.actbox_category}))
-                        LOG('listObjectActions', TRACE, '  Guard ok')
+                        #logger.log(TRACE, "listObjectActions:  guard ok")
                     else:
-                        LOG('listObjectActions', TRACE, '  Guard failed')
+                        #logger.log(TRACE, "listObjectActions:  guard failed")
+                        pass
                 else:
-                    LOG('listObjectActions', TRACE, '  No user-visible action')
+                    #logger.log(TRACE, "listObjectActions:  "
+                    #           "no user-visible action")
+                    pass
         res.sort()
         return map((lambda (id, val): val), res)
 
