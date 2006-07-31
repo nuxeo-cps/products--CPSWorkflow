@@ -6,8 +6,7 @@ New features:
 -
 Bug fixes:
 ~~~~~~~~~~
-- Transition variables were not imported correctly.
-- Variable 'update_always' property was discarded.
+-
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
 -
