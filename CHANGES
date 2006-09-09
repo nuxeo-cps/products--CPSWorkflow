@@ -3,7 +3,7 @@ Requires:
 -
 New features:
 ~~~~~~~~~~~~~
--
+- Getting status history is controlled by its own permission
 Bug fixes:
 ~~~~~~~~~~
 -
