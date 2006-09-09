@@ -29,7 +29,7 @@ from Products.CMFCore.permissions import setDefaultRoles
 ManageWorkflows = 'Manage workflows'
 setDefaultRoles(ManageWorkflows, ('Manager',))
 
-# wftool will check 'View', too, so that it's not necessary (but possible) to
+# wftool will check 'View' too, so that it's not necessary (but possible) to
 # have the wf control this permission
-ViewWorkflowHistory = 'View workflow history'
-setDefaultRoles(ViewWorkflowHistory, ('Member',))
+ViewStatusHistory = 'View status history'
+setDefaultRoles(ViewStatusHistory, ('Member',))

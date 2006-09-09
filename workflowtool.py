@@ -38,7 +38,7 @@ from Products.CMFCore.permissions import ManagePortal
 from Products.CMFCore.WorkflowCore import WorkflowException
 from Products.CMFCore.WorkflowTool import WorkflowTool as BaseWorkflowTool
 
-from permissions import ViewWorkflowHistory
+from permissions import ViewStatusHistory
 
 from stackregistries import WorkflowStackRegistry
 from stackregistries import WorkflowStackDefRegistry
@@ -771,9 +771,9 @@ class WorkflowTool(BaseWorkflowTool):
         """
         if not _checkPermission(View, ob):
             raise Unauthorized("Can't get history of an unreachable object.")
-        if not _checkPermission(ViewWorkflowHistory, ob):
+        if not _checkPermission(ViewStatusHistory, ob):
             raise Unauthorized("You don't have permission to see "
-                               "the workflow history of this document.")
+                               "the status history of this document.")
         if not isinstance(ob, ProxyBase):
             return ()
         repotool = getToolByName(self, 'portal_repository')
