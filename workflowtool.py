@@ -772,8 +772,8 @@ class WorkflowTool(BaseWorkflowTool):
         if not _checkPermission(View, ob):
             raise Unauthorized("Can't get history of an unreachable object.")
         if not _checkPermission(ViewWorkflowHistory, ob):
-            raise Unauthorized("You don't have permission to see"
-                               "the worflow history of this document.")
+            raise Unauthorized("You don't have permission to see "
+                               "the workflow history of this document.")
         if not isinstance(ob, ProxyBase):
             return ()
         repotool = getToolByName(self, 'portal_repository')
