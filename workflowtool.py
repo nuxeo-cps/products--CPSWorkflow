@@ -38,6 +38,8 @@ from Products.CMFCore.permissions import ManagePortal
 from Products.CMFCore.WorkflowCore import WorkflowException
 from Products.CMFCore.WorkflowTool import WorkflowTool as BaseWorkflowTool
 
+from permissions import ViewWorkflowHistory
+
 from stackregistries import WorkflowStackRegistry
 from stackregistries import WorkflowStackDefRegistry
 from stackregistries import WorkflowStackElementRegistry
@@ -202,6 +204,7 @@ class WorkflowTool(BaseWorkflowTool):
                                      TRANSITION_INITIAL_CREATE):
                 allowed.append(type)
 
+        logger.debug('Allowed: %s', allowed)
         return allowed
 
     security.declarePublic('getAllowedPublishingTransitions')
@@ -768,6 +771,9 @@ class WorkflowTool(BaseWorkflowTool):
         """
         if not _checkPermission(View, ob):
             raise Unauthorized("Can't get history of an unreachable object.")
+        if not _checkPermission(ViewWorkflowHistory, ob):
+            raise Unauthorized("You don't have permission to see"
+                               "the worflow history of this document.")
         if not isinstance(ob, ProxyBase):
             return ()
         repotool = getToolByName(self, 'portal_repository')
