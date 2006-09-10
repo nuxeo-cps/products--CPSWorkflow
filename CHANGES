@@ -6,7 +6,7 @@ New features:
 - Getting status history is controlled by its own permission
 Bug fixes:
 ~~~~~~~~~~
--
+- typo in exception msg: s/No workflows found./No workflow found./
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
 -

@@ -726,7 +726,7 @@ class WorkflowTool(BaseWorkflowTool):
             wfs = ()
         if wf_id is None:
             if not wfs:
-                raise WorkflowException('No workflows found.')
+                raise WorkflowException('No workflow found.')
             for wf in wfs:
                 #logger.log(TRACE, "_doActionFor: testing wf %s", wf.getId())
                 if wf.isActionSupported(ob, action, **kw):
