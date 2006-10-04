@@ -7,6 +7,10 @@ New features:
 Bug fixes:
 ~~~~~~~~~~
 - typo in exception msg: s/No workflows found./No workflow found./
+- initial publishing transitions with merge or delete behaviors were blocking
+  the end of the processing of initiating publishing transition (after wf
+  scripts, deletion, ...) due to an uncatched ObjectMoved or ObjectDeleted
+  exception.
 New internal features:
 ~~~~~~~~~~~~~~~~~~~~~~
 -

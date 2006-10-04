@@ -550,7 +550,15 @@ class WorkflowDefinition(DCWorkflowDefinition):
             #XXX
 
         if TRANSITION_BEHAVIOR_PUBLISHING in behavior:
-            wftool.cloneObject(ob, dest_container, initial_transition, kwargs)
+            try:
+                wftool.cloneObject(ob, dest_container, initial_transition, kwargs)
+            except ObjectMoved, ex:
+                # do not prevent the end of the current transition to happen
+                # while doing the necessary reindexing of the moved object
+                wftool._reindexWorkflowVariables(ex.getNewObject())
+            except ObjectDeleted:
+                # idem but no reindexing required
+                pass
 
         if TRANSITION_BEHAVIOR_CHECKOUT in behavior:
             wftool.checkoutObject(ob, dest_container, initial_transition,
