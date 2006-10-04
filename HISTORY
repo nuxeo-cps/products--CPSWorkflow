@@ -1,3 +1,27 @@
+===========================================================
+Package: CPSWorkflow 0.10.0
+===========================================================
+First release built by: ogrisel at: 2006-10-04T21:18:47
+SVN Tag: https://svn.nuxeo.org/pub/CPS3/products/CPSWorkflow/tags/0.10.0
+Build from: https://svn.nuxeo.org/pub/CPS3/products/CPSWorkflow/trunk@49317
+
+Requires:
+~~~~~~~~~
+-
+New features:
+~~~~~~~~~~~~~
+- Getting status history is controlled by its own permission
+Bug fixes:
+~~~~~~~~~~
+- typo in exception msg: s/No workflows found./No workflow found./
+- initial publishing transitions with merge or delete behaviors were blocking
+  the end of the processing of initiating publishing transition (after wf
+  scripts, deletion, ...) due to an uncatched ObjectMoved or ObjectDeleted
+  exception.
+New internal features:
+~~~~~~~~~~~~~~~~~~~~~~
+-
+
 *******************************************
 ** CPSWorkflow V0.9.2 [R1 build 2006/07/31-13:25 by fermigier]
 ** SVN URL: https://svn.nuxeo.org/pub/CPS3/products/CPSWorkflow/trunk Revision: 47588

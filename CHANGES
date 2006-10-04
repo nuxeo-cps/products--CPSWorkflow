@@ -1,16 +1,12 @@
-Requires:
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
 ~~~~~~~~~
 -
-New features:
-~~~~~~~~~~~~~
-- Getting status history is controlled by its own permission
-Bug fixes:
-~~~~~~~~~~
-- typo in exception msg: s/No workflows found./No workflow found./
-- initial publishing transitions with merge or delete behaviors were blocking
-  the end of the processing of initiating publishing transition (after wf
-  scripts, deletion, ...) due to an uncatched ObjectMoved or ObjectDeleted
-  exception.
-New internal features:
-~~~~~~~~~~~~~~~~~~~~~~
--
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
