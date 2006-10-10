@@ -1,13 +1,12 @@
-Requires
-~~~~~~~~
--
-New features
-~~~~~~~~~~~~
--
-Bug fixes
+Requires:
 ~~~~~~~~~
 -
-New internal features
-~~~~~~~~~~~~~~~~~~~~~
-- wftool.isBehaviorAllowedFor accepts "publishing" as alias for
-  constants.TRANSITION_ALLOWSUB_PUBLISHING
+New features:
+~~~~~~~~~~~~~
+-
+Bug fixes:
+~~~~~~~~~~
+-
+New internal features:
+~~~~~~~~~~~~~~~~~~~~~~
+-

@@ -1,3 +1,20 @@
+*******************************************
+** CPSWorkflow V0.11.0 [R1 build 2006/10/10-14:07 by madarche]
+** SVN URL: https://svn.nuxeo.org/pub/CPS3/products/CPSWorkflow/trunk Revision: 49489
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
+~~~~~~~~~
+-
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- wftool.isBehaviorAllowedFor accepts "publishing" as alias for
+  constants.TRANSITION_ALLOWSUB_PUBLISHING
+
 ===========================================================
 Package: CPSWorkflow 0.10.0
 ===========================================================
