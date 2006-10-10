@@ -167,11 +167,12 @@ class WorkflowTool(BaseWorkflowTool):
         """
         container = self._container_maybe_rpath(container)
         behavior = {
-            'create': TRANSITION_ALLOWSUB_CREATE,
-            'delete': TRANSITION_ALLOWSUB_DELETE,
-            'cut':    TRANSITION_ALLOWSUB_MOVE,
-            'copy':   TRANSITION_ALLOWSUB_COPY,
-            'paste':  TRANSITION_ALLOWSUB_CREATE,
+            'create':     TRANSITION_ALLOWSUB_CREATE,
+            'publishing': TRANSITION_ALLOWSUB_PUBLISHING,
+            'delete':     TRANSITION_ALLOWSUB_DELETE,
+            'cut':        TRANSITION_ALLOWSUB_MOVE,
+            'copy':       TRANSITION_ALLOWSUB_COPY,
+            'paste':      TRANSITION_ALLOWSUB_CREATE,
             }.get(behavior, behavior)
         for wf in self.getWorkflowsFor(container):
             # XXX deal with non-CPS workflows
