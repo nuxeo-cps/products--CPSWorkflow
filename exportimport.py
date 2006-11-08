@@ -753,6 +753,7 @@ class LocalWorkflowConfigurationXMLAdapter(XMLAdapterBase):
                 child.setAttribute('name', portal_type)
                 child.setAttribute('wf', chain)
                 node.appendChild(child)
+            fragment.appendChild(node)
         return fragment
 
     def _purgeChains(self):

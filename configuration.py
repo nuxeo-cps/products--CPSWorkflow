@@ -178,7 +178,9 @@ class Configuration(SimpleItem):
     manage_options = ({'label' : 'Workflows',
                        'action' : 'manage_editForm',
                        },
-                      ) + SimpleItem.manage_options
+                      ) + SimpleItem.manage_options  + (
+        {'label': 'Export', 'action': 'manage_genericSetupExport.html'},
+        )
 
     _manage_editForm = DTMLFile('zmi/workflowConfigurationEditForm', globals())
 
