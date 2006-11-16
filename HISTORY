@@ -1,3 +1,23 @@
+===========================================================
+Package: CPSWorkflow 0.11.1
+===========================================================
+First release built by: gracinet at: 2006-11-16T18:19:36
+SVN Tag: https://svn.nuxeo.org/pub/CPS3/products/CPSWorkflow/tags/0.11.1
+Build from: https://svn.nuxeo.org/pub/CPS3/products/CPSWorkflow/trunk@50008
+
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
+~~~~~~~~~
+- Made ZMI XML export tab work for local workflow configurations
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
 *******************************************
 ** CPSWorkflow V0.11.0 [R1 build 2006/10/10-14:07 by madarche]
 ** SVN URL: https://svn.nuxeo.org/pub/CPS3/products/CPSWorkflow/trunk Revision: 49489
