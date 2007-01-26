@@ -206,7 +206,7 @@ class TransitionDefinition(DCWFTransitionDefinition):
 
     def getCommentBehaviour(self, proxy, context):
         if not self.comment_behaviour_expr:
-            return 'displayed'
+            return 'display'
         utool = getToolByName(self, 'portal_url', None) # None in unit test
         portal = utool is not None and utool.getPortalObject() or None
         expr_context = getEngine().getContext(
