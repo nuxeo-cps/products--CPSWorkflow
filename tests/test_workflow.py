@@ -212,6 +212,9 @@ class WorkflowToolTests(SecurityRequestTest):
         context = {'cb': 'Comment Behaviour'}
         self.assertEquals(wft.getCommentBehaviour('t1', dummy, context),
                           'Comment Behaviour')
+        self.assertEquals(wft.getCommentBehaviour('no such transition',
+                                                  dummy, context),
+                          None)
 
 def test_suite():
     loader = unittest.TestLoader()

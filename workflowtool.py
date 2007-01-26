@@ -884,13 +884,17 @@ class WorkflowTool(BaseWorkflowTool):
 
 
     def getCommentBehaviour(self, transition_id, proxy, context):
-        for wf_id in self.getChainFor(proxy):
+        wf_ids = self.getChainFor(proxy)
+        for wf_id in wf_ids:
             wf = self.getWorkflowById(wf_id)
             tdef = wf.transitions.get(transition_id, None)
             if tdef is not None:
                 break
         else:
-            raise ValueError("Unknown transition: %s" % transition_id)
+            logger.info("getCommentBehaviour; no transition by id %s "
+                        "in workflows %s", transition_id, wf_ids)
+
+            return None # no point having commment if there's no transition
 
         return tdef.getCommentBehaviour(proxy, context)
 
