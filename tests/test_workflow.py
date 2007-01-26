@@ -82,7 +82,9 @@ class WorkflowToolTests(SecurityRequestTest):
         wf.transitions.addTransition('t1')
         t1 = wf.transitions.get('t1')
         t1.setProperties('title', 's1', trigger_type=TRIGGER_USER_ACTION,
-            transition_behavior=('initial_create',))
+                         transition_behavior=('initial_create',),
+                         comment_behaviour_expr="context/cb",
+                         )
         transitions = wf.transitions.objectIds()
         self.assertEqual(tuple(transitions), ('t1',))
 
@@ -199,6 +201,17 @@ class WorkflowToolTests(SecurityRequestTest):
         chain = wft.getChainFor('Dummy Content', f2)
         self.assertEqual(tuple(chain), ('wf2',))
 
+    def test_wf_getCommentBehaviour(self):
+        self.makeWorkflows()
+        self.makeTypes()
+        self.makeTree()
+        wft = self.root.portal_workflow
+        wft.setChainForPortalTypes(('Dummy Content',), ('wf',))
+
+        dummy = self.root.f.dummy
+        context = {'cb': 'Comment Behaviour'}
+        self.assertEquals(wft.getCommentBehaviour('t1', dummy, context),
+                          'Comment Behaviour')
 
 def test_suite():
     loader = unittest.TestLoader()

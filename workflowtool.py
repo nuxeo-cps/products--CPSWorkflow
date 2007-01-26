@@ -882,6 +882,18 @@ class WorkflowTool(BaseWorkflowTool):
                 perms[p] = None
         return perms.keys()
 
+
+    def getCommentBehaviour(self, transition_id, proxy, context):
+        for wf_id in self.getChainFor(proxy):
+            wf = self.getWorkflowById(wf_id)
+            tdef = wf.transitions.get(transition_id, None)
+            if tdef is not None:
+                break
+        else:
+            raise ValueError("Unknown transition: %s" % transition_id)
+
+        return tdef.getCommentBehaviour(proxy, context)
+
     #
     # STACK WORKFLOWS API
     #

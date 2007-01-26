@@ -203,6 +203,9 @@
  ><tal:case tal:condition="transition/description">
   <description
       tal:content="transition/description">DESCRIPTION</description></tal:case>
+  <comment-behaviour-expr tal:define="cbe transition/comment_behaviour_expr"
+                          tal:condition="cbe"
+                          tal:content="cbe"/>
   <action
         url="URL"
         category="CATEGORY"

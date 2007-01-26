@@ -181,8 +181,8 @@ class CPSWorkflowDefinitionConfigurator(WorkflowDefinitionConfigurator):
     def _extractTransitions(self, workflow):
         """Return a sequence of mappings describing DCWorkflow transitions.
 
-        In addition to DCWorkflow export, adds transition flags and
-        stack properties.
+        In addition to DCWorkflow export, adds transition flags,
+        stack properties and comment behaviour expressions.
         """
         result = WorkflowDefinitionConfigurator._extractTransitions(
             self, workflow)
@@ -221,6 +221,7 @@ class CPSWorkflowDefinitionConfigurator(WorkflowDefinitionConfigurator):
                     v.workflow_down_on_workflow_variable,
                 'workflow_reset_on_workflow_variable':
                     v.workflow_reset_on_workflow_variable,
+                'comment_behaviour_expr': v.comment_behaviour_expr,
                 })
 
         return result
@@ -461,6 +462,7 @@ def _initCPSWorkflowTransitions(workflow, transitions):
                 t_info['workflow_down_on_workflow_variable'],
             workflow_reset_on_workflow_variable =
                 t_info['workflow_reset_on_workflow_variable'],
+            comment_behaviour_expr = t_info['comment_behaviour_expr'],
             )
 
         # use API so that the Expression is set
@@ -596,6 +598,11 @@ def _extractCPSTransitionNodes(root, encoding=None):
             stack_vars = t_node.getElementsByTagName(elt)
             info[key] = [_getNodeAttribute(x, 'variable_id', encoding)
                          for x in stack_vars]
+
+        # Comment behaviour. If multiple the last one takes precedence
+        elts = t_node.getElementsByTagName('comment-behaviour')
+        expr = elts and _coalesceTextNodeChildren(elts[-1], encoding) or ''
+        info['comment_behaviour_expr'] = expr
 
         result.append(info)
 
