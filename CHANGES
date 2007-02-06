@@ -3,8 +3,7 @@ Requires
 -
 New features
 ~~~~~~~~~~~~
-- new API to request whether to display a comment textarea input
-  through a TALES expr kept on the transition
+-
 Bug fixes
 ~~~~~~~~~
 -
