@@ -363,6 +363,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
         state.
         """
 
+        if kwargs.get('pdb'):
+            import pdb; pdb.set_trace()
         sci = None
         econtext = None
         moved_exc = None
@@ -538,7 +540,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
         ### CPS: Behavior.
         #
 
-        delete_ob = None
+        delete_ob = None # to be deleted
+        dest_ob = None # target of potential merge
 
         if TRANSITION_BEHAVIOR_MOVE in behavior:
             raise NotImplementedError
@@ -1096,8 +1099,14 @@ class WorkflowDefinition(DCWorkflowDefinition):
         #
         if delete_ob is not None:
             # XXX refactoring.
+            if dest_ob is not None:
+                # this is a merge
+                notif_ob = dest_ob
+            else:
+                notif_ob = delete_ob
             evtool.notify('workflow_%s' % tdef.getId(),
-                          delete_ob, {'kwargs': kwargs})
+                          notif_ob,
+                          {'kwargs': kwargs})
             container = aq_parent(aq_inner(delete_ob))
             container._delObject(delete_ob.getId())
             if moved_exc is not None:

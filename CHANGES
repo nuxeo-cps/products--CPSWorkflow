@@ -6,7 +6,7 @@ New features
 -
 Bug fixes
 ~~~~~~~~~
--
+- #1705: republishing triggers event on transient object instead of target one.
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 
