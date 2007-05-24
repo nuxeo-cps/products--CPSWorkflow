@@ -120,6 +120,20 @@ class TestCPSWorkflowTransitions(SecurityRequestTest):
 
         # more tests
 
+    def test_comment_behaviour(self):
+       tdef = TransitionDefinition(id='fake')
+       expr = "python:proxy.portal_type == 'TightDoc' and 'required' or 'none'"
+       tdef.setProperties('Title', '', comment_behaviour_expr=expr)
+       class FakeProxy:
+           pass
+
+       proxy = FakeProxy()
+       proxy.portal_type = 'TightDoc'
+       context = None
+       self.assertEquals(tdef.getCommentBehaviour(proxy, context), 'required')
+       proxy.portal_type = 'Other type'
+       self.assertEquals(tdef.getCommentBehaviour(proxy, context), 'none')
+
 def test_suite():
     loader = unittest.TestLoader()
     return loader.loadTestsFromTestCase(TestCPSWorkflowTransitions)

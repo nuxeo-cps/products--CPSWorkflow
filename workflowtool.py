@@ -882,6 +882,22 @@ class WorkflowTool(BaseWorkflowTool):
                 perms[p] = None
         return perms.keys()
 
+
+    def getCommentBehaviour(self, transition_id, proxy, context):
+        wf_ids = self.getChainFor(proxy)
+        for wf_id in wf_ids:
+            wf = self.getWorkflowById(wf_id)
+            tdef = wf.transitions.get(transition_id, None)
+            if tdef is not None:
+                break
+        else:
+            logger.info("getCommentBehaviour; no transition by id %s "
+                        "in workflows %s", transition_id, wf_ids)
+
+            return None # no point having commment if there's no transition
+
+        return tdef.getCommentBehaviour(proxy, context)
+
     #
     # STACK WORKFLOWS API
     #

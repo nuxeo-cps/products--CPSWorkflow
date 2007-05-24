@@ -40,6 +40,12 @@ It currently adds :
 
 from Globals import DTMLFile
 
+
+from Products.CMFCore.utils import getToolByName
+from Products.CMFCore.Expression import Expression
+from Products.CMFCore.Expression import getEngine
+from Products.CMFCore.Expression import SecureModuleImporter
+
 from Products.DCWorkflow.Transitions \
      import TransitionDefinition as DCWFTransitionDefinition
 from Products.DCWorkflow.Transitions import Transitions as DCWFTransitions
@@ -85,6 +91,11 @@ class TransitionDefinition(DCWFTransitionDefinition):
     workflow_down_on_workflow_variable = []
     workflow_reset_on_workflow_variable = []
 
+    # a TALES expression that's used to indicate caling scipts and pts
+    # the current behaviour wrt workflow comments
+    # returned values should be either "required", "displayed" and "none"
+    comment_behaviour_expr = ''
+
     _properties_form = DTMLFile('zmi/workflow_transition_properties',
                                 globals())
 
@@ -101,6 +112,7 @@ class TransitionDefinition(DCWFTransitionDefinition):
                       workflow_up_on_workflow_variable = None,
                       workflow_down_on_workflow_variable = None,
                       workflow_reset_on_workflow_variable = None,
+                      comment_behaviour_expr = None,
                       REQUEST=None,
                       **kw):
         """Set the properties."""
@@ -131,6 +143,14 @@ class TransitionDefinition(DCWFTransitionDefinition):
         if workflow_reset_on_workflow_variable is not None:
             self.workflow_reset_on_workflow_variable = \
                  workflow_reset_on_workflow_variable
+
+
+        # comment behaviour
+        expr = comment_behaviour_expr
+        if expr is not None:
+            expr = expr.strip()
+            self.comment_behaviour_expr = expr
+            self.comment_behaviour_expr_c = Expression(expr)
 
         # Now call original method.
         if REQUEST is not None:
@@ -183,6 +203,20 @@ class TransitionDefinition(DCWFTransitionDefinition):
             if behavior in self._getStackWorkflowFlagsRange():
                 _interested_behaviors += (behavior,)
         return _interested_behaviors
+
+    def getCommentBehaviour(self, proxy, context):
+        if not self.comment_behaviour_expr:
+            return 'display'
+        utool = getToolByName(self, 'portal_url', None) # None in unit test
+        portal = utool is not None and utool.getPortalObject() or None
+        expr_context = getEngine().getContext(
+            {'transition': self,
+             'proxy': proxy,
+             'context': context,
+             'portal': portal,
+             'nothing': None,
+             'modules': SecureModuleImporter})
+        return self.comment_behaviour_expr_c(expr_context)
 
 class Transitions(DCWFTransitions):
     """CPS Transitions
