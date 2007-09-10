@@ -1,6 +1,8 @@
-# Copyright (c) 2005 Nuxeo SAS <http://nuxeo.com>
-# Authors: Anahide Tchertchian <at@nuxeo.com>
-#          Florent Guillaume <fg@nuxeo.com>
+# Copyright (c) 2005-2007 Nuxeo SAS <http://nuxeo.com>
+# Authors:
+# Anahide Tchertchian <at@nuxeo.com>
+# Florent Guillaume <fg@nuxeo.com>
+# M.-A. Darche <madarche@nuxeo.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as published
@@ -769,11 +771,14 @@ class LocalWorkflowConfigurationXMLAdapter(XMLAdapterBase):
     def _initChains(self, node):
         conf = self.context
         local, below = {}, {}
+        processing_local_chain = True
+        local_previous, below_previous = conf.getChains()
         for child in node.childNodes:
             if child.nodeName == 'local-workflows':
                 mapping = local
             elif child.nodeName == 'below-workflows':
                 mapping = below
+                processing_local_chain = False
             else:
                 continue
             for subchild in child.childNodes:
@@ -781,5 +786,14 @@ class LocalWorkflowConfigurationXMLAdapter(XMLAdapterBase):
                     continue
                 portal_type = str(subchild.getAttribute('name'))
                 chain = str(subchild.getAttribute('wf'))
-                mapping[portal_type] = chain
+                remove = str(subchild.getAttribute('remove'))
+                if remove == 'True':
+                    if processing_local_chain:
+                        if local_previous.has_key(portal_type):
+                            conf.delChain(portal_type)
+                    else:
+                        if below_previous.has_key(portal_type):
+                            conf.delChainUnder(portal_type)
+                else:
+                    mapping[portal_type] = chain
         conf.setChains(local, below)
