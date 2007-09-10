@@ -6,8 +6,7 @@ New features
 -
 Bug fixes
 ~~~~~~~~~
-- Fixed #1853 "Not possible through GenericSetup profiles to remove types form
-  Local or below workflow chains".
+-
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 

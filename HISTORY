@@ -1,4 +1,25 @@
 ===========================================================
+Package: CPSWorkflow 0.12.2
+===========================================================
+First release built by: madarche at: 2007-09-10T16:25:25
+SVN Tag: https://svn.nuxeo.org/pub/CPS3/products/CPSWorkflow/tags/0.12.2
+Build from: https://svn.nuxeo.org/pub/CPS3/products/CPSWorkflow/trunk@51966
+
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
+~~~~~~~~~
+- Fixed #1853 "Not possible through GenericSetup profiles to remove types form
+  Local or below workflow chains".
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
 Package: CPSWorkflow 0.12.1
 ===========================================================
 First release built by: div at: 2007-02-19T18:36:35
