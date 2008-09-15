@@ -152,7 +152,7 @@ class Stack(SimpleItem):
     def render(self, context, mode, **kw):
         """Render in mode
 
-        context is te context. var_id is the wokkflow variable holding this
+        context is the context. var_id is the wokkflow variable holding this
         stack
         """
         meth = getattr(context, self.render_method, None)
