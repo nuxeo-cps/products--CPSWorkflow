@@ -30,6 +30,7 @@ stack workflow support to be able to define dynamic delegation / validation
 chains through dedicated transitions.
 """
 
+import os
 import logging
 from ZODB.loglevels import TRACE
 
@@ -39,13 +40,25 @@ from Acquisition import aq_parent
 from Acquisition import aq_inner
 from Globals import InitializeClass
 
+from Products.PageTemplates.PageTemplateFile import PageTemplateFile
+
 from Products.CMFCore.utils import getToolByName
+from Products.CMFCore.permissions import ManagePortal
 from Products.CMFCore.WorkflowCore import ObjectMoved
 from Products.CMFCore.WorkflowCore import ObjectDeleted
 from Products.CMFCore.WorkflowCore import WorkflowException
 
 from Products.DCWorkflow.DCWorkflow import DCWorkflowDefinition
 from Products.DCWorkflow.Transitions import TRIGGER_USER_ACTION
+
+# DCWorkflowGraph is not always present
+try:
+    from Products import DCWorkflowGraph
+    DC_WORKFLOW_GRAPH_PRESENT = True
+except ImportError, e:
+    if str(e) != 'cannot import name DCWorkflowGraph':
+        raise
+    DC_WORKFLOW_GRAPH_PRESENT = Fale
 
 from expression import CPSStateChangeInfo as StateChangeInfo
 from expression import createExprContext
@@ -1338,8 +1351,22 @@ class WorkflowDefinition(DCWorkflowDefinition):
         {'label': 'Export', 'action': 'manage_genericSetupExport.html'},
         )
 
+    security.declareProtected(ManagePortal, 'manage_workflowGraph')
+
+# Patching for workflow graph support (used to be done in CPSCompat)
+if DC_WORKFLOW_GRAPH_PRESENT:
+    # TODO EGGS ?
+    dc_wf_graph_dir = os.path.split(DCWorkflowGraph.__file__)[0]
+    manage_workflowGraph = PageTemplateFile(os.path.join(
+        dc_wf_graph_dir, 'www', 'manage_workflowGraph'), globals())
+    manage_workflowGraph.__name__ = 'manage_workflowGraph'
+    manage_workflowGraph._need__name__ = 0
+
+    WorkflowDefinition.getGraph = DCWorkflowGraph.getGraph
+    WorkflowDefinition.manage_workflowGraph = manage_workflowGraph
 
 InitializeClass(WorkflowDefinition)
+
 
 from Products.CMFCore.WorkflowTool import addWorkflowFactory
 addWorkflowFactory(WorkflowDefinition, id='cps_workflow',
