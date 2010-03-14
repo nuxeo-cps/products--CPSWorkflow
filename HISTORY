@@ -1,4 +1,21 @@
 ===========================================================
+Package: CPSWorkflow 0.12.4
+===========================================================
+First release built by: gracinet at: 2010-03-14T16:51:30
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
+~~~~~~~~~
+- #2127: tests now run, graph enabling now done in CPSWorkflow
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
 Package: CPSWorkflow 0.12.3
 ===========================================================
 First release built by: madarche at: 2008-11-23T23:23:02
