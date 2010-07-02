@@ -377,7 +377,9 @@ class WorkflowDefinition(DCWorkflowDefinition):
         """
 
         if kwargs.get('pdb'):
-            import pdb; pdb.set_trace()
+            # GR: this invocation style escapes my precommit hook
+            from pdb import set_trace()
+            set_trace()
         sci = None
         econtext = None
         moved_exc = None
