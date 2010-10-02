@@ -6,7 +6,7 @@ New features
 -
 Bug fixes
 ~~~~~~~~~
--
+- #2179: Unicode upgrade step for workflow transition comments
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 
