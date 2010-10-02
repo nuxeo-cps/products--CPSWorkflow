@@ -107,4 +107,5 @@ def upgrade_aggregated_histories(portal):
             logger.info("Upgraded %d/%d aggregated workflow histories",
                         done, total)
             transaction.commit()
-
+    logger.info("Finished upgrading the %d aggregated workflow histories", done)
+    transaction.commit()
