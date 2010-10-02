@@ -807,6 +807,11 @@ class WorkflowTool(BaseWorkflowTool):
             return
         repotool = getToolByName(self, 'portal_repository')
         docid = ob.getDocid()
+        # GR PERF: this is probably a (minor) conflict source in repository
+        # also, using PersistentList would be nicer for upgrade steps and the
+        # like (see unicode stuff in upgrade.py), and could *maybe* allow for
+        # conflict resolution by implementation of merging logic if actions are
+        # on different proxies
         wfh = repotool.getHistory(docid) or ()
         wfh += (status,)
         repotool.setHistory(docid, wfh)
