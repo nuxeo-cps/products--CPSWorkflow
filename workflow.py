@@ -377,7 +377,8 @@ class WorkflowDefinition(DCWorkflowDefinition):
         """
 
         if kwargs.get('pdb'):
-            import pdb; pdb.set_trace()
+            from pdb import set_trace as st
+            st()
         sci = None
         econtext = None
         moved_exc = None
