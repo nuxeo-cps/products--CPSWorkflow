@@ -31,11 +31,14 @@ logger = logging.getLogger(__name__)
 def upgrade_unicode_for(proxy):
     """Upgrade workflow history for proxy."""
 
-    for transitions in proxy.workflow_history.values():
+    wfh = proxy.workflow_history
+    for transitions in wfh.values():
         for trans in transitions:
             c = trans.get('comments')
             if c is not None:
                 trans['comments'] = upgrade_string_unicode(c)
+
+    wfh._p_changed = 1
     return True
 
 def upgrade_unicode_in(folder, counters=None, walk_folders=False):
