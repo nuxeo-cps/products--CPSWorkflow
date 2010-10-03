@@ -1,4 +1,21 @@
 ===========================================================
+Package: CPSWorkflow 0.12.5
+===========================================================
+First release built by: gracinet at: 2010-10-03T11:46:47
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
+~~~~~~~~~
+- #2179: Unicode upgrade step for workflow transition comments
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
 Package: CPSWorkflow 0.12.4
 ===========================================================
 First release built by: gracinet at: 2010-03-14T16:51:30
