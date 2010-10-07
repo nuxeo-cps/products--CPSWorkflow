@@ -40,7 +40,13 @@ def upgrade_unicode_for(proxy):
     """Upgrade workflow history for proxy."""
 
     wfh = proxy.workflow_history
-    for transitions in wfh.values():
+    try:
+        values = wfh.values
+    except AttributeError:
+        logger.error("Broken workflow history for %r", proxy)
+        return False
+
+    for transitions in values():
         upgrade_transitions_unicode(transitions)
 
     wfh._p_changed = 1

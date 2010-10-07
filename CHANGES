@@ -6,7 +6,7 @@ New features
 -
 Bug fixes
 ~~~~~~~~~
--
+- #2179: robustness wrt broken proxies
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 
