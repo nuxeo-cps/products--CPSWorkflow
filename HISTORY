@@ -1,4 +1,21 @@
 ===========================================================
+Package: CPSWorkflow 0.12.6
+===========================================================
+First release built by: gracinet at: 2010-10-13T11:36:19
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
+~~~~~~~~~
+- #2179: robustness wrt broken proxies
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
 Package: CPSWorkflow 0.12.5
 ===========================================================
 First release built by: gracinet at: 2010-10-03T11:46:47
