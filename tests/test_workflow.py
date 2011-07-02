@@ -33,12 +33,12 @@ from Products.Five import zcml
 import Products.CMFCore
 from Products.CMFCore.tests.base.testcase import SecurityRequestTest
 from Products.CMFCore.tests.base.testcase import _TRAVERSE_ZCML
+from Products.CPSUtil.testing.introspect import ZOPE_VERSION
 
 from Products.CPSWorkflow.workflow import WorkflowDefinition
 from Products.CPSWorkflow.workflow import TRIGGER_USER_ACTION
 from Products.CPSWorkflow.configuration import addConfiguration
 from Products.CPSWorkflow.workflowtool import Config_id
-from Products.CPSDefault.tests.CPSTestCase import CPSZCMLLayer
 
 from dummy import DummyContent, DummyTypesTool
 
@@ -49,10 +49,11 @@ class WorkflowToolTests(SecurityRequestTest):
     def setUp(self):
         SecurityRequestTest.setUp(self)
 
-        zcml.load_config('meta.zcml', Products.Five)
-        zcml.load_config('permissions.zcml', Products.Five)
-        zcml.load_config('configure.zcml', Products.CMFCore)
-        zcml.load_string(_TRAVERSE_ZCML)
+        if ZOPE_VERSION > (2, 10):
+            zcml.load_config('meta.zcml', Products.Five)
+            zcml.load_config('permissions.zcml', Products.Five)
+            zcml.load_config('configure.zcml', Products.CMFCore)
+            zcml.load_string(_TRAVERSE_ZCML)
 
         root = self.root
 
