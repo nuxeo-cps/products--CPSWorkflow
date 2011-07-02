@@ -22,17 +22,18 @@
 """
 
 import os, sys
-if __name__ == '__main__':
-    execfile(os.path.join(sys.path[0], 'framework.py'))
-
+import unittest
 from Testing import ZopeTestCase
 ZopeTestCase.installProduct('CPSWorkflow')
 
-import unittest
-
-from Products.CMFCore.tests.base.testcase import SecurityRequestTest
-
 from OFS.Folder import Folder
+import Products.Five
+from Products.Five import zcml
+
+import Products.CMFCore
+from Products.CMFCore.tests.base.testcase import SecurityRequestTest
+from Products.CMFCore.tests.base.testcase import _TRAVERSE_ZCML
+from Products.CPSUtil.testing.introspect import ZOPE_VERSION
 
 from Products.CPSWorkflow.workflow import WorkflowDefinition
 from Products.CPSWorkflow.workflow import TRIGGER_USER_ACTION
@@ -47,6 +48,12 @@ class WorkflowToolTests(SecurityRequestTest):
 
     def setUp(self):
         SecurityRequestTest.setUp(self)
+
+        if ZOPE_VERSION > (2, 10):
+            zcml.load_config('meta.zcml', Products.Five)
+            zcml.load_config('permissions.zcml', Products.Five)
+            zcml.load_config('configure.zcml', Products.CMFCore)
+            zcml.load_string(_TRAVERSE_ZCML)
 
         root = self.root
 
