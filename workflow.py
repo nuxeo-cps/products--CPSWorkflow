@@ -58,7 +58,7 @@ try:
 except ImportError, e:
     if str(e) != 'cannot import name DCWorkflowGraph':
         raise
-    DC_WORKFLOW_GRAPH_PRESENT = Fale
+    DC_WORKFLOW_GRAPH_PRESENT = False
 
 from expression import CPSStateChangeInfo as StateChangeInfo
 from expression import createExprContext
@@ -1369,6 +1369,6 @@ if DC_WORKFLOW_GRAPH_PRESENT:
 InitializeClass(WorkflowDefinition)
 
 
-from Products.CMFCore.WorkflowTool import addWorkflowFactory
-addWorkflowFactory(WorkflowDefinition, id='cps_workflow',
-                   title='Web-configurable workflow for CPS')
+#from Products.CMFCore.WorkflowTool import addWorkflowFactory
+#addWorkflowFactory(WorkflowDefinition, id='cps_workflow',
+#                   title='Web-configurable workflow for CPS')
