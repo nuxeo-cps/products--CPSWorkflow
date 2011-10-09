@@ -1367,8 +1367,3 @@ if DC_WORKFLOW_GRAPH_PRESENT:
     WorkflowDefinition.manage_workflowGraph = manage_workflowGraph
 
 InitializeClass(WorkflowDefinition)
-
-
-#from Products.CMFCore.WorkflowTool import addWorkflowFactory
-#addWorkflowFactory(WorkflowDefinition, id='cps_workflow',
-#                   title='Web-configurable workflow for CPS')
