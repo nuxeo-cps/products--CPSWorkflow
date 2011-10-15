@@ -1,4 +1,21 @@
 ===========================================================
+Package: CPSWorkflow 0.14.0-CPS-3.5
+===========================================================
+First release built by: gracinet at: 2011-09-28T20:54:55
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+- Creation of the stable CPS-3.5 branch
+Bug fixes
+~~~~~~~~~
+-
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
 Package: CPSWorkflow 0.13.0
 ===========================================================
 First release built by: gracinet at: 2011-07-07T17:47:17
