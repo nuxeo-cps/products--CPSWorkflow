@@ -32,7 +32,6 @@ from Products.Five import zcml
 
 import Products.CMFCore
 from Products.CMFCore.tests.base.testcase import SecurityRequestTest
-from Products.CMFCore.tests.base.testcase import _TRAVERSE_ZCML
 from Products.CPSUtil.testing.introspect import ZOPE_VERSION
 
 from Products.CPSWorkflow.workflow import WorkflowDefinition
@@ -41,6 +40,27 @@ from Products.CPSWorkflow.configuration import addConfiguration
 from Products.CPSWorkflow.workflowtool import Config_id
 
 from dummy import DummyContent, DummyTypesTool
+
+_TRAVERSE_ZCML = """
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    >
+
+  <adapter
+      for="*"
+      factory="Products.Five.traversable.FiveTraversable"
+      provides="zope.app.traversing.interfaces.ITraversable"
+      />
+
+  <adapter
+      for="*"
+      factory="zope.app.traversing.adapters.Traverser"
+      provides="zope.app.traversing.interfaces.ITraverser"
+      />
+
+</configure>
+"""
 
 
 class WorkflowToolTests(SecurityRequestTest):
@@ -57,15 +77,15 @@ class WorkflowToolTests(SecurityRequestTest):
 
         root = self.root
 
-        from Products.CMFCore.WorkflowTool import addWorkflowFactory
-        addWorkflowFactory(WorkflowDefinition, id='cps wfdef')
+#        from Products.CMFCore.WorkflowTool import addWorkflowFactory
+#        addWorkflowFactory(WorkflowDefinition, id='cps wfdef')
 
         from Products.CPSWorkflow.workflowtool import addWorkflowTool
         addWorkflowTool(root)
 
     def tearDown(self):
-        from Products.CMFCore.WorkflowTool import _removeWorkflowFactory
-        _removeWorkflowFactory(WorkflowDefinition, id='cps wfdef')
+#        from Products.CMFCore.WorkflowTool import _removeWorkflowFactory
+#        _removeWorkflowFactory(WorkflowDefinition, id='cps wfdef')
 
         SecurityRequestTest.tearDown(self)
 

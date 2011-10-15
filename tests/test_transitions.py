@@ -31,19 +31,8 @@ class TestCPSWorkflowTransitions(SecurityRequestTest):
     def setUp(self):
         SecurityRequestTest.setUp(self)
 
-        root = self.root
-
-        from Products.CMFCore.WorkflowTool import addWorkflowFactory
-        addWorkflowFactory(WorkflowDefinition, id='cps wfdef')
-
         from Products.CPSWorkflow.workflowtool import addWorkflowTool
-        addWorkflowTool(root)
-
-    def tearDown(self):
-        from Products.CMFCore.WorkflowTool import _removeWorkflowFactory
-        _removeWorkflowFactory(WorkflowDefinition, id='cps wfdef')
-
-        SecurityRequestTest.tearDown(self)
+        addWorkflowTool(self.root)
 
     def test_cps_transition_definition(self):
 

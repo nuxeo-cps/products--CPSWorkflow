@@ -40,6 +40,9 @@ class DummyRoot(Folder):
     def getPhysicalRoot(self):
         return self
 
+WORKFLOW_CLASSES = dict(dc_workflow=DCWorkflowDefinition,
+                        cps_workflow=CPSWorkflowDefinition)
+
 class SetupWorkflowTestCase(BaseRegistryTests):
     """Test workflows setup with CMFSetup
     """
@@ -54,20 +57,10 @@ class SetupWorkflowTestCase(BaseRegistryTests):
         from Products.CPSWorkflow.workflowtool import addWorkflowTool
         addWorkflowTool(self.root)
 
-        from Products.CMFCore.WorkflowTool import addWorkflowFactory
-        addWorkflowFactory(DCWorkflowDefinition, id='dc_workflow',
-                           title = '(Web-configurable workflow)')
-        addWorkflowFactory(CPSWorkflowDefinition, id='cps_workflow',
-                           title = '(Web-configurable workflow for CPS)')
-
         self.wftool = self.root.portal_workflow
 
     def tearDown(self):
         self.root._delObject('portal_workflow')
-        from Products.CMFCore.WorkflowTool import _removeWorkflowFactory
-        _removeWorkflowFactory(DCWorkflowDefinition, id='dc_workflow')
-        _removeWorkflowFactory(CPSWorkflowDefinition, id='cps_workflow')
-
         self.app.REQUEST.close() # should be done by BaseRegistryTests
         BaseRegistryTests.tearDown(self)
 
@@ -148,8 +141,8 @@ class SetupWorkflowTestCase(BaseRegistryTests):
     def _setUpTestWorkflow(self, wfdef):
         # wf
         wfid = wfdef['wfid']
-        wftype = wfdef['wftype']
-        self.wftool.manage_addWorkflow(id=wfid, workflow_type=wftype)
+        wftype = wfdef['wftype'].split()[0]
+        self.wftool._setObject(wfid, WORKFLOW_CLASSES[wftype](wfid))
         wf = self.wftool[wfid]
 
         # permissions

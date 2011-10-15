@@ -25,45 +25,52 @@ import string
 import unittest
 from Testing import ZopeTestCase
 
-ZopeTestCase.installProduct('CPSWorkflow')
+from layer import CMFDefaultLayer
 
-from Products.CMFDefault.Portal import manage_addCMFSite
+from Products.CMFCore.utils import getToolByName
 
 from Products.CPSWorkflow.stack import Stack
 from Products.CPSWorkflow.basicstacks import SimpleStack
 from Products.CPSWorkflow.basicstacks import HierarchicalStack
 
-# XXX has to be changed.
-RUN = True
-try:
-    from Products.CPSInstaller.CMFInstaller import CMFInstaller
-except ImportError:
-    RUN = False
-    class CMFInstaller:
-        pass
-
-SKINS = {'cps_workflow_default':
-         'Products/CPSWorkflow/skins/cps_workflow_default',
+# GR TODO make a profile and layer ?
+from Products.CMFCore.DirectoryView import createDirectoryView
+SKINS = { 'cps_workflow_default':
+              'Products.CPSWorkflow:skins/cps_workflow_default',
          }
 
-class StackRenderingTestCase(ZopeTestCase.PortalTestCase, CMFInstaller):
+class StackRenderingTestCase(ZopeTestCase.PortalTestCase):
 
-    portal_name = 'portal'
+    layer = CMFDefaultLayer
+
+    portal_name = 'site'
 
     def __init__(self, id):
         ZopeTestCase.PortalTestCase.__init__(self, id)
         self.messages = []
 
     def getPortal(self):
-        if not hasattr(self.app, self.portal_name):
-            manage_addCMFSite(self.app,
-                              self.portal_name)
-        return self.app[self.portal_name]
+        return self.app.site
 
     def afterSetUp(self):
         self.portal = self.getPortal()
-        self.verifySkins(SKINS)
-        self.resetSkinCache()
+        self.setUpSkins()
+
+    def setUpSkins(self):
+        portal = self.portal
+        sktool = getToolByName(portal, 'portal_skins')
+        to_add = []
+        for skin, path in SKINS.items():
+            createDirectoryView(sktool, path, skin)
+            to_add.append(skin)
+
+        all_skins = sktool.getSkinPaths()
+        for skin, path in all_skins:
+            path = ','.join(to_add) + ',' + path
+            sktool.addSkinSelection(skin, path)
+
+        portal.clearCurrentSkin()
+        portal.setupCurrentSkin(self.app.REQUEST)
 
     def test_skins_ok(self):
         self.assert_(
@@ -117,13 +124,5 @@ class StackRenderingTestCase(ZopeTestCase.PortalTestCase, CMFInstaller):
 
 def test_suite():
     suite = unittest.TestSuite()
-    if RUN is True:
-        suite.addTest(unittest.makeSuite(StackRenderingTestCase))
-    else:
-        from logging import getLogger
-        logger = getLogger('StackRenderingTestCase')
-        logger.warn('Test cannot be run, CPSInstaller product is missing')
+    suite.addTest(unittest.makeSuite(StackRenderingTestCase))
     return suite
-
-if __name__=='__main__':
-    unittest.TextTestRunner().run(test_suite())

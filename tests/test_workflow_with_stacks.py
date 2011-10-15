@@ -27,10 +27,8 @@ the whole stack workflow API.
 
 import os, sys
 
-if __name__ == '__main__':
-    execfile(os.path.join(sys.path[0], 'framework.py'))
-
 from Testing import ZopeTestCase
+from layer import CMFDefaultLayer
 
 ZopeTestCase.installProduct('CMFCore')
 ZopeTestCase.installProduct('CMFDefault')
@@ -46,8 +44,6 @@ ZopeTestCase.installProduct('CPSUserFolder')
 import unittest
 
 from Products.CMFCore.utils import getToolByName
-from Products.CMFDefault.Portal import manage_addCMFSite
-
 from Products.CPSCore.CPSBase import CPSBaseFolder as Folder
 
 from Products.CPSWorkflow.workflow import WorkflowDefinition
@@ -63,16 +59,13 @@ from Products.CPSWorkflow.basicstacks import HierarchicalStack
 
 from dummy import DummyContent
 
-portal_name = 'portal'
-
 class WorkflowToolTests(ZopeTestCase.PortalTestCase):
     """Test CPS Workflow Tool and CPS Workflow stacks """
 
+    layer = CMFDefaultLayer
+
     def getPortal(self):
-        if not hasattr(self.app, portal_name):
-            manage_addCMFSite(self.app,
-                              portal_name)
-        return self.app[portal_name]
+        return self.app.site
 
     #####################################################################
 
