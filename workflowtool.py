@@ -287,6 +287,12 @@ class WorkflowTool(BaseWorkflowTool):
         The object created will be a proxy to a real object if the type
         type_name has an property of id 'cps_proxy_type' and of value
         'folder', 'document' or 'folderishdocument'.
+
+        The wf_before_content keyword argument is been used to optionaly
+        insert new proxies in the workflow before creating the content they
+        point to. This is useful for recursive creations, but can be
+        unapplicable in some workflow cases, typically if a post script needs
+        to access the content.
         """
         container = self._container_maybe_rpath(container)
         #logger.debug("invokeFactoryFor: Called with container=%s "
@@ -441,21 +447,31 @@ class WorkflowTool(BaseWorkflowTool):
                 id = container.constructContent(type_name, id, **kwargs)
                 # constructContent indexed the object (CMF contract)
                 ob = getattr(container, id)
-            else:
-                # Create a proxy and a document in the repository.
+                self._insertWorkflow(ob, initial_transition, initial_behavior,
+                                     kwargs)
+            else: # Create a proxy and a document in the repository.
                 proxy = pxtool.createEmptyProxy(proxy_type, container,
                                                 type_name, id)
-
                 # Set the first language as default language.
                 proxy.setDefaultLanguage(language)
-                pxtool.createRevision(proxy, language, **kwargs)
+                def insert_wf():
+                    self._insertWorkflow(proxy, initial_transition,
+                                         initial_behavior, kwargs)
+                def create_doc():
+                    pxtool.createRevision(proxy, language, **kwargs)
+
+                if kwargs.pop('wf_before_content', False):
+                    insert_wf()
+                    create_doc()
+                else:
+                    create_doc()
+                    insert_wf()
+
                 # createRevision indexed the proxy
                 ob = proxy
             ob.manage_afterCMFAdd(ob, container)
             # XXX at this point we still don't have a workflow state...
             # XXX so tree caches are wrong!
-            self._insertWorkflow(ob, initial_transition, initial_behavior,
-                                 kwargs)
         elif initial_behavior == TRANSITION_INITIAL_CHECKOUT:
             if not isinstance(old_ob, ProxyBase):
                 raise WorkflowException("Can't checkout non-proxy object %s"
