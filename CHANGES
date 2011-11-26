@@ -6,7 +6,7 @@ New features
 -
 Bug fixes
 ~~~~~~~~~
--
+- #2495: optional workflow inserting before proxy content creation
 New internal features
 ~~~~~~~~~~~~~~~~~~~~~
 - 
