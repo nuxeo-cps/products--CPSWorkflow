@@ -1,4 +1,21 @@
 ===========================================================
+Package: CPSWorkflow 0.14.1-CPS-3.5
+===========================================================
+First release built by: gracinet at: 2011-12-19T15:41:24
+Requires
+~~~~~~~~
+-
+New features
+~~~~~~~~~~~~
+-
+Bug fixes
+~~~~~~~~~
+- #2495: optional workflow inserting before proxy content creation
+New internal features
+~~~~~~~~~~~~~~~~~~~~~
+- 
+
+===========================================================
 Package: CPSWorkflow 0.14.0-CPS-3.5
 ===========================================================
 First release built by: gracinet at: 2011-09-28T20:54:55
